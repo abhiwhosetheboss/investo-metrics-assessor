@@ -30,14 +30,32 @@ export interface AnalysisResult {
     description?: string;
   }[];
   createdAt: string;
+  aiModel?: {
+    name: string;
+    provider: string;
+  }
 }
 
-// In a real application, this would be an API call
+// In a real application, this would make an API call to an AI model
 export const getAnalysisById = (id: string): Promise<AnalysisResult> => {
   return new Promise((resolve) => {
     // Simulate API delay
     setTimeout(() => {
-      const result = sampleData.find(item => item.id === id) || generateMockAnalysis(id);
+      let result = sampleData.find(item => item.id === id) || generateMockAnalysis(id);
+      
+      // Add AI model information if one is selected
+      const storedModel = localStorage.getItem("selectedAIModel");
+      if (storedModel) {
+        const model = JSON.parse(storedModel);
+        result = {
+          ...result,
+          aiModel: {
+            name: model.name,
+            provider: model.provider
+          }
+        };
+      }
+      
       resolve(result);
     }, 800);
   });
@@ -50,6 +68,39 @@ export const getAllAnalyses = (): Promise<AnalysisResult[]> => {
     setTimeout(() => {
       resolve(sampleData);
     }, 800);
+  });
+};
+
+// This function would be replaced with actual API calls to the AI model
+export const analyzeStartupWithAI = async (startupData: any, modelId: string): Promise<AnalysisResult> => {
+  // In a real application, you would:
+  // 1. Get the AI model details based on modelId
+  // 2. Make an API call to the appropriate endpoint (OpenAI, Hugging Face, etc.)
+  // 3. Process the response and return it
+  
+  // For now, we'll simulate this with a delay and mock data
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      // Get the model info if available
+      const storedModel = localStorage.getItem("selectedAIModel");
+      const modelInfo = storedModel ? JSON.parse(storedModel) : null;
+      
+      // Generate a mock analysis
+      const result = generateMockAnalysis(`mock-${Date.now()}`);
+      
+      // Add the startup name from the input data
+      result.startupName = startupData.name || "Unnamed Startup";
+      
+      // Add AI model information if available
+      if (modelInfo) {
+        result.aiModel = {
+          name: modelInfo.name,
+          provider: modelInfo.provider
+        };
+      }
+      
+      resolve(result);
+    }, 2000);
   });
 };
 

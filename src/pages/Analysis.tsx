@@ -1,20 +1,32 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAnalysisById } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Download, Share2, ArrowLeft, Brain } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import InvestibilityScore from "@/components/InvestibilityScore";
 import RiskRating from "@/components/RiskRating";
 import StrengthsWeaknesses from "@/components/StrengthsWeaknesses";
 import Suggestions from "@/components/Suggestions";
 import DataVisualizer from "@/components/DataVisualizer";
 import RiskToRewardMeter from "@/components/RiskToRewardMeter";
+import { useEffect, useState } from "react";
+import { AIModel } from "@/components/AIModelSelector";
 
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
+  const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
+  
+  // Load the selected model from localStorage on component mount
+  useEffect(() => {
+    const storedModel = localStorage.getItem("selectedAIModel");
+    if (storedModel) {
+      setSelectedModel(JSON.parse(storedModel));
+    }
+  }, []);
+  
   const { data: analysis, isLoading, error } = useQuery({
     queryKey: ['analysis', id],
     queryFn: () => getAnalysisById(id || ''),
@@ -63,9 +75,18 @@ const Analysis = () => {
             Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold">{analysis.startupName}</h1>
-          <p className="text-muted-foreground">
-            Analysis created on {new Date(analysis.createdAt).toLocaleDateString()}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-muted-foreground">
+              Analysis created on {new Date(analysis.createdAt).toLocaleDateString()}
+            </p>
+            
+            {selectedModel && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Brain className="h-3 w-3" />
+                {selectedModel.name}
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-1">
@@ -106,6 +127,25 @@ const Analysis = () => {
         <h2 className="text-xl font-medium mb-6">Category Analysis</h2>
         <DataVisualizer categories={analysis.categories} />
       </div>
+      
+      {selectedModel && (
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-medium">AI Model Information</h2>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Brain className="h-3 w-3" />
+              {selectedModel.name}
+            </Badge>
+          </div>
+          <div className="text-sm text-muted-foreground space-y-2">
+            <p>This analysis was generated using <span className="font-medium">{selectedModel.name}</span> by {selectedModel.provider}.</p>
+            <p>{selectedModel.description}</p>
+            <p className="text-xs mt-4">
+              AI models improve over time as they receive more training data. For best results, contribute to the Shark Tank dataset in the dashboard.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
