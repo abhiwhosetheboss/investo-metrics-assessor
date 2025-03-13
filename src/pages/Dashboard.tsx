@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getAllAnalyses } from "@/utils/analysisUtils";
@@ -19,10 +19,37 @@ const Dashboard = () => {
   });
   
   const [activeTab, setActiveTab] = useState("analyses");
+  const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
+  const [sharkTankData, setSharkTankData] = useState<any[]>([]);
   const { toast } = useToast();
   
+  // Load saved model and data on initial render
+  useEffect(() => {
+    // Try to load saved model
+    const savedModel = localStorage.getItem("selectedAIModel");
+    if (savedModel) {
+      try {
+        setSelectedModel(JSON.parse(savedModel));
+      } catch (e) {
+        console.error("Failed to parse saved model", e);
+      }
+    }
+    
+    // Try to load saved data
+    const savedData = localStorage.getItem("sharkTankData");
+    if (savedData) {
+      try {
+        setSharkTankData(JSON.parse(savedData));
+      } catch (e) {
+        console.error("Failed to parse saved data", e);
+      }
+    }
+  }, []);
+  
   const handleModelSelect = (model: AIModel) => {
+    setSelectedModel(model);
     console.log("Selected model:", model);
+    
     // In a real app, you would store this in context or state management
     localStorage.setItem("selectedAIModel", JSON.stringify(model));
     
@@ -33,7 +60,9 @@ const Dashboard = () => {
   };
   
   const handleDataCollected = (episodes: any[]) => {
+    setSharkTankData(episodes);
     console.log("Collected episodes:", episodes);
+    
     // In a real app, you would store this data or send it to your backend
     localStorage.setItem("sharkTankData", JSON.stringify(episodes));
   };
@@ -80,10 +109,16 @@ const Dashboard = () => {
     <div className="container mx-auto py-10 space-y-8">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-3xl font-bold">Startup Analysis Dashboard</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
+          {selectedModel && (
+            <div className="flex items-center text-sm bg-primary/10 text-primary px-3 py-1 rounded">
+              <Brain className="h-4 w-4 mr-1" />
+              Using: {selectedModel.name}
+            </div>
+          )}
           <Link 
             to="/" 
-            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
             New Analysis
           </Link>
@@ -99,10 +134,14 @@ const Dashboard = () => {
           <TabsTrigger value="ai-models">
             <Brain className="h-4 w-4 mr-2" />
             AI Models
+            {selectedModel && <span className="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>}
           </TabsTrigger>
           <TabsTrigger value="data">
             <Database className="h-4 w-4 mr-2" />
             Training Data
+            {sharkTankData.length > 0 && (
+              <span className="ml-2 text-xs bg-primary/20 px-1.5 rounded-full">{sharkTankData.length}</span>
+            )}
           </TabsTrigger>
         </TabsList>
         
@@ -191,11 +230,15 @@ const Dashboard = () => {
         </TabsContent>
         
         <TabsContent value="ai-models">
-          <AIModelSelector onModelSelect={handleModelSelect} />
+          <AIModelSelector 
+            onModelSelect={handleModelSelect} 
+          />
         </TabsContent>
         
         <TabsContent value="data">
-          <SharkTankDataCollector onDataCollected={handleDataCollected} />
+          <SharkTankDataCollector 
+            onDataCollected={handleDataCollected} 
+          />
         </TabsContent>
       </Tabs>
     </div>

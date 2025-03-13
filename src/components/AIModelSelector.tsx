@@ -4,8 +4,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, Cpu, ServerCog } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Brain, Cpu, ServerCog, Check } from "lucide-react";
 
 export interface AIModel {
   id: string;
@@ -49,16 +49,22 @@ interface AIModelSelectorProps {
 
 const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => {
   const [selectedModelId, setSelectedModelId] = useState<string>("openai-gpt4");
+  const [isActivated, setIsActivated] = useState<boolean>(false);
   const { toast } = useToast();
 
   const handleModelChange = (value: string) => {
     setSelectedModelId(value);
+    // Reset activation state when a new model is selected
+    setIsActivated(false);
   };
 
   const handleConfirm = () => {
     const model = availableModels.find(m => m.id === selectedModelId);
     if (model) {
       onModelSelect(model);
+      setIsActivated(true);
+      console.log("Selected model:", model);
+      
       toast({
         title: "AI Model Selected",
         description: `Now using ${model.name} by ${model.provider} for analysis.`,
@@ -80,11 +86,12 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
         >
           {availableModels.map((model) => {
             const Icon = model.icon;
+            const isSelected = selectedModelId === model.id;
             return (
               <div
                 key={model.id}
                 className={`flex items-start space-x-3 border rounded-lg p-3 transition-colors ${
-                  selectedModelId === model.id
+                  isSelected
                     ? "border-primary bg-primary/5"
                     : "border-muted hover:border-muted-foreground/20"
                 }`}
@@ -103,6 +110,12 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
                       {model.name}
                     </Label>
                     <Icon className="ml-2 h-4 w-4 text-muted-foreground" />
+                    {isSelected && isActivated && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                        <Check className="mr-1 h-3 w-3" />
+                        Active
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {model.description}
@@ -117,9 +130,21 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
         </RadioGroup>
 
         <Button onClick={handleConfirm} className="mt-6 w-full">
-          Use Selected Model
+          {isActivated && selectedModelId ? "Update Model Selection" : "Use Selected Model"}
         </Button>
       </CardContent>
+      <CardFooter>
+        <div className="w-full text-center text-sm text-muted-foreground">
+          {isActivated ? (
+            <div className="flex items-center justify-center">
+              <Check className="mr-2 h-4 w-4 text-green-500" />
+              Model is active and ready for analysis
+            </div>
+          ) : (
+            "Select a model and click the button above to activate"
+          )}
+        </div>
+      </CardFooter>
     </Card>
   );
 };

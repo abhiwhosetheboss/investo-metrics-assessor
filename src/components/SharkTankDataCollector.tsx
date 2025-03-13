@@ -1,12 +1,12 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Loader2, Upload, Database, ArrowDown } from "lucide-react";
+import { Loader2, Upload, Database, ArrowDown, Download } from "lucide-react";
 
 interface SharkTankEpisode {
   id: string;
@@ -23,6 +23,7 @@ interface SharkTankEpisode {
   source: string;
 }
 
+// More sample episodes to demonstrate the functionality better
 const sampleEpisodes: SharkTankEpisode[] = [
   {
     id: "st-us-s12e01-1",
@@ -63,8 +64,58 @@ const sampleEpisodes: SharkTankEpisode[] = [
     amount: 10000000,
     equity: 1.5,
     source: "Shark Tank India"
+  },
+  {
+    id: "st-us-s10e15-1",
+    season: 10,
+    episode: 15,
+    startupName: "Squatty Potty",
+    description: "Toilet stool for better posture",
+    ask: "$350,000 for 10% equity",
+    valuation: 3500000,
+    outcome: "deal",
+    investors: ["Lori Greiner"],
+    amount: 350000,
+    equity: 10,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s9e24-3",
+    season: 9,
+    episode: 24,
+    startupName: "Scrub Daddy",
+    description: "Texture-changing sponge",
+    ask: "$100,000 for 10% equity",
+    valuation: 1000000,
+    outcome: "deal",
+    investors: ["Lori Greiner"],
+    amount: 200000,
+    equity: 20,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-au-s3e05-2",
+    season: 3,
+    episode: 5,
+    startupName: "Hegs Pegs",
+    description: "Innovative clothes pegs with hooks",
+    ask: "$100,000 for 10% equity",
+    valuation: 1000000,
+    outcome: "deal",
+    investors: ["Naomi Simson"],
+    amount: 100000,
+    equity: 15,
+    source: "Shark Tank Australia"
   }
 ];
+
+// Sample episodes by region for more realistic filtering
+const regionData = {
+  US: sampleEpisodes.filter(ep => ep.source.includes("US")),
+  India: sampleEpisodes.filter(ep => ep.source.includes("India")),
+  Australia: sampleEpisodes.filter(ep => ep.source.includes("Australia")),
+  UK: sampleEpisodes.filter(ep => ep.source.includes("UK"))
+};
 
 interface SharkTankDataCollectorProps {
   onDataCollected: (episodes: SharkTankEpisode[]) => void;
@@ -89,13 +140,15 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
       
       if (currentProgress >= 100) {
         clearInterval(interval);
-        setCollectedData(sampleEpisodes);
-        onDataCollected(sampleEpisodes);
+        // Get the appropriate data based on selected region
+        const dataToImport = regionData[source as keyof typeof regionData] || [];
+        setCollectedData(dataToImport);
+        onDataCollected(dataToImport);
         setIsLoading(false);
         
         toast({
           title: "Data Imported Successfully",
-          description: `Imported ${sampleEpisodes.length} Shark Tank episodes for analysis.`,
+          description: `Imported ${dataToImport.length} Shark Tank episodes for analysis.`,
         });
       }
     }, 200);
@@ -123,6 +176,38 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
         variant: "destructive",
       });
     }
+  };
+
+  const handleExportData = () => {
+    if (collectedData.length === 0) {
+      toast({
+        title: "Export Failed",
+        description: "No data available to export.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create a blob from the data
+    const dataStr = JSON.stringify(collectedData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    
+    // Create a download link and trigger the download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `shark-tank-data-${source.toLowerCase()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    toast({
+      title: "Data Exported Successfully",
+      description: `Exported ${collectedData.length} Shark Tank episodes.`,
+    });
   };
 
   return (
@@ -228,8 +313,8 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
             : "No data collected yet"}
         </div>
         {collectedData.length > 0 && (
-          <Button size="sm" variant="outline">
-            <ArrowDown className="mr-2 h-4 w-4" />
+          <Button size="sm" variant="outline" onClick={handleExportData}>
+            <Download className="mr-2 h-4 w-4" />
             Export Data
           </Button>
         )}
