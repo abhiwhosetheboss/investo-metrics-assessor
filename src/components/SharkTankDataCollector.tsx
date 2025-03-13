@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { DataTable } from "@/components/ui/data-table";
 import { Loader2, Upload, Database, ArrowDown } from "lucide-react";
 
 interface SharkTankEpisode {
@@ -84,7 +82,6 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
   const handleImportSample = () => {
     setIsLoading(true);
     
-    // Simulate a loading process
     let currentProgress = 0;
     const interval = setInterval(() => {
       currentProgress += 10;
