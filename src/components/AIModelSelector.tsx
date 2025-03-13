@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -52,9 +52,35 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const { toast } = useToast();
 
+  // Check for previously saved model on component mount
+  useEffect(() => {
+    const savedModel = localStorage.getItem("selectedAIModel");
+    if (savedModel) {
+      try {
+        const model = JSON.parse(savedModel);
+        setSelectedModelId(model.id);
+        setIsActivated(true);
+      } catch (e) {
+        console.error("Failed to parse saved model", e);
+      }
+    }
+  }, []);
+
   const handleModelChange = (value: string) => {
     setSelectedModelId(value);
-    // Reset activation state when a new model is selected
+    // Reset activation state when a new model is selected, unless it's the currently active model
+    const savedModel = localStorage.getItem("selectedAIModel");
+    if (savedModel) {
+      try {
+        const model = JSON.parse(savedModel);
+        if (model.id === value) {
+          setIsActivated(true);
+          return;
+        }
+      } catch (e) {
+        console.error("Failed to parse saved model", e);
+      }
+    }
     setIsActivated(false);
   };
 
