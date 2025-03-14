@@ -8,20 +8,50 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
-import { Brain, Loader2, ArrowRight } from "lucide-react";
+import { Brain, Loader2, BuildingStore, Users, BookOpen, Briefcase, LineChart, DollarSign, ShoppingCart, Heart } from "lucide-react";
 
 interface AnalysisInputFormProps {
   modelId: string;
 }
 
 type FormValues = {
+  // Basic Info
   name: string;
+  businessModel: string;
+  
+  // Market & Product
+  pmfScore: number;
+  repeatRate: number;
+  customerFeedback: string;
+  socialMediaEngagement: string;
+  
+  // Financial Metrics
   revenue: string;
+  valuation: string;
+  growthExpected: string;
   grossMargin: string;
   netMargin: string;
   burnRate: string;
+  marketingSpend: string;
+  ebitda: string;
+  unitEconomics: string;
+  
+  // Team & Founder
+  foundersEducation: string;
+  foundersHistory: string;
+  founderMarketFit: number;
+  founderTrustRating: number;
+  hungerLevel: number;
   teamSize: string;
+  teamCapability: number;
+  
+  // Operations
+  supplyChain: string;
   customerCount: string;
 };
 
@@ -33,11 +63,28 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
   const form = useForm<FormValues>({
     defaultValues: {
       name: "",
+      businessModel: "b2c",
+      pmfScore: 50,
+      repeatRate: 50,
+      customerFeedback: "",
+      socialMediaEngagement: "",
       revenue: "",
+      valuation: "",
+      growthExpected: "",
       grossMargin: "",
       netMargin: "",
       burnRate: "",
+      marketingSpend: "",
+      ebitda: "",
+      unitEconomics: "",
+      foundersEducation: "",
+      foundersHistory: "",
+      founderMarketFit: 5,
+      founderTrustRating: 5,
+      hungerLevel: 5,
       teamSize: "",
+      teamCapability: 5,
+      supplyChain: "",
       customerCount: ""
     }
   });
@@ -65,19 +112,34 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
       // Convert form data to format expected by analysis function
       const analysisData = {
         name: data.name,
+        businessModel: data.businessModel,
         revenue: data.revenue,
+        valuation: data.valuation,
+        growthExpected: data.growthExpected,
         margins: `${data.grossMargin}% Gross, ${data.netMargin}% Net`,
         burnRate: data.burnRate,
+        marketingSpend: data.marketingSpend,
+        ebitda: data.ebitda,
+        unitEconomics: data.unitEconomics,
         teamSize: data.teamSize,
-        // Add other fields with default values for analysis
-        pmfScore: 60,
-        domainExpertise: 70,
-        keyRolesFilled: true,
-        technicalSkills: 75,
-        businessSkills: 65,
-        passionLevel: 80,
-        // Add customer count as additional field
-        customerCount: data.customerCount
+        pmfScore: data.pmfScore,
+        repeatRate: data.repeatRate,
+        customerFeedback: data.customerFeedback,
+        socialMediaEngagement: data.socialMediaEngagement,
+        foundersEducation: data.foundersEducation,
+        foundersHistory: data.foundersHistory,
+        founderMarketFit: data.founderMarketFit,
+        founderTrustRating: data.founderTrustRating,
+        hungerLevel: data.hungerLevel,
+        teamCapability: data.teamCapability,
+        supplyChain: data.supplyChain,
+        customerCount: data.customerCount,
+        // Additional fields for compatibility with existing analysis function
+        domainExpertise: data.founderMarketFit * 10,
+        keyRolesFilled: data.teamCapability > 7,
+        technicalSkills: data.teamCapability * 10,
+        businessSkills: data.teamCapability * 10,
+        passionLevel: data.hungerLevel * 10
       };
       
       console.log("Starting analysis with data:", analysisData);
@@ -108,32 +170,161 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
   };
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Quick Analysis</CardTitle>
+        <CardTitle>Comprehensive Startup Analysis</CardTitle>
         <CardDescription>
-          Enter key metrics about your startup for an AI-powered analysis
+          Enter detailed metrics about your startup for a comprehensive AI-powered analysis
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Startup Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your startup name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Basic Info */}
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Startup Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your startup name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="businessModel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Business Model</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1 sm:flex-row sm:space-x-4 sm:space-y-0"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="b2b" id="b2b" />
+                          <FormLabel htmlFor="b2b" className="font-normal">B2B</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="b2c" id="b2c" />
+                          <FormLabel htmlFor="b2c" className="font-normal">B2C</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="d2c" id="d2c" />
+                          <FormLabel htmlFor="d2c" className="font-normal">D2C</FormLabel>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="marketplace" id="marketplace" />
+                          <FormLabel htmlFor="marketplace" className="font-normal">Marketplace</FormLabel>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <Separator className="my-4" />
+            <h3 className="text-sm font-medium mb-4 flex items-center">
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Market & Product
+            </h3>
+            
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="pmfScore"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Product-Market Fit</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/100</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={0}
+                        max={100}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      How well does your product fit the market needs?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="repeatRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Customer Repeat Rate</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/100</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={0}
+                        max={100}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Percentage of customers who make repeat purchases
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="customerFeedback"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer Feedback</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Summarize key customer feedback" {...field} className="h-20" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="socialMediaEngagement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Social Media Engagement</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. 2.5% engagement rate, 10K followers" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <Separator className="my-4" />
-            <h3 className="text-sm font-medium mb-4">Financial Metrics</h3>
+            <h3 className="text-sm font-medium mb-4 flex items-center">
+              <DollarSign className="h-4 w-4 mr-2" />
+              Financial Metrics
+            </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
@@ -153,6 +344,34 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="valuation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current Valuation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. $2,000,000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="growthExpected"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expected Growth Rate</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. 20% MoM" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="burnRate"
@@ -203,12 +422,174 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="marketingSpend"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Marketing Spend</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. $5,000/month" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ebitda"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>EBITDA</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. -$15,000/month" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Earnings before interest, taxes, depreciation, and amortization
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="unitEconomics"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit Economics</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. CAC $50, LTV $250" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             
             <Separator className="my-4" />
-            <h3 className="text-sm font-medium mb-4">Team & Traction</h3>
+            <h3 className="text-sm font-medium mb-4 flex items-center">
+              <Users className="h-4 w-4 mr-2" />
+              Team & Founders
+            </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="foundersEducation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Founders' Education</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="e.g. MBA from Stanford, BS in Computer Science from MIT" 
+                        {...field} 
+                        className="h-20"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="foundersHistory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Founders' History</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="e.g. Previously founded a successful startup, 5 years at Google" 
+                        {...field} 
+                        className="h-20"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="founderMarketFit"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Founder-Market Fit</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={1}
+                        max={10}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      How well do the founders understand this market?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="founderTrustRating"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Founder Trust & Potential</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={1}
+                        max={10}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Self-assessment of trustworthiness and potential
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="hungerLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Founder Hunger Level</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={1}
+                        max={10}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      How motivated and committed are the founders?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="teamSize"
@@ -221,6 +602,58 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
                     <FormDescription>
                       Number of team members
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="teamCapability"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between">
+                      <FormLabel>Team Capability</FormLabel>
+                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
+                    </div>
+                    <FormControl>
+                      <Slider
+                        value={[field.value]}
+                        min={1}
+                        max={10}
+                        step={1}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Overall capability of your team
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <Separator className="my-4" />
+            <h3 className="text-sm font-medium mb-4 flex items-center">
+              <BuildingStore className="h-4 w-4 mr-2" />
+              Operations
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="supplyChain"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Supply Chain Details</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe your supply chain and logistics" 
+                        {...field} 
+                        className="h-20"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -244,7 +677,7 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
               />
             </div>
             
-            <div className="pt-2">
+            <div className="pt-4">
               <Button 
                 type="submit" 
                 disabled={isAnalyzing}
@@ -258,12 +691,12 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
                 ) : (
                   <>
                     <Brain className="mr-2 h-4 w-4" />
-                    Run Analysis
+                    Run Comprehensive Analysis
                   </>
                 )}
               </Button>
               <p className="text-xs text-center text-muted-foreground mt-2">
-                This will generate an investibility report for your startup
+                This will generate a detailed investibility report for your startup
               </p>
             </div>
           </form>

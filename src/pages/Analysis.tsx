@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAnalysisById } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft, Brain } from "lucide-react";
+import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import InvestibilityScore from "@/components/InvestibilityScore";
 import RiskRating from "@/components/RiskRating";
@@ -63,6 +63,9 @@ const Analysis = () => {
     );
   }
 
+  // Get business model from analysis data
+  const businessModel = analysis.businessModel ? analysis.businessModel.toUpperCase() : "Unknown";
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
@@ -75,10 +78,17 @@ const Analysis = () => {
             Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold">{analysis.startupName}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mt-1">
             <p className="text-muted-foreground">
               Analysis created on {new Date(analysis.createdAt).toLocaleDateString()}
             </p>
+            
+            {businessModel && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Building2 className="h-3 w-3" />
+                {businessModel}
+              </Badge>
+            )}
             
             {selectedModel && (
               <Badge variant="outline" className="flex items-center gap-1">
@@ -114,6 +124,57 @@ const Analysis = () => {
           reward={analysis.investibilityScore}
         />
       </div>
+
+      {analysis.founderTrustRating && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium">Founder Trust Rating</h3>
+              <Users className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-end gap-2">
+              <p className="text-3xl font-bold">{analysis.founderTrustRating}</p>
+              <p className="text-sm text-muted-foreground mb-1">/10</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {analysis.founderTrustRating >= 8 ? "Exceptional founder potential" : 
+               analysis.founderTrustRating >= 6 ? "Strong founder potential" : 
+               analysis.founderTrustRating >= 4 ? "Average founder potential" : 
+               "Needs development"}
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium">Product-Market Fit</h3>
+              <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-end gap-2">
+              <p className="text-3xl font-bold">{analysis.pmfScore || "N/A"}</p>
+              <p className="text-sm text-muted-foreground mb-1">/100</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {analysis.pmfScore >= 80 ? "Excellent fit" : 
+               analysis.pmfScore >= 60 ? "Good fit" : 
+               analysis.pmfScore >= 40 ? "Moderate fit" : 
+               "Poor fit"}
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium">Growth Potential</h3>
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-end gap-2">
+              <p className="text-3xl font-bold">{analysis.growthExpected || "N/A"}</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Projected growth rate
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         <StrengthsWeaknesses 
