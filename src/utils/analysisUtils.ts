@@ -36,6 +36,14 @@ export interface AnalysisResult {
   }
 }
 
+// Track the training status
+let trainingStatus = {
+  isTraining: false,
+  progress: 0,
+  isModelTrained: false,
+  dataPoints: 0
+};
+
 // In a real application, this would make an API call to an AI model
 export const getAnalysisById = (id: string): Promise<AnalysisResult> => {
   return new Promise((resolve) => {
@@ -71,22 +79,79 @@ export const getAllAnalyses = (): Promise<AnalysisResult[]> => {
   });
 };
 
-// This function would be replaced with actual API calls to the AI model
+// Train the AI model on the dataset
+export const trainAIModel = async (dataset: any[]): Promise<{success: boolean, message: string}> => {
+  // In a real application, this would send the data to an actual AI training pipeline
+  return new Promise((resolve) => {
+    // Set training status
+    trainingStatus.isTraining = true;
+    trainingStatus.progress = 0;
+    trainingStatus.dataPoints = dataset.length;
+    
+    // Simulate training process with progress updates
+    const totalSteps = 10;
+    let currentStep = 0;
+    
+    const trainingInterval = setInterval(() => {
+      currentStep++;
+      trainingStatus.progress = Math.round((currentStep / totalSteps) * 100);
+      
+      if (currentStep >= totalSteps) {
+        clearInterval(trainingInterval);
+        trainingStatus.isTraining = false;
+        trainingStatus.isModelTrained = true;
+        
+        // Store training completion in localStorage for persistence
+        localStorage.setItem("aiModelTrained", "true");
+        localStorage.setItem("trainedDataPoints", dataset.length.toString());
+        
+        resolve({
+          success: true,
+          message: `Model successfully trained on ${dataset.length} data points`
+        });
+      }
+    }, 500);
+  });
+};
+
+// Get current training status
+export const getTrainingStatus = (): typeof trainingStatus => {
+  // Check if we have stored training status
+  if (!trainingStatus.isModelTrained) {
+    const trained = localStorage.getItem("aiModelTrained");
+    if (trained === "true") {
+      trainingStatus.isModelTrained = true;
+      trainingStatus.dataPoints = parseInt(localStorage.getItem("trainedDataPoints") || "0");
+      trainingStatus.progress = 100;
+    }
+  }
+  return { ...trainingStatus };
+};
+
+// This function would be replaced with actual API calls to the AI model in a real app
 export const analyzeStartupWithAI = async (startupData: any, modelId: string): Promise<AnalysisResult> => {
+  // Check if model is trained
+  const trainStatus = getTrainingStatus();
+  
+  if (!trainStatus.isModelTrained) {
+    // If model is not trained, throw error
+    throw new Error("Please train the AI model before running analysis");
+  }
+  
   // In a real application, you would:
   // 1. Get the AI model details based on modelId
   // 2. Make an API call to the appropriate endpoint (OpenAI, Hugging Face, etc.)
   // 3. Process the response and return it
   
-  // For now, we'll simulate this with a delay and mock data
+  // For now, we'll simulate this with a delay and more intelligent mock data
   return new Promise((resolve) => {
     setTimeout(() => {
       // Get the model info if available
       const storedModel = localStorage.getItem("selectedAIModel");
       const modelInfo = storedModel ? JSON.parse(storedModel) : null;
       
-      // Generate a mock analysis
-      const result = generateMockAnalysis(`mock-${Date.now()}`);
+      // Generate a more customized analysis based on input data
+      const result = generateSmartAnalysis(startupData);
       
       // Add the startup name from the input data
       result.startupName = startupData.name || "Unnamed Startup";
@@ -104,7 +169,202 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
   });
 };
 
-// Generate mock data for demo purposes
+// Generate a more intelligent mock analysis based on the input data
+const generateSmartAnalysis = (startupData: any): AnalysisResult => {
+  // Calculate investibility score based on various factors
+  let investibilityScore = 50; // Base score
+  
+  // Adjust based on team factors
+  if (startupData.keyRolesFilled) investibilityScore += 5;
+  if (startupData.domainExpertise > 70) investibilityScore += 7;
+  if (startupData.technicalSkills > 70) investibilityScore += 5;
+  if (startupData.businessSkills > 70) investibilityScore += 5;
+  
+  // Adjust based on product-market fit
+  if (startupData.pmfScore > 70) investibilityScore += 10;
+  
+  // Adjust based on financials
+  const hasRevenue = startupData.revenue && startupData.revenue.trim() !== "";
+  if (hasRevenue) investibilityScore += 8;
+  
+  // Positive growth rate
+  if (startupData.growthRate && startupData.growthRate.includes("%") && !startupData.growthRate.includes("-")) {
+    investibilityScore += 6;
+  }
+  
+  // Adjust based on intangibles
+  if (startupData.passionLevel > 80) investibilityScore += 3;
+  if (startupData.leadershipScore > 80) investibilityScore += 3;
+  
+  // Cap the score at 100
+  investibilityScore = Math.min(Math.max(investibilityScore, 0), 100);
+  
+  // Calculate overall risk (inverse of investibility with some noise)
+  const overallRisk = Math.min(Math.max(100 - investibilityScore + (Math.random() * 10 - 5), 0), 100);
+  
+  // Generate risk factors
+  const riskFactors = [
+    {
+      name: "Market Risk",
+      score: 100 - (startupData.pmfScore || 50),
+      description: "Risk associated with market conditions and demand."
+    },
+    {
+      name: "Team Risk",
+      score: 100 - ((startupData.teamExperience ? 70 : 40) + (startupData.keyRolesFilled ? 20 : 0)),
+      description: "Risk associated with team composition and expertise."
+    },
+    {
+      name: "Financial Risk",
+      score: hasRevenue ? 50 : 80,
+      description: "Risk associated with financial stability and projections."
+    },
+    {
+      name: "Technology Risk",
+      score: 100 - (startupData.technicalSkills || 50),
+      description: "Risk associated with technological implementation and scalability."
+    }
+  ];
+
+  // Generate strengths
+  const strengths = [];
+  if (startupData.domainExpertise > 70) {
+    strengths.push({
+      text: "Strong domain expertise in the target industry",
+      impact: "high" as const
+    });
+  }
+  
+  if (startupData.teamExperience && startupData.teamExperience.length > 20) {
+    strengths.push({
+      text: "Experienced team with relevant background",
+      impact: "critical" as const
+    });
+  }
+  
+  if (startupData.pmfScore > 70) {
+    strengths.push({
+      text: "Strong product-market fit with validated demand",
+      impact: "critical" as const
+    });
+  }
+  
+  if (hasRevenue) {
+    strengths.push({
+      text: "Revenue-generating business model",
+      impact: "high" as const
+    });
+  }
+  
+  if (strengths.length === 0) {
+    strengths.push({
+      text: "Passionate founding team",
+      impact: "medium" as const
+    });
+  }
+
+  // Generate weaknesses
+  const weaknesses = [];
+  if (startupData.domainExpertise < 50) {
+    weaknesses.push({
+      text: "Limited domain expertise in the target industry",
+      impact: "high" as const
+    });
+  }
+  
+  if (!startupData.keyRolesFilled) {
+    weaknesses.push({
+      text: "Key team roles not fully filled",
+      impact: "high" as const
+    });
+  }
+  
+  if (!hasRevenue) {
+    weaknesses.push({
+      text: "Pre-revenue business model",
+      impact: "medium" as const
+    });
+  }
+  
+  if (weaknesses.length === 0) {
+    weaknesses.push({
+      text: "Potential scaling challenges in competitive market",
+      impact: "low" as const
+    });
+  }
+
+  // Generate suggestions
+  const suggestions = [
+    {
+      title: "Strengthen Financial Position",
+      description: hasRevenue ? 
+        "Focus on improving unit economics and extending runway." : 
+        "Prioritize finding paying customers to validate business model.",
+      priority: "high" as const
+    },
+    {
+      title: startupData.keyRolesFilled ? "Expand Advisory Board" : "Complete Core Team",
+      description: startupData.keyRolesFilled ?
+        "Add industry experts to advisors to help navigate challenges." :
+        "Fill critical gaps in the team with experienced professionals.",
+      priority: "medium" as const
+    },
+    {
+      title: "Improve Market Validation",
+      description: "Gather more customer feedback and refine product-market fit.",
+      priority: "medium" as const
+    }
+  ];
+
+  // Generate categories based on input data
+  const categories = [
+    { 
+      name: "Product-Market Fit", 
+      value: startupData.pmfScore || Math.floor(Math.random() * 100),
+      description: "How well the product meets market needs"
+    },
+    { 
+      name: "Founder-Market Fit", 
+      value: startupData.domainExpertise || Math.floor(Math.random() * 100),
+      description: "How well the founders understand the market"
+    },
+    { 
+      name: "Team Composition", 
+      value: startupData.keyRolesFilled ? 80 : 50,
+      description: "Quality and completeness of the team"
+    },
+    { 
+      name: "Financials", 
+      value: hasRevenue ? 70 : 30,
+      description: "Financial health and projections"
+    },
+    { 
+      name: "Exit Strategy", 
+      value: startupData.expectedExitValue ? 75 : 40,
+      description: "Clarity and feasibility of exit plan"
+    },
+    { 
+      name: "Intangibles", 
+      value: startupData.passionLevel || Math.floor(Math.random() * 100),
+      description: "Leadership, passion, and other soft factors"
+    }
+  ];
+
+  return {
+    id: `analysis-${Date.now()}`,
+    startupName: startupData.name || "Startup",
+    investibilityScore,
+    overallRisk,
+    riskFactors,
+    strengths,
+    weaknesses,
+    suggestions,
+    categories,
+    createdAt: new Date().toISOString()
+  };
+};
+
+// Generate mock data for demo purposes (fallback)
 const generateMockAnalysis = (id: string): AnalysisResult => {
   const investibilityScore = Math.floor(Math.random() * 100);
   const overallRisk = 100 - investibilityScore;
