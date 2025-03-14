@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -83,6 +82,10 @@ interface StartupFormData {
   marketBuzz: string;
 }
 
+interface StartupFormProps {
+  onSubmit?: (formData: StartupFormData) => void;
+}
+
 const defaultFormData: StartupFormData = {
   name: "",
   industry: "",
@@ -129,7 +132,7 @@ const exitTypeOptions = ["acquisition", "ipo", "merger", "unknown"];
 const sentimentOptions = ["very negative", "negative", "neutral", "positive", "very positive"];
 const buzzOptions = ["none", "low", "moderate", "high", "viral"];
 
-const StartupForm = () => {
+const StartupForm = ({ onSubmit }: StartupFormProps) => {
   const [formData, setFormData] = useState<StartupFormData>(defaultFormData);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -159,11 +162,13 @@ const StartupForm = () => {
     setLoading(true);
 
     try {
-      // This is a placeholder for actual API submission
-      // In a real app, you would send this data to your backend
       console.log("Form Data:", formData);
       
-      // Simulate API request
+      if (onSubmit) {
+        onSubmit(formData);
+        return;
+      }
+      
       await new Promise((resolve) => setTimeout(resolve, 1500));
       
       toast({
@@ -171,7 +176,6 @@ const StartupForm = () => {
         description: "Your startup data has been submitted for analysis.",
       });
       
-      // In a real app, the backend would return an analysis ID
       const analysisId = "demo-" + Date.now();
       navigate(`/analysis/${analysisId}`);
     } catch (error) {
@@ -825,3 +829,4 @@ const StartupForm = () => {
 };
 
 export default StartupForm;
+
