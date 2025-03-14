@@ -156,6 +156,116 @@ const usEpisodes: SharkTankEpisode[] = [
     outcome: "no deal",
     investors: [],
     source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s15e01-1",
+    season: 15,
+    episode: 1,
+    startupName: "Pop It Pal",
+    description: "Pimple popping toy",
+    ask: "$250,000 for 10% equity",
+    valuation: 2500000,
+    outcome: "deal",
+    investors: ["Kevin O'Leary"],
+    amount: 250000,
+    equity: 10,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s15e03-2",
+    season: 15,
+    episode: 3,
+    startupName: "Dino Don",
+    description: "Museum-quality dinosaur replicas",
+    ask: "$500,000 for 10% equity",
+    valuation: 5000000,
+    outcome: "deal",
+    investors: ["Mark Cuban"],
+    amount: 500000,
+    equity: 10,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s16e01-1",
+    season: 16,
+    episode: 1,
+    startupName: "Pretty Rugged",
+    description: "Luxury fur blankets",
+    ask: "$200,000 for 15% equity",
+    valuation: 1333333,
+    outcome: "deal",
+    investors: ["Lori Greiner"],
+    amount: 200000,
+    equity: 15,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s16e02-2",
+    season: 16,
+    episode: 2,
+    startupName: "Snactiv",
+    description: "Finger chopsticks for snacks",
+    ask: "$200,000 for 10% equity",
+    valuation: 2000000,
+    outcome: "deal",
+    investors: ["Kevin O'Leary", "Peter Jones"],
+    amount: 200000,
+    equity: 10,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s17e01-1",
+    season: 17,
+    episode: 1,
+    startupName: "Deem Bar",
+    description: "Sustainable bath and body products",
+    ask: "$300,000 for 15% equity",
+    valuation: 2000000,
+    outcome: "deal",
+    investors: ["Barbara Corcoran"],
+    amount: 300000, 
+    equity: 27,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s17e03-2",
+    season: 17,
+    episode: 3,
+    startupName: "DriftAll",
+    description: "Hammock that can attach to any post",
+    ask: "$150,000 for 10% equity",
+    valuation: 1500000,
+    outcome: "no deal",
+    investors: [],
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s18e01-1",
+    season: 18,
+    episode: 1,
+    startupName: "Bonus Meals",
+    description: "Meal service using surplus restaurant food",
+    ask: "$150,000 for 10% equity",
+    valuation: 1500000,
+    outcome: "deal",
+    investors: ["Mark Cuban", "Lori Greiner"],
+    amount: 150000,
+    equity: 20,
+    source: "US Shark Tank"
+  },
+  {
+    id: "st-us-s18e02-2",
+    season: 18,
+    episode: 2,
+    startupName: "MountainFlow",
+    description: "Plant-based ski wax",
+    ask: "$300,000 for 10% equity",
+    valuation: 3000000,
+    outcome: "deal",
+    investors: ["Barbara Corcoran", "Kevin O'Leary"],
+    amount: 300000,
+    equity: 20,
+    source: "US Shark Tank"
   }
 ];
 
@@ -269,6 +379,60 @@ const indiaEpisodes: SharkTankEpisode[] = [
     amount: 6500000,
     equity: 5,
     source: "Shark Tank India"
+  },
+  {
+    id: "st-in-s3e01-1",
+    season: 3,
+    episode: 1,
+    startupName: "Cocofit",
+    description: "Coconut-based health products",
+    ask: "₹75 lakh for 5% equity",
+    valuation: 150000000,
+    outcome: "deal",
+    investors: ["Namita Thapar", "Aman Gupta"],
+    amount: 7500000,
+    equity: 5,
+    source: "Shark Tank India"
+  },
+  {
+    id: "st-in-s3e02-2",
+    season: 3,
+    episode: 2,
+    startupName: "Altor",
+    description: "Smart helmet with safety features",
+    ask: "₹50 lakh for 4% equity",
+    valuation: 125000000,
+    outcome: "deal",
+    investors: ["Anupam Mittal", "Peyush Bansal"],
+    amount: 5000000,
+    equity: 5,
+    source: "Shark Tank India"
+  },
+  {
+    id: "st-in-s3e03-1",
+    season: 3,
+    episode: 3,
+    startupName: "Custkart",
+    description: "Custom merchandising platform",
+    ask: "₹30 lakh for 3% equity",
+    valuation: 100000000,
+    outcome: "no deal",
+    investors: [],
+    source: "Shark Tank India"
+  },
+  {
+    id: "st-in-s3e04-1",
+    season: 3,
+    episode: 4,
+    startupName: "Zoff",
+    description: "Stain removing spray",
+    ask: "₹40 lakh for 4% equity",
+    valuation: 100000000,
+    outcome: "deal",
+    investors: ["Namita Thapar"],
+    amount: 4000000,
+    equity: 6,
+    source: "Shark Tank India"
   }
 ];
 
@@ -312,6 +476,46 @@ const australiaEpisodes: SharkTankEpisode[] = [
     amount: 300000,
     equity: 10,
     source: "Shark Tank Australia"
+  },
+  {
+    id: "st-au-s4e03-1",
+    season: 4,
+    episode: 3,
+    startupName: "Be Fit Food",
+    description: "Doctor-designed weight loss meals",
+    ask: "$300,000 for 20% equity",
+    valuation: 1500000,
+    outcome: "deal",
+    investors: ["Janine Allis"],
+    amount: 300000,
+    equity: 20,
+    source: "Shark Tank Australia"
+  },
+  {
+    id: "st-au-s4e04-2",
+    season: 4,
+    episode: 4,
+    startupName: "Sonsee Woman",
+    description: "Plus-size pantyhose",
+    ask: "$80,000 for 20% equity",
+    valuation: 400000,
+    outcome: "deal",
+    investors: ["Naomi Simson"],
+    amount: 80000,
+    equity: 20,
+    source: "Shark Tank Australia"
+  },
+  {
+    id: "st-au-s4e05-1",
+    season: 4,
+    episode: 5,
+    startupName: "Tiddlers",
+    description: "Swim training aid for kids",
+    ask: "$150,000 for 20% equity",
+    valuation: 750000,
+    outcome: "no deal",
+    investors: [],
+    source: "Shark Tank Australia"
   }
 ];
 
@@ -354,6 +558,48 @@ const ukEpisodes: SharkTankEpisode[] = [
     investors: ["Peter Jones", "Richard Farleigh"],
     amount: 50000,
     equity: 40,
+    source: "Dragons' Den UK"
+  },
+  {
+    id: "st-uk-s19e01-1",
+    season: 19,
+    episode: 1,
+    startupName: "Revival Shots",
+    description: "Effervescent vitamin sachets",
+    ask: "£60,000 for 5% equity",
+    valuation: 1200000,
+    outcome: "deal",
+    investors: ["Tej Lalvani", "Peter Jones"],
+    amount: 60000,
+    equity: 10,
+    source: "Dragons' Den UK"
+  },
+  {
+    id: "st-uk-s19e02-2",
+    season: 19,
+    episode: 2,
+    startupName: "Mak Tok",
+    description: "Authentic Malaysian chili paste",
+    ask: "£50,000 for 20% equity",
+    valuation: 250000,
+    outcome: "deal",
+    investors: ["Sara Davies"],
+    amount: 50000,
+    equity: 33.3,
+    source: "Dragons' Den UK"
+  },
+  {
+    id: "st-uk-s19e03-1",
+    season: 19,
+    episode: 3,
+    startupName: "PipeSnug",
+    description: "Pipe sealing solution",
+    ask: "£100,000 for 10% equity",
+    valuation: 1000000,
+    outcome: "deal",
+    investors: ["Deborah Meaden", "Touker Suleyman"],
+    amount: 100000,
+    equity: 30,
     source: "Dragons' Den UK"
   }
 ];
@@ -453,8 +699,10 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
     document.body.appendChild(a);
     a.click();
     
-    URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    }, 100);
     
     toast({
       title: "Data Exported Successfully",
@@ -501,11 +749,11 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
               <SelectValue placeholder="Select Data Source" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="All">All Episodes</SelectItem>
-              <SelectItem value="US">Shark Tank US</SelectItem>
-              <SelectItem value="India">Shark Tank India</SelectItem>
-              <SelectItem value="Australia">Shark Tank Australia</SelectItem>
-              <SelectItem value="UK">Dragons' Den UK</SelectItem>
+              <SelectItem value="All">All Episodes ({sampleEpisodes.length})</SelectItem>
+              <SelectItem value="US">Shark Tank US ({usEpisodes.length})</SelectItem>
+              <SelectItem value="India">Shark Tank India ({indiaEpisodes.length})</SelectItem>
+              <SelectItem value="Australia">Shark Tank Australia ({australiaEpisodes.length})</SelectItem>
+              <SelectItem value="UK">Dragons' Den UK ({ukEpisodes.length})</SelectItem>
               <SelectItem value="custom">Custom Data</SelectItem>
             </SelectContent>
           </Select>

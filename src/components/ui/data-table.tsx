@@ -55,6 +55,11 @@ function DataTable<T extends Record<string, any>>({
     setFilteredData(filtered);
   }, [searchTerm, data, searchKeys]);
 
+  // Update filtered data whenever the data prop changes
+  React.useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
+
   return (
     <div className="space-y-4">
       {searchable && (
