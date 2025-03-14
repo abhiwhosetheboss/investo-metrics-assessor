@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2, Upload, Database, ArrowDown, Download, RefreshCw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
+import { additionalEpisodes } from "@/utils/sampleData";
 
 interface SharkTankEpisode {
   id: string;
@@ -608,7 +609,8 @@ const sampleEpisodes: SharkTankEpisode[] = [
   ...usEpisodes,
   ...indiaEpisodes,
   ...australiaEpisodes,
-  ...ukEpisodes
+  ...ukEpisodes,
+  ...additionalEpisodes
 ];
 
 const regionData = {
@@ -616,7 +618,8 @@ const regionData = {
   India: indiaEpisodes,
   Australia: australiaEpisodes,
   UK: ukEpisodes,
-  All: sampleEpisodes
+  All: sampleEpisodes,
+  Generated: additionalEpisodes
 };
 
 interface SharkTankDataCollectorProps {
@@ -754,6 +757,7 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
               <SelectItem value="India">Shark Tank India ({indiaEpisodes.length})</SelectItem>
               <SelectItem value="Australia">Shark Tank Australia ({australiaEpisodes.length})</SelectItem>
               <SelectItem value="UK">Dragons' Den UK ({ukEpisodes.length})</SelectItem>
+              <SelectItem value="Generated">Generated Data ({additionalEpisodes.length})</SelectItem>
               <SelectItem value="custom">Custom Data</SelectItem>
             </SelectContent>
           </Select>

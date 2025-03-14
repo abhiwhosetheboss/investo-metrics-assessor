@@ -1,4 +1,3 @@
-
 import { AnalysisResult } from './analysisUtils';
 
 // Sample data for demo purposes
@@ -250,3 +249,131 @@ export const sampleData: AnalysisResult[] = [
     createdAt: "2023-11-05T09:45:00Z"
   }
 ];
+
+// Generator function to create more Shark Tank episodes with realistic data
+const generateSharkTankEpisodes = (count: number) => {
+  const sources = ['US Shark Tank', 'Shark Tank India', 'Shark Tank Australia', 'Dragons\' Den UK', 'Shark Tank Colombia', 'Shark Tank Mexico', 'Dragons\' Den Canada', 'Shark Tank Vietnam'];
+  const possibleInvestors = {
+    'US Shark Tank': ['Mark Cuban', 'Kevin O\'Leary', 'Lori Greiner', 'Barbara Corcoran', 'Daymond John', 'Robert Herjavec', 'Daniel Lubetzky', 'Emma Grede'],
+    'Shark Tank India': ['Aman Gupta', 'Anupam Mittal', 'Namita Thapar', 'Vineeta Singh', 'Peyush Bansal', 'Ghazal Alagh', 'Amit Jain'],
+    'Shark Tank Australia': ['Janine Allis', 'Andrew Banks', 'Steve Baxter', 'Naomi Simson', 'Glen Richards', 'Boost John', 'Marissa Payne'],
+    'Dragons\' Den UK': ['Peter Jones', 'Deborah Meaden', 'Touker Suleyman', 'Sara Davies', 'Steven Bartlett', 'Tej Lalvani', 'Duncan Bannatyne'],
+    'Shark Tank Colombia': ['Alexander Torrenegra', 'Alejandra Torres', 'Ricardo Leyva', 'Andrea Arnau', 'Carlos Cubillos'],
+    'Shark Tank Mexico': ['Carlos Bremer', 'Arturo Elías Ayub', 'Marcus Dantus', 'Rodrigo Herrera', 'Deborah Dana'],
+    'Dragons\' Den Canada': ['Jim Treliving', 'Arlene Dickinson', 'Michele Romanow', 'Manjit Minhas', 'Vincenzo Guzzo'],
+    'Shark Tank Vietnam': ['Phạm Thanh Hưng', 'Nguyễn Hòa Bình', 'Nguyễn Ngọc Thủy', 'Đỗ Liên', 'Trần Anh Vương']
+  };
+  
+  const industries = ['Food & Beverage', 'Tech', 'Health & Wellness', 'Fashion', 'Education', 'Sustainable Products', 'Home Solutions', 'Beauty', 'Fitness', 'Pet Products', 'Children\'s Products', 'Entertainment', 'Outdoors', 'Travel', 'Financial Services'];
+  
+  const outcomes = ['deal', 'no deal'];
+  
+  const episodes = [];
+  
+  for (let i = 0; i < count; i++) {
+    const source = sources[Math.floor(Math.random() * sources.length)];
+    const season = Math.floor(Math.random() * 15) + 1;
+    const episode = Math.floor(Math.random() * 24) + 1;
+    const industry = industries[Math.floor(Math.random() * industries.length)];
+    const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+    
+    // Create a startup name using industry keywords
+    const prefixes = ['Smart', 'Eco', 'Tech', 'Next', 'Pure', 'Pro', 'Zen', 'Swift', 'Nova', 'Vital', 'Peak', 'Prime', 'Flex', 'Lux', 'Bio'];
+    const suffixes = ['Solutions', 'Hub', 'Box', 'Connect', 'Craft', 'Labs', 'Ware', 'Boost', 'Genius', 'Mind', 'Wave', 'Sync', 'Blend', 'Go', 'Life'];
+    const startupName = `${prefixes[Math.floor(Math.random() * prefixes.length)]}${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+    
+    // Generate a realistic valuation
+    const baseFactor = Math.floor(Math.random() * 20) + 1;
+    const valuation = baseFactor * 500000;
+    
+    // Create ask string based on source (different currencies)
+    let askAmount, askEquity, askString;
+    askEquity = Math.floor(Math.random() * 25) + 5; // 5% to 30%
+    askAmount = Math.floor(valuation * (askEquity / 100));
+    
+    if (source === 'Shark Tank India') {
+      askString = `₹${Math.round(askAmount / 10000) / 10} crore for ${askEquity}% equity`;
+    } else if (source === 'Dragons\' Den UK') {
+      askString = `£${Math.round(askAmount / 100000) * 10}0,000 for ${askEquity}% equity`;
+    } else {
+      askString = `$${Math.round(askAmount / 10000) * 10},000 for ${askEquity}% equity`;
+    }
+    
+    // Generate investors if there was a deal
+    let investors: string[] = [];
+    let dealAmount = 0;
+    let dealEquity = 0;
+    
+    if (outcome === 'deal') {
+      const sourceInvestors = possibleInvestors[source as keyof typeof possibleInvestors];
+      const numInvestors = Math.random() > 0.7 ? 2 : 1; // 30% chance of 2 investors
+      
+      for (let j = 0; j < numInvestors; j++) {
+        const investor = sourceInvestors[Math.floor(Math.random() * sourceInvestors.length)];
+        if (!investors.includes(investor)) {
+          investors.push(investor);
+        }
+      }
+      
+      // Sometimes the deal is different than the ask
+      const dealFactor = Math.random();
+      if (dealFactor < 0.3) {
+        // Same deal
+        dealAmount = askAmount;
+        dealEquity = askEquity;
+      } else if (dealFactor < 0.6) {
+        // More equity
+        dealAmount = askAmount;
+        dealEquity = askEquity + Math.floor(Math.random() * 15) + 5;
+      } else {
+        // Different amount
+        dealAmount = Math.round(askAmount * (0.7 + Math.random() * 0.3));
+        dealEquity = askEquity + Math.floor(Math.random() * 10);
+      }
+    }
+    
+    // Generate a description based on industry
+    const descriptionPhrases = {
+      'Food & Beverage': ['healthy snacks', 'plant-based', 'specialty drink', 'meal delivery', 'superfood', 'gourmet', 'organic'],
+      'Tech': ['app', 'software platform', 'smart device', 'AI-powered', 'IoT solution', 'digital marketplace', 'wearable tech'],
+      'Health & Wellness': ['wellness product', 'medical device', 'health tracker', 'therapy solution', 'supplement', 'mental health', 'telehealth'],
+      'Fashion': ['sustainable fashion', 'customizable clothing', 'fashion tech', 'accessory brand', 'direct-to-consumer', 'athleisure'],
+      'Education': ['learning platform', 'educational toy', 'e-learning solution', 'skill development', 'interactive curriculum', 'STEM kit'],
+      'Sustainable Products': ['eco-friendly alternative', 'plastic-free', 'compostable', 'upcycled', 'carbon-negative', 'zero-waste'],
+      'Home Solutions': ['smart home', 'cleaning innovation', 'space-saving furniture', 'home automation', 'kitchen gadget', 'organization solution'],
+      'Beauty': ['clean beauty', 'personalized skincare', 'beauty device', 'innovative makeup', 'hair care', 'anti-aging'],
+      'Fitness': ['workout equipment', 'fitness app', 'recovery tool', 'performance wear', 'digital fitness', 'wellness community'],
+      'Pet Products': ['pet health', 'pet tech', 'sustainable pet product', 'pet food', 'pet accessory', 'pet service'],
+      'Children\'s Products': ['educational toy', 'baby product', 'children\'s apparel', 'parenting solution', 'child safety', 'developmental'],
+      'Entertainment': ['gaming platform', 'content creation', 'social app', 'interactive experience', 'streaming service', 'entertainment tech'],
+      'Outdoors': ['camping gear', 'adventure equipment', 'outdoor apparel', 'travel accessory', 'sports innovation', 'recreational'],
+      'Travel': ['travel platform', 'luggage innovation', 'accommodations', 'experience marketplace', 'travel tech', 'tourism solution'],
+      'Financial Services': ['fintech solution', 'investing platform', 'payment innovation', 'financial education', 'personal finance', 'crypto']
+    };
+    
+    const industryPhrases = descriptionPhrases[industry as keyof typeof descriptionPhrases] || ['innovative product', 'consumer solution'];
+    const phrase1 = industryPhrases[Math.floor(Math.random() * industryPhrases.length)];
+    const phrase2 = industryPhrases[Math.floor(Math.random() * industryPhrases.length)];
+    const description = `${phrase1} with ${phrase2}`;
+    
+    episodes.push({
+      id: `st-gen-s${season}e${episode}-${i}`,
+      season,
+      episode,
+      startupName,
+      description,
+      ask: askString,
+      valuation,
+      outcome,
+      investors,
+      amount: outcome === 'deal' ? dealAmount : undefined,
+      equity: outcome === 'deal' ? dealEquity : undefined,
+      source
+    });
+  }
+  
+  return episodes;
+};
+
+// Generate 500 episodes
+export const additionalEpisodes = generateSharkTankEpisodes(500);
