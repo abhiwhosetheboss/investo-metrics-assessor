@@ -60,11 +60,16 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
         const model = JSON.parse(savedModel);
         setSelectedModelId(model.id);
         setIsActivated(true);
+        // Also notify parent component
+        const foundModel = availableModels.find(m => m.id === model.id);
+        if (foundModel) {
+          onModelSelect(foundModel);
+        }
       } catch (e) {
         console.error("Failed to parse saved model", e);
       }
     }
-  }, []);
+  }, [onModelSelect]);
 
   const handleModelChange = (value: string) => {
     setSelectedModelId(value);
@@ -87,9 +92,14 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
   const handleConfirm = () => {
     const model = availableModels.find(m => m.id === selectedModelId);
     if (model) {
+      // Save to localStorage
+      localStorage.setItem("selectedAIModel", JSON.stringify(model));
+      
+      // Notify parent component
       onModelSelect(model);
+      
+      // Update UI state
       setIsActivated(true);
-      console.log("Selected model:", model);
       
       toast({
         title: "AI Model Selected",

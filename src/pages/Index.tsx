@@ -1,15 +1,36 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StartupForm from "@/components/StartupForm";
 import RiskToRewardMeter from "@/components/RiskToRewardMeter";
 import { BarChart4, Scale, Users, LineChart, ArrowRight, Brain, Rocket } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("form");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const handleStartAnalysis = () => {
+    navigate("/dashboard");
+  };
+
+  const handleFormSubmit = (formData: any) => {
+    // In a real app, we would submit this data to an API
+    console.log("Form submitted with data:", formData);
+    toast({
+      title: "Analysis started",
+      description: "Your startup is being analyzed. You'll be redirected to the dashboard shortly.",
+    });
+    
+    // Redirect to dashboard after a short delay
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1500);
+  };
   
   return (
     <div className="min-h-screen">
@@ -25,11 +46,11 @@ const Index = () => {
                 Investometer analyzes startups using proven metrics and AI-powered insights to help investors evaluate risk and potential.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="gap-2">
+                <Button size="lg" className="gap-2" onClick={handleStartAnalysis}>
                   Start Analysis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" onClick={() => setActiveTab("examples")}>
                   View Examples
                 </Button>
               </div>
@@ -133,7 +154,7 @@ const Index = () => {
       <section className="py-16 bg-slate-50 dark:bg-slate-900/50">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <Tabs defaultValue="form" className="space-y-8" onValueChange={setActiveTab}>
+            <Tabs defaultValue="form" value={activeTab} className="space-y-8" onValueChange={setActiveTab}>
               <div className="flex justify-center">
                 <TabsList className="grid grid-cols-2 w-full max-w-md">
                   <TabsTrigger value="form">Startup Analysis</TabsTrigger>
@@ -148,7 +169,7 @@ const Index = () => {
                     Fill out the form below to get a comprehensive analysis of your startup's investibility.
                   </p>
                 </div>
-                <StartupForm />
+                <StartupForm onSubmit={handleFormSubmit} />
               </TabsContent>
               
               <TabsContent value="examples" className="space-y-8">

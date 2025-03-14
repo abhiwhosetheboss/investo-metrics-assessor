@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronRight, LineChart, BarChart3, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +38,10 @@ const Navbar = () => {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+
+  const handleStartAnalysis = () => {
+    navigate("/dashboard");
+  };
 
   return (
     <header 
@@ -72,8 +77,11 @@ const Navbar = () => {
                 {item.title}
               </Link>
             ))}
-            <Button asChild className="rounded-full px-6">
-              <Link to="/dashboard">Start Analysis</Link>
+            <Button 
+              className="rounded-full px-6"
+              onClick={handleStartAnalysis}
+            >
+              Start Analysis
             </Button>
           </div>
 
@@ -109,8 +117,11 @@ const Navbar = () => {
                   <span>{item.title}</span>
                 </Link>
               ))}
-              <Button asChild className="w-full mt-4 rounded-full">
-                <Link to="/dashboard">Start Analysis</Link>
+              <Button 
+                className="w-full mt-4 rounded-full"
+                onClick={handleStartAnalysis}
+              >
+                Start Analysis
               </Button>
             </div>
           </div>

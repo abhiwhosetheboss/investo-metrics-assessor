@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Loader2, Upload, Database, ArrowDown, Download, RefreshCw } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
+import { Badge } from "@/components/ui/badge";
 
 interface SharkTankEpisode {
   id: string;
@@ -24,7 +24,6 @@ interface SharkTankEpisode {
   source: string;
 }
 
-// Additional sample episodes for US Shark Tank
 const usEpisodes: SharkTankEpisode[] = [
   {
     id: "st-us-s12e01-1",
@@ -160,7 +159,6 @@ const usEpisodes: SharkTankEpisode[] = [
   }
 ];
 
-// Additional sample episodes for India Shark Tank
 const indiaEpisodes: SharkTankEpisode[] = [
   {
     id: "st-in-s2e12-1",
@@ -274,7 +272,6 @@ const indiaEpisodes: SharkTankEpisode[] = [
   }
 ];
 
-// Sample episodes for Australia
 const australiaEpisodes: SharkTankEpisode[] = [
   {
     id: "st-au-s3e05-2",
@@ -318,7 +315,6 @@ const australiaEpisodes: SharkTankEpisode[] = [
   }
 ];
 
-// Sample episodes for UK Dragons' Den
 const ukEpisodes: SharkTankEpisode[] = [
   {
     id: "st-uk-s18e12-1",
@@ -362,7 +358,6 @@ const ukEpisodes: SharkTankEpisode[] = [
   }
 ];
 
-// All sample episodes combined
 const sampleEpisodes: SharkTankEpisode[] = [
   ...usEpisodes,
   ...indiaEpisodes,
@@ -370,7 +365,6 @@ const sampleEpisodes: SharkTankEpisode[] = [
   ...ukEpisodes
 ];
 
-// Sample episodes by region for filtering
 const regionData = {
   US: usEpisodes,
   India: indiaEpisodes,
@@ -402,7 +396,6 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
       
       if (currentProgress >= 100) {
         clearInterval(interval);
-        // Get the appropriate data based on selected region
         const dataToImport = regionData[source as keyof typeof regionData] || [];
         setCollectedData(dataToImport);
         onDataCollected(dataToImport);
@@ -450,11 +443,9 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
       return;
     }
 
-    // Create a blob from the data
     const dataStr = JSON.stringify(collectedData, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     
-    // Create a download link and trigger the download
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -462,7 +453,6 @@ const SharkTankDataCollector = ({ onDataCollected, className }: SharkTankDataCol
     document.body.appendChild(a);
     a.click();
     
-    // Clean up
     URL.revokeObjectURL(url);
     document.body.removeChild(a);
     
