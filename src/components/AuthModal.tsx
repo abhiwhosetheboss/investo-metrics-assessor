@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,23 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(open || false);
   const navigate = useNavigate();
+  
+  // Sync with parent component's open state
+  useEffect(() => {
+    if (open !== undefined) {
+      setModalOpen(open);
+    }
+  }, [open]);
+  
+  // Handle internal open change
+  const handleOpenChange = (open: boolean) => {
+    setModalOpen(open);
+    if (onOpenChange) {
+      onOpenChange(open);
+    }
+  };
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -97,9 +114,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
         });
         
         // Close the modal
-        if (onOpenChange) {
-          onOpenChange(false);
-        }
+        handleOpenChange(false);
         
         // Trigger session change event for other tabs
         window.dispatchEvent(new Event('storage'));
@@ -176,9 +191,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
         });
         
         // Close the modal
-        if (onOpenChange) {
-          onOpenChange(false);
-        }
+        handleOpenChange(false);
         
         // Trigger session change event for other tabs
         window.dispatchEvent(new Event('storage'));
@@ -215,7 +228,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={modalOpen} onOpenChange={handleOpenChange}>
       {children ? (
         <DialogTrigger asChild>
           {children}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AuthModal from "./AuthModal";
 import UserMenu from "./UserMenu";
+import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
   title: string;
@@ -26,10 +27,47 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check authentication status on mount
+  // Check authentication status on mount and when auth state changes
   useEffect(() => {
-    const authStatus = localStorage.getItem("isAuthenticated") === "true";
-    setIsAuthenticated(authStatus);
+    const checkAuth = async () => {
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      
+      // Fallback to localStorage for backward compatibility
+      if (!session) {
+        const localAuth = localStorage.getItem("isAuthenticated") === "true";
+        setIsAuthenticated(localAuth);
+      }
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Navbar: Auth state changed:", event);
+        if (event === 'SIGNED_IN') {
+          setIsAuthenticated(true);
+        } else if (event === 'SIGNED_OUT') {
+          setIsAuthenticated(false);
+        }
+      }
+    );
+    
+    // Also listen for storage events (for multi-tab support)
+    const handleStorageChange = () => {
+      console.log("Navbar: Storage changed, checking auth...");
+      const localAuth = localStorage.getItem("isAuthenticated") === "true";
+      setIsAuthenticated(localAuth);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
