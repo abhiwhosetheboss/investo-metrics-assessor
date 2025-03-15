@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, LogOut, Settings, History } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserData {
   name: string;
@@ -24,38 +25,68 @@ const UserMenu = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check authentication status on component mount and whenever localStorage changes
-    const checkAuth = () => {
-      const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-      if (isAuthenticated) {
-        const userData = localStorage.getItem("user");
-        if (userData) {
-          try {
-            setUser(JSON.parse(userData));
-          } catch (error) {
-            console.error("Failed to parse user data:", error);
-            // Reset invalid user data
-            localStorage.removeItem("user");
-            localStorage.removeItem("isAuthenticated");
-          }
-        }
+    // Check auth when component mounts
+    const checkAuth = async () => {
+      // First try to get session from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session && session.user) {
+        // User is authenticated in Supabase
+        setUser({
+          email: session.user.email || "",
+          name: session.user.user_metadata?.name || "User"
+        });
       } else {
-        setUser(null);
+        // Fallback to localStorage for backward compatibility
+        const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+        if (isAuthenticated) {
+          const userData = localStorage.getItem("user");
+          if (userData) {
+            try {
+              setUser(JSON.parse(userData));
+            } catch (error) {
+              console.error("Failed to parse user data:", error);
+              // Reset invalid user data
+              localStorage.removeItem("user");
+              localStorage.removeItem("isAuthenticated");
+            }
+          }
+        } else {
+          setUser(null);
+        }
       }
     };
     
-    // Initial check
     checkAuth();
     
-    // Listen for storage events (for multi-tab support)
+    // Setup auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          setUser({
+            email: session.user.email || "",
+            name: session.user.user_metadata?.name || "User"
+          });
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      }
+    );
+    
+    // Also listen for storage events (for multi-tab support)
     window.addEventListener('storage', checkAuth);
     
     return () => {
+      subscription.unsubscribe();
       window.removeEventListener('storage', checkAuth);
     };
   }, []);
   
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Sign out from Supabase
+    await supabase.auth.signOut();
+    
+    // Also clear localStorage for backward compatibility
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("user");
     

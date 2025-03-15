@@ -181,11 +181,53 @@ const Index = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Sample cards with links to the example analyses */}
+                  {/* Scrub Daddy from Shark Tank US */}
                   <Card className="hover:shadow-md transition-all">
                     <CardHeader>
-                      <CardTitle>EcoTech Solutions</CardTitle>
-                      <CardDescription>Clean energy startup with strong team</CardDescription>
+                      <CardTitle>Scrub Daddy</CardTitle>
+                      <CardDescription>Revolutionary cleaning product from Shark Tank US</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-500">Investibility Score:</span>
+                        <span className="font-medium text-green-600">92/100</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-500">Risk Level:</span>
+                        <span className="font-medium text-green-600">Low</span>
+                      </div>
+                      <Button asChild className="w-full mt-4">
+                        <Link to="/analysis/scrub-daddy">View Full Analysis</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* PeeSafe Snitch from Shark Tank India */}
+                  <Card className="hover:shadow-md transition-all">
+                    <CardHeader>
+                      <CardTitle>PeeSafe Snitch</CardTitle>
+                      <CardDescription>Innovative hygiene product from Shark Tank India</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-500">Investibility Score:</span>
+                        <span className="font-medium text-yellow-600">68/100</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-500">Risk Level:</span>
+                        <span className="font-medium text-yellow-600">Moderate</span>
+                      </div>
+                      <Button asChild className="w-full mt-4">
+                        <Link to="/analysis/peeschute-snitch">View Full Analysis</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                  
+                  {/* Moderate from Shark Tank India */}
+                  <Card className="hover:shadow-md transition-all">
+                    <CardHeader>
+                      <CardTitle>Moderate</CardTitle>
+                      <CardDescription>AI content moderation platform from Shark Tank India</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex justify-between items-center">
@@ -197,31 +239,33 @@ const Index = () => {
                         <span className="font-medium text-yellow-600">Moderate</span>
                       </div>
                       <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/startup-1">View Full Analysis</Link>
+                        <Link to="/analysis/moderate">View Full Analysis</Link>
                       </Button>
                     </CardContent>
                   </Card>
                   
+                  {/* Bombs Away Bath from Shark Tank US */}
                   <Card className="hover:shadow-md transition-all">
                     <CardHeader>
-                      <CardTitle>HealthMinder AI</CardTitle>
-                      <CardDescription>Healthcare AI with regulatory challenges</CardDescription>
+                      <CardTitle>Bombs Away Bath</CardTitle>
+                      <CardDescription>Creative bath products from Shark Tank US</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-yellow-600">65/100</span>
+                        <span className="font-medium text-green-600">82/100</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-orange-600">High</span>
+                        <span className="font-medium text-green-600">Low</span>
                       </div>
                       <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/startup-2">View Full Analysis</Link>
+                        <Link to="/analysis/bombs-away">View Full Analysis</Link>
                       </Button>
                     </CardContent>
                   </Card>
                   
+                  {/* Original example kept for reference */}
                   <Card className="hover:shadow-md transition-all md:col-span-2">
                     <CardHeader>
                       <CardTitle>LogisticsHub</CardTitle>

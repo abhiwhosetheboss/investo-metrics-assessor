@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn, UserPlus, User, Mail, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -41,6 +43,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
   const [activeTab, setActiveTab] = useState("login");
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
   
   const loginForm = useForm<LoginFormValues>({
@@ -61,56 +64,111 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     },
   });
   
-  const onLoginSubmit = (values: LoginFormValues) => {
+  const onLoginSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
+    setAuthError(null);
     
-    console.log("Login form submitted:", values);
-    
-    // Simulate successful login
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("user", JSON.stringify({ email: values.email, name: "Demo User" }));
-    
-    toast({
-      title: "Success!",
-      description: "You are now logged in.",
-    });
-    
-    setIsSubmitting(false);
-    
-    // Close the modal
-    if (onOpenChange) {
-      onOpenChange(false);
+    try {
+      // Try to sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // If successful, store user info
+      if (data && data.user) {
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("user", JSON.stringify({ 
+          email: data.user.email, 
+          name: data.user.user_metadata?.name || "User" 
+        }));
+        
+        toast({
+          title: "Success!",
+          description: "You are now logged in.",
+        });
+        
+        // Close the modal
+        if (onOpenChange) {
+          onOpenChange(false);
+        }
+        
+        // Navigate to dashboard
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setAuthError(error.message || "Failed to sign in. Please check your credentials.");
+      
+      toast({
+        title: "Login failed",
+        description: error.message || "Failed to sign in. Please check your credentials.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Navigate to dashboard instead of reloading the page
-    navigate("/dashboard");
   };
   
-  const onSignupSubmit = (values: SignupFormValues) => {
+  const onSignupSubmit = async (values: SignupFormValues) => {
     setIsSubmitting(true);
+    setAuthError(null);
     
-    console.log("Signup form submitted:", values);
-    
-    // Simulate successful signup
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("user", JSON.stringify({ email: values.email, name: values.name }));
-    
-    toast({
-      title: "Account created!",
-      description: "Your account has been created successfully.",
-    });
-    
-    setIsSubmitting(false);
-    
-    // Close the modal
-    if (onOpenChange) {
-      onOpenChange(false);
+    try {
+      // Try to sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            name: values.name,
+          },
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // If successful, store user info
+      if (data && data.user) {
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("user", JSON.stringify({ 
+          email: data.user.email, 
+          name: values.name 
+        }));
+        
+        toast({
+          title: "Account created!",
+          description: "Your account has been created successfully.",
+        });
+        
+        // Close the modal
+        if (onOpenChange) {
+          onOpenChange(false);
+        }
+        
+        // Navigate to dashboard
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setAuthError(error.message || "Failed to create account. Please try again later.");
+      
+      toast({
+        title: "Signup failed",
+        description: error.message || "Failed to create account. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-    
-    // Navigate to dashboard instead of reloading the page
-    navigate("/dashboard");
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {children ? (
@@ -137,6 +195,12 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
               : "Create a new account to get started."}
           </DialogDescription>
         </DialogHeader>
+        
+        {authError && (
+          <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+            {authError}
+          </div>
+        )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-2">
           <TabsList className="grid grid-cols-2 w-full">

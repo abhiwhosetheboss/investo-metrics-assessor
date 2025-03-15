@@ -3,6 +3,350 @@ import { AnalysisResult } from './analysisUtils';
 // Sample data for demo purposes
 export const sampleData: AnalysisResult[] = [
   {
+    id: "scrub-daddy",
+    startupName: "Scrub Daddy",
+    investibilityScore: 92,
+    overallRisk: 28,
+    businessModel: "b2c",
+    founderTrustRating: 9,
+    pmfScore: 95,
+    growthExpected: "75% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 25,
+        description: "Low market risk due to universal need and established market."
+      },
+      {
+        name: "Team Risk",
+        score: 20,
+        description: "Strong founder with deep industry expertise and proven execution ability."
+      },
+      {
+        name: "Financial Risk",
+        score: 30,
+        description: "Strong margins with manageable cost structure and clear path to profitability."
+      },
+      {
+        name: "Technology Risk",
+        score: 35,
+        description: "Patented technology with unique material properties that competitors cannot easily replicate."
+      }
+    ],
+    strengths: [
+      {
+        text: "Patented smile-shaped design with temperature-responsive material",
+        impact: "critical"
+      },
+      {
+        text: "Versatile product with multiple use cases in every household",
+        impact: "high"
+      },
+      {
+        text: "Charismatic founder with strong pitching and sales skills",
+        impact: "high"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "Scaling production to meet potential demand could be challenging",
+        impact: "medium"
+      },
+      {
+        text: "Potential for competition with similar cleaning products",
+        impact: "low"
+      },
+      {
+        text: "Need for continual innovation to maintain market leadership",
+        impact: "low"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Expand Product Line",
+        description: "Develop complementary products using the same material technology to create a family of branded cleaning solutions.",
+        priority: "high"
+      },
+      {
+        title: "International Expansion",
+        description: "Prepare for global distribution by securing international patents and adapting marketing for different markets.",
+        priority: "medium"
+      },
+      {
+        title: "Retail Partnerships",
+        description: "Secure exclusive partnerships with major retailers to guarantee shelf space and promotional opportunities.",
+        priority: "medium"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 95 },
+      { name: "Founder-Market Fit", value: 90 },
+      { name: "Team Composition", value: 85 },
+      { name: "Financials", value: 85 },
+      { name: "Exit Strategy", value: 90 },
+      { name: "Intangibles", value: 95 }
+    ],
+    createdAt: "2023-12-05T14:30:00Z"
+  },
+  {
+    id: "peeschute-snitch",
+    startupName: "PeeSafe Snitch",
+    investibilityScore: 68,
+    overallRisk: 48,
+    businessModel: "b2c",
+    founderTrustRating: 7,
+    pmfScore: 72,
+    growthExpected: "40% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 40,
+        description: "Addressing a real need, but consumer adoption of innovations in this space can be slow."
+      },
+      {
+        name: "Team Risk",
+        score: 35,
+        description: "Experienced founders with complementary skills but limited track record in manufacturing."
+      },
+      {
+        name: "Financial Risk",
+        score: 55,
+        description: "Higher financial risk due to manufacturing costs and competitive pricing needed for market entry."
+      },
+      {
+        name: "Technology Risk",
+        score: 45,
+        description: "Innovative design but with concerns about durability and consistent quality."
+      }
+    ],
+    strengths: [
+      {
+        text: "Solves a universal and persistent hygiene problem",
+        impact: "high"
+      },
+      {
+        text: "Part of established brand with existing distribution channels",
+        impact: "high"
+      },
+      {
+        text: "Potential for recurring revenue through disposable components",
+        impact: "medium"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "Cultural taboos and reluctance to discuss the problem openly",
+        impact: "high"
+      },
+      {
+        text: "Price point might be high for mass market adoption",
+        impact: "medium"
+      },
+      {
+        text: "Competing with established behaviors and simpler alternatives",
+        impact: "medium"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Educational Marketing Campaign",
+        description: "Develop marketing that normalizes discussion around the problem and educates consumers on the health benefits.",
+        priority: "high"
+      },
+      {
+        title: "Strategic Pricing Tiers",
+        description: "Create different pricing tiers to capture various market segments, with premium and economy options.",
+        priority: "medium"
+      },
+      {
+        title: "Institutional Partnerships",
+        description: "Partner with travel companies, hospitals, and public facility managers to drive B2B adoption alongside consumer sales.",
+        priority: "medium"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 72 },
+      { name: "Founder-Market Fit", value: 75 },
+      { name: "Team Composition", value: 70 },
+      { name: "Financials", value: 65 },
+      { name: "Exit Strategy", value: 60 },
+      { name: "Intangibles", value: 75 }
+    ],
+    createdAt: "2023-09-18T10:45:00Z"
+  },
+  {
+    id: "moderate",
+    startupName: "Moderate",
+    investibilityScore: 78,
+    overallRisk: 38,
+    businessModel: "b2b",
+    founderTrustRating: 8,
+    pmfScore: 80,
+    growthExpected: "55% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 35,
+        description: "Growing demand for content moderation solutions but with varying regulatory requirements across regions."
+      },
+      {
+        name: "Team Risk",
+        score: 30,
+        description: "Strong technical team with AI expertise and domain knowledge in content policies."
+      },
+      {
+        name: "Financial Risk",
+        score: 45,
+        description: "Good unit economics but requires continual investment in AI capabilities to stay competitive."
+      },
+      {
+        name: "Technology Risk",
+        score: 40,
+        description: "Advanced AI algorithms but facing challenges with context-sensitive content and evolving methods of policy violation."
+      }
+    ],
+    strengths: [
+      {
+        text: "Sophisticated AI platform with high accuracy in detecting problematic content",
+        impact: "critical"
+      },
+      {
+        text: "Technical founders with deep expertise in machine learning and natural language processing",
+        impact: "high"
+      },
+      {
+        text: "Scalable solution addressing a growing need for all online platforms",
+        impact: "high"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "High computation costs that scale with content volume",
+        impact: "medium"
+      },
+      {
+        text: "Need for continuous training with new data to maintain effectiveness",
+        impact: "medium"
+      },
+      {
+        text: "Exposure to reputational risk if moderation fails on high-profile cases",
+        impact: "high"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Tiered Service Model",
+        description: "Develop different service tiers with varying levels of human oversight to address different client needs and budgets.",
+        priority: "high"
+      },
+      {
+        title: "Regional Customization",
+        description: "Create adaptable moderation policies that can be customized for different cultural contexts and regulatory environments.",
+        priority: "high"
+      },
+      {
+        title: "Strategic Partnerships",
+        description: "Partner with major platform providers to integrate as the default moderation solution for their developers.",
+        priority: "medium"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 80 },
+      { name: "Founder-Market Fit", value: 85 },
+      { name: "Team Composition", value: 75 },
+      { name: "Financials", value: 70 },
+      { name: "Exit Strategy", value: 75 },
+      { name: "Intangibles", value: 80 }
+    ],
+    createdAt: "2023-11-22T09:15:00Z"
+  },
+  {
+    id: "bombs-away",
+    startupName: "Bombs Away Bath",
+    investibilityScore: 82,
+    overallRisk: 32,
+    businessModel: "b2c",
+    founderTrustRating: 9,
+    pmfScore: 85,
+    growthExpected: "60% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 30,
+        description: "Well-established market with strong consumer demand for bath and personal care products."
+      },
+      {
+        name: "Team Risk",
+        score: 25,
+        description: "Passionate founder with strong marketing skills and product development expertise."
+      },
+      {
+        name: "Financial Risk",
+        score: 40,
+        description: "Good margins but faces challenges in scaling production while maintaining quality."
+      },
+      {
+        name: "Technology Risk",
+        score: 30,
+        description: "Innovative formulations but limited technical barriers to entry for competitors."
+      }
+    ],
+    strengths: [
+      {
+        text: "Unique, engaging product design appealing to multiple demographics",
+        impact: "high"
+      },
+      {
+        text: "Strong brand identity with cohesive marketing and packaging",
+        impact: "high"
+      },
+      {
+        text: "Profitable unit economics with healthy margins",
+        impact: "critical"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "Seasonal sales fluctuations requiring careful inventory management",
+        impact: "medium"
+      },
+      {
+        text: "Limited patent protection for core product designs",
+        impact: "medium"
+      },
+      {
+        text: "Dependency on social media marketing effectiveness",
+        impact: "low"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Expand Product Categories",
+        description: "Develop complementary personal care products to create a complete brand ecosystem and increase customer lifetime value.",
+        priority: "high"
+      },
+      {
+        title: "Subscription Model",
+        description: "Launch a subscription service for regular product delivery to stabilize revenue and improve customer retention.",
+        priority: "medium"
+      },
+      {
+        title: "Retail Expansion Strategy",
+        description: "Create a phased approach to expanding retail presence while balancing direct-to-consumer sales channels.",
+        priority: "medium"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 85 },
+      { name: "Founder-Market Fit", value: 90 },
+      { name: "Team Composition", value: 75 },
+      { name: "Financials", value: 80 },
+      { name: "Exit Strategy", value: 75 },
+      { name: "Intangibles", value: 85 }
+    ],
+    createdAt: "2023-10-30T15:45:00Z"
+  },
+  {
     id: "startup-1",
     startupName: "EcoTech Solutions",
     investibilityScore: 78,
