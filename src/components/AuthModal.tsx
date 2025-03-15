@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LogIn, UserPlus, User, Mail, Lock } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -41,6 +41,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
   const [activeTab, setActiveTab] = useState("login");
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -63,57 +64,51 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
   const onLoginSubmit = (values: LoginFormValues) => {
     setIsSubmitting(true);
     
-    // In a real app, this would be an API call to authenticate the user
-    setTimeout(() => {
-      console.log("Login form submitted:", values);
-      
-      // Simulate successful login
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("user", JSON.stringify({ email: values.email, name: "Demo User" }));
-      
-      toast({
-        title: "Success!",
-        description: "You are now logged in.",
-      });
-      
-      setIsSubmitting(false);
-      
-      // Close the modal
-      if (onOpenChange) {
-        onOpenChange(false);
-      }
-      
-      // Reload the page to update auth state
-      window.location.reload();
-    }, 1500);
+    console.log("Login form submitted:", values);
+    
+    // Simulate successful login
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("user", JSON.stringify({ email: values.email, name: "Demo User" }));
+    
+    toast({
+      title: "Success!",
+      description: "You are now logged in.",
+    });
+    
+    setIsSubmitting(false);
+    
+    // Close the modal
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+    
+    // Navigate to dashboard instead of reloading the page
+    navigate("/dashboard");
   };
   
   const onSignupSubmit = (values: SignupFormValues) => {
     setIsSubmitting(true);
     
-    // In a real app, this would be an API call to register the user
-    setTimeout(() => {
-      console.log("Signup form submitted:", values);
-      
-      // Simulate successful signup
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("user", JSON.stringify({ email: values.email, name: values.name }));
-      
-      toast({
-        title: "Account created!",
-        description: "Your account has been created successfully.",
-      });
-      
-      setIsSubmitting(false);
-      
-      // Close the modal
-      if (onOpenChange) {
-        onOpenChange(false);
-      }
-      
-      // Reload the page to update auth state
-      window.location.reload();
-    }, 1500);
+    console.log("Signup form submitted:", values);
+    
+    // Simulate successful signup
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("user", JSON.stringify({ email: values.email, name: values.name }));
+    
+    toast({
+      title: "Account created!",
+      description: "Your account has been created successfully.",
+    });
+    
+    setIsSubmitting(false);
+    
+    // Close the modal
+    if (onOpenChange) {
+      onOpenChange(false);
+    }
+    
+    // Navigate to dashboard instead of reloading the page
+    navigate("/dashboard");
   };
   
   return (

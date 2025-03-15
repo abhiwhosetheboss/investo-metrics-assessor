@@ -24,29 +24,50 @@ const UserMenu = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    if (isAuthenticated) {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        setUser(JSON.parse(userData));
+    // Check authentication status on component mount and whenever localStorage changes
+    const checkAuth = () => {
+      const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+      if (isAuthenticated) {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+          try {
+            setUser(JSON.parse(userData));
+          } catch (error) {
+            console.error("Failed to parse user data:", error);
+            // Reset invalid user data
+            localStorage.removeItem("user");
+            localStorage.removeItem("isAuthenticated");
+          }
+        }
+      } else {
+        setUser(null);
       }
-    }
+    };
+    
+    // Initial check
+    checkAuth();
+    
+    // Listen for storage events (for multi-tab support)
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
   }, []);
   
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("user");
     
+    setUser(null);
+    
     toast({
       title: "Logged out",
       description: "You have been logged out successfully",
     });
     
-    // Redirect to home page
+    // Navigate to home page without full page reload
     navigate("/");
-    
-    // Reload to update auth state
-    window.location.reload();
   };
   
   if (!user) {
