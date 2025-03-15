@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -13,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
-import { Brain, Loader2, BuildingStore, Users, BookOpen, Briefcase, LineChart, DollarSign, ShoppingCart, Heart } from "lucide-react";
+import { Brain, Loader2, Building2, Users, BookOpen, Briefcase, LineChart, DollarSign, ShoppingCart, Heart } from "lucide-react";
 
 interface AnalysisInputFormProps {
   modelId: string;
@@ -636,7 +635,7 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
             
             <Separator className="my-4" />
             <h3 className="text-sm font-medium mb-4 flex items-center">
-              <BuildingStore className="h-4 w-4 mr-2" />
+              <Building2 className="h-4 w-4 mr-2" />
               Operations
             </h3>
             

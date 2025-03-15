@@ -7,6 +7,10 @@ export const sampleData: AnalysisResult[] = [
     startupName: "EcoTech Solutions",
     investibilityScore: 78,
     overallRisk: 42,
+    businessModel: "b2b",
+    founderTrustRating: 8,
+    pmfScore: 80,
+    growthExpected: "35% YoY",
     riskFactors: [
       {
         name: "Market Risk",
@@ -89,6 +93,10 @@ export const sampleData: AnalysisResult[] = [
     startupName: "HealthMinder AI",
     investibilityScore: 65,
     overallRisk: 55,
+    businessModel: "b2c",
+    founderTrustRating: 6,
+    pmfScore: 75,
+    growthExpected: "50% YoY",
     riskFactors: [
       {
         name: "Market Risk",
@@ -171,6 +179,10 @@ export const sampleData: AnalysisResult[] = [
     startupName: "LogisticsHub",
     investibilityScore: 82,
     overallRisk: 33,
+    businessModel: "b2b",
+    founderTrustRating: 9,
+    pmfScore: 85,
+    growthExpected: "40% YoY",
     riskFactors: [
       {
         name: "Market Risk",

@@ -1,4 +1,3 @@
-
 import { sampleData } from './sampleData';
 
 export interface AnalysisResult {
@@ -33,7 +32,11 @@ export interface AnalysisResult {
   aiModel?: {
     name: string;
     provider: string;
-  }
+  };
+  businessModel?: string;
+  founderTrustRating?: number;
+  pmfScore?: number;
+  growthExpected?: string;
 }
 
 // Track the training status
@@ -360,7 +363,11 @@ const generateSmartAnalysis = (startupData: any): AnalysisResult => {
     weaknesses,
     suggestions,
     categories,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    businessModel: startupData.businessModel || "b2c",
+    founderTrustRating: startupData.founderTrustRating || 5,
+    pmfScore: startupData.pmfScore || 50,
+    growthExpected: startupData.growthExpected || "20%"
   };
 };
 
@@ -449,6 +456,10 @@ const generateMockAnalysis = (id: string): AnalysisResult => {
       { name: "Exit Strategy", value: Math.floor(Math.random() * 100) },
       { name: "Intangibles", value: Math.floor(Math.random() * 100) }
     ],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    businessModel: ["b2b", "b2c", "d2c", "marketplace"][Math.floor(Math.random() * 4)],
+    founderTrustRating: Math.floor(Math.random() * 10) + 1,
+    pmfScore: Math.floor(Math.random() * 100),
+    growthExpected: `${Math.floor(Math.random() * 100)}%`
   };
 };
