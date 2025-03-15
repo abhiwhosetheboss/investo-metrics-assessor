@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InvestibilityScore from "@/components/InvestibilityScore";
 import RiskRating from "@/components/RiskRating";
 import StrengthsWeaknesses from "@/components/StrengthsWeaknesses";
@@ -176,12 +177,32 @@ const Analysis = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <StrengthsWeaknesses 
-          strengths={analysis.strengths} 
-          weaknesses={analysis.weaknesses} 
-        />
-        <Suggestions suggestions={analysis.suggestions} />
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-medium mb-6">Evaluation Insights</h2>
+        <Tabs defaultValue="strengths" className="w-full">
+          <TabsList className="w-full grid grid-cols-3 mb-6">
+            <TabsTrigger value="strengths">Key Strengths</TabsTrigger>
+            <TabsTrigger value="weaknesses">Key Weaknesses</TabsTrigger>
+            <TabsTrigger value="suggestions">Improvement Suggestions</TabsTrigger>
+          </TabsList>
+          <TabsContent value="strengths">
+            <StrengthsWeaknesses 
+              strengths={analysis.strengths} 
+              weaknesses={[]}
+              showWeaknesses={false}
+            />
+          </TabsContent>
+          <TabsContent value="weaknesses">
+            <StrengthsWeaknesses 
+              strengths={[]}
+              weaknesses={analysis.weaknesses} 
+              showStrengths={false}
+            />
+          </TabsContent>
+          <TabsContent value="suggestions">
+            <Suggestions suggestions={analysis.suggestions} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">

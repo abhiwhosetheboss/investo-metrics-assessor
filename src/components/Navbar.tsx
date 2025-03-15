@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronRight, LineChart, BarChart3, Info } from "lucide-react";
+import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import AuthModal from "./AuthModal";
+import UserMenu from "./UserMenu";
 
 interface NavItem {
   title: string;
@@ -20,8 +22,15 @@ const navItems: NavItem[] = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem("isAuthenticated") === "true";
+    setIsAuthenticated(authStatus);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,16 +86,35 @@ const Navbar = () => {
                 {item.title}
               </Link>
             ))}
-            <Button 
-              className="rounded-full px-6"
-              onClick={handleStartAnalysis}
-            >
-              Start Analysis
-            </Button>
+            
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <UserMenu />
+              ) : (
+                <AuthModal buttonVariant="ghost" />
+              )}
+              
+              <Button 
+                className="rounded-full px-6"
+                onClick={handleStartAnalysis}
+              >
+                Start Analysis
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Navigation Toggle */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-4">
+            {isAuthenticated ? (
+              <UserMenu />
+            ) : (
+              <AuthModal>
+                <Button variant="ghost" size="sm" className="gap-1">
+                  <LogIn className="h-4 w-4" />
+                </Button>
+              </AuthModal>
+            )}
+            
             <Button
               variant="ghost"
               size="icon"

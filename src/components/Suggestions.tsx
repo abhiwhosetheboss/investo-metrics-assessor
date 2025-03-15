@@ -56,8 +56,6 @@ const Suggestions = ({ suggestions, className }: SuggestionsProps) => {
 
   return (
     <div className={cn("space-y-4", className)}>
-      <h3 className="text-xl font-medium mb-4">Improvement Suggestions</h3>
-      
       <div className="space-y-4">
         {suggestions.map((suggestion, index) => (
           <div 
