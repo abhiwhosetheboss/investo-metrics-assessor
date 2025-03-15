@@ -27,33 +27,49 @@ const UserMenu = () => {
   useEffect(() => {
     // Check auth when component mounts
     const checkAuth = async () => {
-      // First try to get session from Supabase
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session && session.user) {
-        // User is authenticated in Supabase
-        setUser({
-          email: session.user.email || "",
-          name: session.user.user_metadata?.name || "User"
-        });
-      } else {
-        // Fallback to localStorage for backward compatibility
-        const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-        if (isAuthenticated) {
-          const userData = localStorage.getItem("user");
-          if (userData) {
-            try {
-              setUser(JSON.parse(userData));
-            } catch (error) {
-              console.error("Failed to parse user data:", error);
-              // Reset invalid user data
-              localStorage.removeItem("user");
-              localStorage.removeItem("isAuthenticated");
-            }
-          }
+      try {
+        console.log("Checking auth state...");
+        
+        // First try to get session from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session && session.user) {
+          // User is authenticated in Supabase
+          console.log("User authenticated in Supabase:", session.user);
+          setUser({
+            email: session.user.email || "",
+            name: session.user.user_metadata?.name || "User"
+          });
         } else {
-          setUser(null);
+          console.log("No Supabase session, checking localStorage...");
+          // Fallback to localStorage for backward compatibility
+          const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+          if (isAuthenticated) {
+            const userData = localStorage.getItem("user");
+            if (userData) {
+              try {
+                const parsedUser = JSON.parse(userData);
+                console.log("User found in localStorage:", parsedUser);
+                setUser(parsedUser);
+              } catch (error) {
+                console.error("Failed to parse user data:", error);
+                // Reset invalid user data
+                localStorage.removeItem("user");
+                localStorage.removeItem("isAuthenticated");
+                setUser(null);
+              }
+            } else {
+              console.log("No user data in localStorage");
+              setUser(null);
+            }
+          } else {
+            console.log("Not authenticated");
+            setUser(null);
+          }
         }
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        setUser(null);
       }
     };
     
@@ -62,46 +78,79 @@ const UserMenu = () => {
     // Setup auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
+        
         if (event === 'SIGNED_IN' && session) {
           setUser({
             email: session.user.email || "",
             name: session.user.user_metadata?.name || "User"
           });
+          
+          // Update localStorage for backward compatibility
+          localStorage.setItem("isAuthenticated", "true");
+          localStorage.setItem("user", JSON.stringify({
+            email: session.user.email || "",
+            name: session.user.user_metadata?.name || "User"
+          }));
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          
+          // Clear localStorage for backward compatibility
+          localStorage.removeItem("isAuthenticated");
+          localStorage.removeItem("user");
         }
       }
     );
     
     // Also listen for storage events (for multi-tab support)
-    window.addEventListener('storage', checkAuth);
+    const handleStorageChange = () => {
+      console.log("Storage changed, checking auth...");
+      checkAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
     
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
   
   const handleLogout = async () => {
-    // Sign out from Supabase
-    await supabase.auth.signOut();
-    
-    // Also clear localStorage for backward compatibility
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
-    
-    setUser(null);
-    
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
-    });
-    
-    // Navigate to home page without full page reload
-    navigate("/");
+    try {
+      console.log("Logging out...");
+      
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      
+      // Also clear localStorage for backward compatibility
+      localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("user");
+      
+      setUser(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+      
+      // Trigger storage event for other tabs
+      window.dispatchEvent(new Event('storage'));
+      
+      // Navigate to home page without full page reload
+      navigate("/");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      toast({
+        title: "Logout failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
   
   if (!user) {
+    console.log("No user, not rendering UserMenu");
     return null;
   }
   

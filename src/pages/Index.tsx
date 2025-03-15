@@ -32,6 +32,16 @@ const Index = () => {
     }, 1500);
   };
   
+  // Fixed function to properly handle tab switching
+  const handleViewExamples = () => {
+    setActiveTab("examples");
+    // Scroll to the tabs section for better UX
+    const tabsElement = document.querySelector('[role="tablist"]');
+    if (tabsElement) {
+      tabsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+  
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -50,7 +60,7 @@ const Index = () => {
                   Start Analysis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={() => setActiveTab("examples")}>
+                <Button size="lg" variant="outline" onClick={handleViewExamples}>
                   View Examples
                 </Button>
               </div>
@@ -151,7 +161,7 @@ const Index = () => {
       </section>
       
       {/* Main Content */}
-      <section className="py-16 bg-slate-50 dark:bg-slate-900/50">
+      <section className="py-16 bg-slate-50 dark:bg-slate-900/50" id="examples-section">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <Tabs defaultValue="form" value={activeTab} className="space-y-8" onValueChange={setActiveTab}>

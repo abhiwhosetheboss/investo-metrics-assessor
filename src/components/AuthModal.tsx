@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -69,6 +67,8 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     setAuthError(null);
     
     try {
+      console.log("Attempting to sign in with:", values.email);
+      
       // Try to sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
@@ -76,11 +76,15 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
       });
       
       if (error) {
+        console.error("Supabase login error:", error);
         throw error;
       }
       
       // If successful, store user info
       if (data && data.user) {
+        console.log("Login successful, user data:", data.user);
+        
+        // Store auth state in localStorage for backward compatibility
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("user", JSON.stringify({ 
           email: data.user.email, 
@@ -97,16 +101,33 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
           onOpenChange(false);
         }
         
+        // Trigger session change event for other tabs
+        window.dispatchEvent(new Event('storage'));
+        
         // Navigate to dashboard
         navigate("/dashboard");
+      } else {
+        // This should not happen if there's no error, but just in case
+        throw new Error("Login successful but no user data returned");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      setAuthError(error.message || "Failed to sign in. Please check your credentials.");
+      
+      // Show a more user-friendly error message
+      let errorMessage = "Failed to sign in. Please check your credentials.";
+      if (error.message) {
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password. Please try again.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setAuthError(errorMessage);
       
       toast({
         title: "Login failed",
-        description: error.message || "Failed to sign in. Please check your credentials.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -119,6 +140,8 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     setAuthError(null);
     
     try {
+      console.log("Attempting to sign up with:", values.email);
+      
       // Try to sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -131,11 +154,15 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
       });
       
       if (error) {
+        console.error("Supabase signup error:", error);
         throw error;
       }
       
       // If successful, store user info
       if (data && data.user) {
+        console.log("Signup successful, user data:", data.user);
+        
+        // Store auth state in localStorage for backward compatibility
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("user", JSON.stringify({ 
           email: data.user.email, 
@@ -144,7 +171,8 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
         
         toast({
           title: "Account created!",
-          description: "Your account has been created successfully.",
+          description: data.session ? "Your account has been created and you are now logged in." : 
+                      "Your account has been created. Please check your email for confirmation.",
         });
         
         // Close the modal
@@ -152,16 +180,33 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
           onOpenChange(false);
         }
         
+        // Trigger session change event for other tabs
+        window.dispatchEvent(new Event('storage'));
+        
         // Navigate to dashboard
         navigate("/dashboard");
+      } else {
+        throw new Error("Signup successful but no user data returned");
       }
     } catch (error: any) {
       console.error("Signup error:", error);
-      setAuthError(error.message || "Failed to create account. Please try again later.");
+      
+      // Show a more user-friendly error message
+      let errorMessage = "Failed to create account. Please try again later.";
+      
+      if (error.message) {
+        if (error.message.includes("already exists")) {
+          errorMessage = "This email is already registered. Please use a different email or try logging in.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setAuthError(errorMessage);
       
       toast({
         title: "Signup failed",
-        description: error.message || "Failed to create account. Please try again later.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
