@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -665,5 +666,143 @@ const StartupForm = ({ onSubmit }: StartupFormProps) => {
                     <SelectValue placeholder="Select timeline" />
                   </SelectTrigger>
                   <SelectContent>
-                    {exit
+                    {exitTimeOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="exitType">Exit Type</Label>
+                <Select
+                  value={formData.exitType}
+                  onValueChange={(value) => handleSelectChange("exitType", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select exit type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {exitTypeOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="expectedExitValue">Expected Exit Value</Label>
+                <Input
+                  id="expectedExitValue"
+                  name="expectedExitValue"
+                  value={formData.expectedExitValue}
+                  onChange={handleInputChange}
+                  placeholder="e.g. $50M - $100M"
+                />
+              </div>
+            </div>
+          </FormSection>
 
+          {/* Emotional Indicators */}
+          <FormSection 
+            title="Emotional Indicators" 
+            description="Subjective feelings about the company"
+            icon={<HeartPulse className="h-5 w-5 text-primary" />}
+            index={7}
+          >
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="investorSentiment">Investor Sentiment</Label>
+                <Select
+                  value={formData.investorSentiment}
+                  onValueChange={(value) => handleSelectChange("investorSentiment", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sentiment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sentimentOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="marketBuzz">Market Buzz</Label>
+                <Select
+                  value={formData.marketBuzz}
+                  onValueChange={(value) => handleSelectChange("marketBuzz", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select buzz level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buzzOptions.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label htmlFor="passionLevel">Founder Passion</Label>
+                  <span className="text-sm text-muted-foreground">{formData.passionLevel}/100</span>
+                </div>
+                <Slider
+                  id="passionLevel"
+                  value={[formData.passionLevel]}
+                  min={0}
+                  max={100}
+                  step={1}
+                  onValueChange={(value) => handleSliderChange("passionLevel", value)}
+                />
+              </div>
+            </div>
+          </FormSection>
+        </TabsContent>
+
+        <TabsContent value="investor" className="space-y-8">
+          <FormSection 
+            title="Investor Thesis" 
+            description="Define your investment preferences and criteria"
+            icon={<ClipboardList className="h-5 w-5 text-primary" />}
+            index={0}
+          >
+            <InvestorThesis 
+              thesis={formData.investorThesis}
+              onChange={handleThesisChange}
+            />
+          </FormSection>
+        </TabsContent>
+      </Tabs>
+
+      <div className="flex justify-end pt-6">
+        <Button type="submit" disabled={loading} className="w-full md:w-auto">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <LineChart className="h-4 w-4 animate-spin" />
+              Analyzing...
+            </span>
+          ) : (
+            <span className="flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Submit for Analysis
+            </span>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default StartupForm;
