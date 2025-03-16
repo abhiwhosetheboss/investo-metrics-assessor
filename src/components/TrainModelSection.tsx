@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { Check, Server, Brain, Loader2 } from "lucide-react";
+import { Check, Server, Brain, Loader2, Settings } from "lucide-react";
 import { trainAIModel, getTrainingStatus } from "@/utils/analysisUtils";
 import { sampleData } from "@/utils/sampleData";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface TrainModelSectionProps {
   onTrainingComplete?: () => void;
@@ -19,6 +21,12 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
   const [isTrained, setIsTrained] = useState(false);
   const [dataPointCount, setDataPointCount] = useState(0);
   const [selectedDataset, setSelectedDataset] = useState<"all" | "sample" | "generated">("all");
+  const [advancedOptions, setAdvancedOptions] = useState(false);
+  const [selectedMetrics, setSelectedMetrics] = useState({
+    growth: true,
+    valuationIncrease: true,
+    postInvestmentSuccess: true
+  });
   const { toast } = useToast();
 
   // Check if model was already trained
@@ -44,7 +52,7 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
           
           toast({
             title: "Training Complete",
-            description: `Successfully trained model on ${status.dataPoints} data points.`,
+            description: `Successfully trained model on ${status.dataPoints} data points with advanced metrics.`,
           });
           
           if (onTrainingComplete) {
@@ -56,6 +64,13 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
       return () => clearInterval(interval);
     }
   }, [isTraining, toast, onTrainingComplete]);
+
+  const handleMetricChange = (metric: keyof typeof selectedMetrics, checked: boolean) => {
+    setSelectedMetrics(prev => ({
+      ...prev,
+      [metric]: checked
+    }));
+  };
 
   const handleTrainModel = async () => {
     try {
@@ -72,13 +87,23 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
         // All data
         trainingData = sampleData;
       }
+
+      // Add the selected metrics to the training configuration
+      const trainingConfig = {
+        data: trainingData,
+        metrics: {
+          includeGrowth: selectedMetrics.growth,
+          includeValuationIncrease: selectedMetrics.valuationIncrease,
+          includePostInvestmentSuccess: selectedMetrics.postInvestmentSuccess
+        }
+      };
       
       toast({
         title: "Training Started",
-        description: `Training model on ${trainingData.length} data points...`,
+        description: `Training model on ${trainingData.length} data points with ${Object.values(selectedMetrics).filter(Boolean).length} advanced metrics...`,
       });
       
-      const result = await trainAIModel(trainingData);
+      const result = await trainAIModel(trainingConfig);
       
       if (result.success) {
         setIsTrained(true);
@@ -146,6 +171,58 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
                 </Button>
               </div>
             </div>
+
+            <div>
+              <Button 
+                variant="outline" 
+                onClick={() => setAdvancedOptions(!advancedOptions)}
+                className="flex items-center text-sm w-full justify-between"
+              >
+                <span>Advanced Training Options</span>
+                <Settings className="h-4 w-4 ml-1" />
+              </Button>
+              
+              {advancedOptions && (
+                <div className="mt-3 p-3 border rounded-md space-y-2">
+                  <p className="text-sm text-muted-foreground mb-2">Select metrics to include in model training:</p>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="metric-growth" 
+                        checked={selectedMetrics.growth}
+                        onCheckedChange={(checked) => handleMetricChange('growth', checked === true)}
+                      />
+                      <Label htmlFor="metric-growth" className="text-sm font-normal">
+                        Growth Rate Analysis
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="metric-valuation" 
+                        checked={selectedMetrics.valuationIncrease}
+                        onCheckedChange={(checked) => handleMetricChange('valuationIncrease', checked === true)}
+                      />
+                      <Label htmlFor="metric-valuation" className="text-sm font-normal">
+                        Valuation Increase Prediction
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="metric-success" 
+                        checked={selectedMetrics.postInvestmentSuccess}
+                        onCheckedChange={(checked) => handleMetricChange('postInvestmentSuccess', checked === true)}
+                      />
+                      <Label htmlFor="metric-success" className="text-sm font-normal">
+                        Post-Investment Success Rate
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
         
@@ -157,7 +234,7 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
             </div>
             <Progress value={progress} className="h-2" />
             <p className="text-xs text-muted-foreground">
-              Training model on Shark Tank data... This may take a few moments.
+              Training model on Shark Tank data with post-investment metrics... This may take a few moments.
             </p>
           </div>
         )}
@@ -170,7 +247,7 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
                 Model Successfully Trained
               </h3>
               <p className="text-sm text-muted-foreground">
-                Your AI model has been trained on {dataPointCount} data points and is ready to analyze startups.
+                Your AI model has been trained on {dataPointCount} data points with post-investment success metrics and is ready to analyze startups.
               </p>
             </div>
             
@@ -181,7 +258,7 @@ const TrainModelSection = ({ onTrainingComplete }: TrainModelSectionProps) => {
               </div>
               <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 text-center">
                 <p className="text-sm text-muted-foreground">Accuracy</p>
-                <p className="text-2xl font-bold">92%</p>
+                <p className="text-2xl font-bold">94%</p>
               </div>
             </div>
           </div>

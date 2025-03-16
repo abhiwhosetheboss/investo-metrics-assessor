@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface InvestorThesisProps {
   thesis: {
@@ -17,6 +18,9 @@ interface InvestorThesisProps {
     teamImportance: number;
     marketSizePreference: number;
     requiresRevenue: boolean;
+    minGrowthRate?: string;
+    expectedValuationIncrease?: string;
+    postInvestmentSuccess?: string;
   };
   onChange: (field: string, value: any) => void;
 }
@@ -29,6 +33,10 @@ const industryOptions = [
 
 const stageOptions = [
   "Pre-seed", "Seed", "Series A", "Series B", "Series C+", "Growth", "Any"
+];
+
+const successMetricOptions = [
+  "Revenue Growth", "User Acquisition", "Market Share", "Profitability", "Exit Value"
 ];
 
 const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
@@ -118,6 +126,37 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
         </div>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="minGrowthRate">Minimum Growth Rate</Label>
+          <Input
+            id="minGrowthRate"
+            placeholder="e.g. 20% YoY"
+            value={thesis.minGrowthRate || ""}
+            onChange={(e) => onChange("minGrowthRate", e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="expectedValuationIncrease">Expected Valuation Increase</Label>
+          <Select
+            value={thesis.expectedValuationIncrease || ""}
+            onValueChange={(value) => onChange("expectedValuationIncrease", value)}
+          >
+            <SelectTrigger id="expectedValuationIncrease">
+              <SelectValue placeholder="Select expected increase" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2x">2x</SelectItem>
+              <SelectItem value="3x">3x</SelectItem>
+              <SelectItem value="5x">5x</SelectItem>
+              <SelectItem value="10x">10x</SelectItem>
+              <SelectItem value="100x">100x or more</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="stagePreference">Preferred Investment Stage</Label>
         <Select
@@ -131,6 +170,25 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             {stageOptions.map((stage) => (
               <SelectItem key={stage} value={stage.toLowerCase()}>
                 {stage}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="postInvestmentSuccess">Key Success Metric</Label>
+        <Select
+          value={thesis.postInvestmentSuccess || ""}
+          onValueChange={(value) => onChange("postInvestmentSuccess", value)}
+        >
+          <SelectTrigger id="postInvestmentSuccess">
+            <SelectValue placeholder="Select primary success metric" />
+          </SelectTrigger>
+          <SelectContent>
+            {successMetricOptions.map((metric) => (
+              <SelectItem key={metric} value={metric.toLowerCase()}>
+                {metric}
               </SelectItem>
             ))}
           </SelectContent>

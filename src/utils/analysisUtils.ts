@@ -1,3 +1,4 @@
+
 import { sampleData } from './sampleData';
 
 export interface AnalysisResult {
@@ -37,6 +38,20 @@ export interface AnalysisResult {
   founderTrustRating?: number;
   pmfScore?: number;
   growthExpected?: string;
+  postInvestmentMetrics?: {
+    growthRate?: string;
+    valuationIncrease?: string;
+    successProbability?: number;
+  }
+}
+
+interface TrainingConfig {
+  data: any[];
+  metrics: {
+    includeGrowth: boolean;
+    includeValuationIncrease: boolean;
+    includePostInvestmentSuccess: boolean;
+  }
 }
 
 // Track the training status
@@ -44,7 +59,8 @@ let trainingStatus = {
   isTraining: false,
   progress: 0,
   isModelTrained: false,
-  dataPoints: 0
+  dataPoints: 0,
+  includedMetrics: [] as string[]
 };
 
 // In a real application, this would make an API call to an AI model
@@ -67,6 +83,31 @@ export const getAnalysisById = (id: string): Promise<AnalysisResult> => {
         };
       }
       
+      // Add post-investment metrics if those were included in training
+      const includedMetrics = localStorage.getItem("includedMetrics");
+      if (includedMetrics) {
+        const metrics = JSON.parse(includedMetrics);
+        
+        const postInvestmentMetrics: any = {};
+        
+        if (metrics.includes('growth')) {
+          postInvestmentMetrics.growthRate = `${Math.floor(30 + Math.random() * 70)}%`;
+        }
+        
+        if (metrics.includes('valuationIncrease')) {
+          const valIncrease = ['2x', '3x', '5x', '10x', '15x'];
+          postInvestmentMetrics.valuationIncrease = valIncrease[Math.floor(Math.random() * valIncrease.length)];
+        }
+        
+        if (metrics.includes('postInvestmentSuccess')) {
+          postInvestmentMetrics.successProbability = Math.floor(50 + Math.random() * 40);
+        }
+        
+        if (Object.keys(postInvestmentMetrics).length > 0) {
+          result.postInvestmentMetrics = postInvestmentMetrics;
+        }
+      }
+      
       resolve(result);
     }, 800);
   });
@@ -83,13 +124,32 @@ export const getAllAnalyses = (): Promise<AnalysisResult[]> => {
 };
 
 // Train the AI model on the dataset
-export const trainAIModel = async (dataset: any[]): Promise<{success: boolean, message: string}> => {
+export const trainAIModel = async (config: TrainingConfig | any[]): Promise<{success: boolean, message: string}> => {
   // In a real application, this would send the data to an actual AI training pipeline
   return new Promise((resolve) => {
+    // Handle both new config format and legacy array format
+    const dataset = Array.isArray(config) ? config : config.data;
+    const metrics = Array.isArray(config) ? { 
+      includeGrowth: false, 
+      includeValuationIncrease: false, 
+      includePostInvestmentSuccess: false 
+    } : config.metrics;
+    
     // Set training status
     trainingStatus.isTraining = true;
     trainingStatus.progress = 0;
     trainingStatus.dataPoints = dataset.length;
+    
+    // Track which metrics are being included
+    const includedMetrics = [];
+    if (metrics.includeGrowth) includedMetrics.push('growth');
+    if (metrics.includeValuationIncrease) includedMetrics.push('valuationIncrease');
+    if (metrics.includePostInvestmentSuccess) includedMetrics.push('postInvestmentSuccess');
+    
+    trainingStatus.includedMetrics = includedMetrics;
+    
+    // Store the included metrics in localStorage for persistence
+    localStorage.setItem("includedMetrics", JSON.stringify(includedMetrics));
     
     // Simulate training process with progress updates
     const totalSteps = 10;
@@ -110,7 +170,7 @@ export const trainAIModel = async (dataset: any[]): Promise<{success: boolean, m
         
         resolve({
           success: true,
-          message: `Model successfully trained on ${dataset.length} data points`
+          message: `Model successfully trained on ${dataset.length} data points with advanced metrics`
         });
       }
     }, 500);
@@ -126,6 +186,12 @@ export const getTrainingStatus = (): typeof trainingStatus => {
       trainingStatus.isModelTrained = true;
       trainingStatus.dataPoints = parseInt(localStorage.getItem("trainedDataPoints") || "0");
       trainingStatus.progress = 100;
+      
+      // Retrieve the included metrics
+      const includedMetrics = localStorage.getItem("includedMetrics");
+      if (includedMetrics) {
+        trainingStatus.includedMetrics = JSON.parse(includedMetrics);
+      }
     }
   }
   return { ...trainingStatus };
@@ -165,6 +231,41 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
           name: modelInfo.name,
           provider: modelInfo.provider
         };
+      }
+      
+      // Add post-investment metrics based on what was included in training
+      const includedMetrics = localStorage.getItem("includedMetrics");
+      if (includedMetrics) {
+        const metrics = JSON.parse(includedMetrics);
+        
+        const postInvestmentMetrics: any = {};
+        
+        if (metrics.includes('growth')) {
+          // Estimate potential growth based on startup data
+          const baseGrowth = startupData.pmfScore && startupData.pmfScore > 70 ? 50 : 30;
+          postInvestmentMetrics.growthRate = `${baseGrowth + Math.floor(Math.random() * 30)}%`;
+        }
+        
+        if (metrics.includes('valuationIncrease')) {
+          // Estimate valuation increase based on startup data
+          let valMultiplier = 3;
+          if (startupData.revenue && !startupData.revenue.includes("0")) valMultiplier += 2;
+          if (startupData.domainExpertise > 70) valMultiplier += 1;
+          postInvestmentMetrics.valuationIncrease = `${valMultiplier}x`;
+        }
+        
+        if (metrics.includes('postInvestmentSuccess')) {
+          // Calculate success probability based on startup data
+          let baseProb = 50;
+          if (startupData.pmfScore) baseProb += (startupData.pmfScore - 50) / 5;
+          if (startupData.teamExperience && startupData.teamExperience.length > 20) baseProb += 5;
+          if (startupData.keyRolesFilled) baseProb += 5;
+          postInvestmentMetrics.successProbability = Math.min(Math.max(Math.floor(baseProb), 20), 95);
+        }
+        
+        if (Object.keys(postInvestmentMetrics).length > 0) {
+          result.postInvestmentMetrics = postInvestmentMetrics;
+        }
       }
       
       resolve(result);
