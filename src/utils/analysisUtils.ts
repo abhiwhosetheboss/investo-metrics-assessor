@@ -477,7 +477,7 @@ const adjustScoreBasedOnInvestorPreferences = (
   // If investor prefers large markets and startup has large TAM, increase score
   if (investorThesis.marketSizePreference > 70 && startupData.targetMarketSize) {
     const targetMarketSize = startupData.targetMarketSize.toUpperCase();
-    if (targetMarketSize.includes("B") || parseInt(extractNumericValue(targetMarketSize)) > 1000000000) {
+    if (targetMarketSize.includes("B") || parseInt(extractNumericValue(targetMarketSize.toString())) > 1000000000) {
       adjustedScore += 10;
     }
   }
@@ -485,7 +485,7 @@ const adjustScoreBasedOnInvestorPreferences = (
   // If investor prefers niche markets and startup has niche focus, increase score
   if (investorThesis.marketSizePreference < 30 && startupData.targetMarketSize) {
     const targetMarketSize = startupData.targetMarketSize.toUpperCase();
-    if (!targetMarketSize.includes("B") && parseInt(extractNumericValue(targetMarketSize)) < 100000000) {
+    if (!targetMarketSize.includes("B") && parseInt(extractNumericValue(targetMarketSize.toString())) < 100000000) {
       adjustedScore += 10;
     }
   }
