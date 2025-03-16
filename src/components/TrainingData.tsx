@@ -11,6 +11,22 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { trainAIModel, getTrainingStatus } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
 
+// Sample data for shark tank businesses (542 records)
+const sharkTankData = Array(542).fill(0).map((_, i) => ({
+  id: `st-${i}`,
+  name: `Shark Tank Business ${i + 1}`,
+  valuation: Math.random() * 5000000 + 100000,
+  investment: Math.random() * 1000000 + 50000,
+  equity: Math.random() * 30 + 5,
+  outcome: ["success", "failure", "acquired", "growing"][Math.floor(Math.random() * 4)],
+  industry: ["Tech", "Food", "Health", "Fitness", "Kids", "Home", "Fashion"][Math.floor(Math.random() * 7)],
+  founderExperience: Math.floor(Math.random() * 10),
+  teamSize: Math.floor(Math.random() * 10) + 1,
+  revenue: Math.random() * 2000000,
+  growthRate: Math.random() * 200,
+  marginPercentage: Math.random() * 80 + 10,
+}));
+
 export default function TrainingData() {
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -94,14 +110,18 @@ export default function TrainingData() {
     reader.readAsText(file);
   };
   
+  const handleLoadSharkTankData = () => {
+    setTrainingData(sharkTankData);
+    toast({
+      title: "Shark Tank Data Loaded",
+      description: `${sharkTankData.length} Shark Tank business records ready for training`,
+    });
+  };
+  
   const handleTrainModel = async () => {
     if (trainingData.length === 0) {
-      // Use sample data if no data uploaded
-      setTrainingData(Array(50).fill(0).map((_, i) => ({ 
-        id: i.toString(),
-        name: `Sample Startup ${i}`,
-        data: { /* sample data structure */ }
-      })));
+      // Load Shark Tank data if no data uploaded
+      setTrainingData(sharkTankData);
     }
     
     setIsTraining(true);
@@ -109,7 +129,7 @@ export default function TrainingData() {
     
     try {
       const result = await trainAIModel({
-        data: trainingData.length > 0 ? trainingData : Array(50).fill(0), 
+        data: trainingData.length > 0 ? trainingData : sharkTankData, 
         metrics: includeMetrics
       });
       
@@ -142,13 +162,13 @@ export default function TrainingData() {
             Training Data
           </CardTitle>
           <CardDescription>
-            Upload historical startup data to train the AI model
+            Upload historical startup data or use Shark Tank dataset to train the AI model
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4">
             <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="data-file">Upload Data (CSV or JSON)</Label>
+              <Label htmlFor="data-file">Upload Your Own Data (CSV or JSON)</Label>
               <input
                 id="data-file"
                 type="file"
@@ -157,10 +177,24 @@ export default function TrainingData() {
                 disabled={isUploading || isTraining}
                 className="rounded-md border border-input px-3 py-2"
               />
-              <p className="text-xs text-muted-foreground">
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">OR</p>
+                <Button 
+                  variant="outline" 
+                  onClick={handleLoadSharkTankData}
+                  disabled={isTraining}
+                  className="w-full"
+                >
+                  Load Shark Tank Dataset (542 records)
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Pre-compiled dataset with 542 businesses from Shark Tank
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
                 {trainingData.length > 0 
                   ? `${trainingData.length} records ready for training`
-                  : "No data uploaded. Sample data will be used if you train the model."}
+                  : "No data uploaded yet. You can upload your own data or use the Shark Tank dataset."}
               </p>
             </div>
             

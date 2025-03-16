@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Analysis = lazy(() => import("./pages/Analysis"));
 const About = lazy(() => import("./pages/About"));
+const Analyze = lazy(() => import("./pages/Analyze"));
 
 // Loading component
 const PageLoader = () => (
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/analysis/:id" element={<Analysis />} />
+            <Route path="/analyze" element={<Analyze />} />
             <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
