@@ -1,4 +1,3 @@
-
 import { sampleData } from './sampleData';
 
 export interface AnalysisResult {
@@ -42,7 +41,21 @@ export interface AnalysisResult {
     growthRate?: string;
     valuationIncrease?: string;
     successProbability?: number;
-  }
+  };
+  investorMatch?: {
+    overall: number;
+    industryFit: number;
+    stageMatch: number;
+    revenueMatch: number;
+    valuationMatch: number;
+    investorPreferences?: {
+      preferredIndustries: string[];
+      stagePreference: string;
+      minRevenue: string;
+      maxValuation: string;
+      riskTolerance: number;
+    };
+  };
 }
 
 interface TrainingConfig {
@@ -268,9 +281,217 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
         }
       }
       
+      // Add investor match analysis if investor thesis was provided
+      if (startupData.investorThesis) {
+        const thesis = startupData.investorThesis;
+        const investorMatch = calculateInvestorMatch(startupData, thesis);
+        result.investorMatch = investorMatch;
+        
+        // Adjust investibility score based on investor preferences
+        result.investibilityScore = adjustScoreBasedOnInvestorPreferences(
+          result.investibilityScore, 
+          investorMatch,
+          startupData,
+          thesis
+        );
+      }
+      
       resolve(result);
     }, 2000);
   });
+};
+
+// Calculate how well the startup matches with investor preferences
+const calculateInvestorMatch = (startupData: any, investorThesis: any) => {
+  let industryFit = 0;
+  let stageMatch = 0;
+  let revenueMatch = 0;
+  let valuationMatch = 0;
+  
+  // Check industry fit
+  if (investorThesis.preferredIndustries && investorThesis.preferredIndustries.length > 0) {
+    // Simplified check - in a real app would do more sophisticated matching
+    if (investorThesis.preferredIndustries.some((industry: string) => 
+        startupData.industry && startupData.industry.toLowerCase().includes(industry.toLowerCase()))) {
+      industryFit = 100;
+    } else {
+      industryFit = 20; // Some base score if industries don't match exactly
+    }
+  } else {
+    industryFit = 80; // No specific industry preference specified
+  }
+  
+  // Check stage match
+  if (investorThesis.stagePreference && investorThesis.stagePreference !== "any") {
+    // This is a simplified match - would be more sophisticated in a real app
+    // Based on revenue, team size, etc.
+    const startupStage = determineStartupStage(startupData);
+    if (startupStage === investorThesis.stagePreference) {
+      stageMatch = 100;
+    } else {
+      stageMatch = 30; // Some base score if stage doesn't match exactly
+    }
+  } else {
+    stageMatch = 80; // No specific stage preference
+  }
+  
+  // Check revenue match
+  if (investorThesis.minRevenue && investorThesis.minRevenue !== "0") {
+    const minRevenue = parseInt(investorThesis.minRevenue);
+    // Extract numeric value from revenue string (e.g. "$100K ARR" -> 100000)
+    const startupRevenue = extractNumericValue(startupData.revenue);
+    
+    if (startupRevenue >= minRevenue) {
+      revenueMatch = 100;
+    } else if (startupRevenue >= minRevenue * 0.7) {
+      revenueMatch = 70; // Close to minimum requirement
+    } else {
+      revenueMatch = 20; // Far below minimum requirement
+    }
+  } else {
+    revenueMatch = 100; // No minimum revenue required
+  }
+  
+  // Check valuation match
+  if (investorThesis.maxValuation && investorThesis.maxValuation !== "no-limit") {
+    const maxValuation = parseInt(investorThesis.maxValuation);
+    // Extract numeric value from valuation string
+    const startupValuation = extractNumericValue(startupData.valuation);
+    
+    if (startupValuation <= maxValuation) {
+      valuationMatch = 100;
+    } else if (startupValuation <= maxValuation * 1.3) {
+      valuationMatch = 70; // Slightly above max valuation
+    } else {
+      valuationMatch = 30; // Far above max valuation
+    }
+  } else {
+    valuationMatch = 100; // No maximum valuation limit
+  }
+  
+  // Calculate overall match score (weighted average)
+  const overallMatch = Math.round(
+    (industryFit * 0.3) + 
+    (stageMatch * 0.3) + 
+    (revenueMatch * 0.2) + 
+    (valuationMatch * 0.2)
+  );
+  
+  return {
+    overall: overallMatch,
+    industryFit,
+    stageMatch,
+    revenueMatch,
+    valuationMatch,
+    investorPreferences: {
+      preferredIndustries: investorThesis.preferredIndustries,
+      stagePreference: investorThesis.stagePreference,
+      minRevenue: investorThesis.minRevenue,
+      maxValuation: investorThesis.maxValuation,
+      riskTolerance: investorThesis.riskTolerance
+    }
+  };
+};
+
+// Helper function to determine startup stage based on various metrics
+const determineStartupStage = (startupData: any) => {
+  // This is a simplified determination - would be more sophisticated in a real app
+  
+  // Extract numeric value from revenue string
+  const revenue = extractNumericValue(startupData.revenue);
+  
+  if (revenue === 0) {
+    return "pre-seed";
+  } else if (revenue < 100000) {
+    return "seed";
+  } else if (revenue < 1000000) {
+    return "series a";
+  } else if (revenue < 10000000) {
+    return "series b";
+  } else {
+    return "series c+";
+  }
+};
+
+// Helper function to extract numeric value from string like "$100K ARR" or "$5M"
+const extractNumericValue = (valueString: string) => {
+  if (!valueString) return 0;
+  
+  // Remove non-numeric characters except for K, M, B (thousands, millions, billions)
+  const numericPart = valueString.replace(/[^0-9\.KMB]/gi, "");
+  
+  // Extract the base number
+  const numMatch = numericPart.match(/^(\d+\.?\d*)/);
+  if (!numMatch) return 0;
+  
+  const baseNumber = parseFloat(numMatch[0]);
+  
+  // Apply multiplier based on K, M, B suffix
+  if (numericPart.toUpperCase().includes("K")) {
+    return baseNumber * 1000;
+  } else if (numericPart.toUpperCase().includes("M")) {
+    return baseNumber * 1000000;
+  } else if (numericPart.toUpperCase().includes("B")) {
+    return baseNumber * 1000000000;
+  } else {
+    return baseNumber;
+  }
+};
+
+// Adjust investibility score based on investor preferences
+const adjustScoreBasedOnInvestorPreferences = (
+  originalScore: number, 
+  investorMatch: any,
+  startupData: any,
+  investorThesis: any
+) => {
+  let adjustedScore = originalScore;
+  
+  // Factor in the overall match
+  const matchAdjustment = ((investorMatch.overall - 50) / 50) * 20; // Scale to -20 to +20
+  adjustedScore += matchAdjustment;
+  
+  // Apply risk tolerance adjustment
+  // Lower tolerance means more conservative, so they want safer investments with higher scores
+  const riskToleranceAdjustment = ((50 - investorThesis.riskTolerance) / 50) * 10;
+  if (originalScore < 60) {
+    // For riskier startups, conservative investors would rate them lower
+    adjustedScore += riskToleranceAdjustment * -1;
+  } else {
+    // For safer startups, conservative investors would rate them higher
+    adjustedScore += riskToleranceAdjustment;
+  }
+  
+  // Apply team importance factor if the investor cares a lot about team
+  if (investorThesis.teamImportance > 70) {
+    const teamScore = (
+      (startupData.founderTrustRating || 5) * 10 + 
+      (startupData.teamCapability || 5) * 10
+    ) / 2;
+    
+    const teamAdjustment = ((teamScore - 50) / 50) * 15 * (investorThesis.teamImportance / 100);
+    adjustedScore += teamAdjustment;
+  }
+  
+  // Apply market size preference
+  // If investor prefers large markets and startup has large TAM, increase score
+  if (investorThesis.marketSizePreference > 70 && startupData.targetMarketSize) {
+    const targetMarketSize = startupData.targetMarketSize.toUpperCase();
+    if (targetMarketSize.includes("B") || parseInt(extractNumericValue(targetMarketSize)) > 1000000000) {
+      adjustedScore += 10;
+    }
+  }
+  
+  // If investor prefers niche markets and startup has niche focus, increase score
+  if (investorThesis.marketSizePreference < 30 && startupData.targetMarketSize) {
+    const targetMarketSize = startupData.targetMarketSize.toUpperCase();
+    if (!targetMarketSize.includes("B") && parseInt(extractNumericValue(targetMarketSize)) < 100000000) {
+      adjustedScore += 10;
+    }
+  }
+  
+  // Cap the score between 0 and 100
+  return Math.min(Math.max(Math.round(adjustedScore), 0), 100);
 };
 
 // Generate a more intelligent mock analysis based on the input data

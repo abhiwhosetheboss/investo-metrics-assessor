@@ -4,9 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getAnalysisById } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart } from "lucide-react";
+import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import InvestibilityScore from "@/components/InvestibilityScore";
 import RiskRating from "@/components/RiskRating";
 import StrengthsWeaknesses from "@/components/StrengthsWeaknesses";
@@ -118,6 +119,125 @@ const Analysis = () => {
           factors={analysis.riskFactors} 
         />
       </div>
+
+      {/* Add Investor Match section if available */}
+      {analysis.investorMatch && (
+        <div className="mb-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
+          <h2 className="text-xl font-medium mb-4">Investor Criteria Match</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium">Overall Match</span>
+                  <span className="text-sm font-medium text-primary">{analysis.investorMatch.overall}%</span>
+                </div>
+                <Progress 
+                  value={analysis.investorMatch.overall} 
+                  className="h-2"
+                  indicatorClassName={
+                    analysis.investorMatch.overall > 80 ? "bg-green-500" :
+                    analysis.investorMatch.overall > 60 ? "bg-emerald-500" :
+                    analysis.investorMatch.overall > 40 ? "bg-yellow-500" :
+                    analysis.investorMatch.overall > 20 ? "bg-orange-500" : "bg-red-500"
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  {analysis.investorMatch.overall > 80 ? "Excellent match with your investment criteria" :
+                   analysis.investorMatch.overall > 60 ? "Good match with your investment criteria" :
+                   analysis.investorMatch.overall > 40 ? "Moderate match with your investment criteria" :
+                   "Low match with your investment criteria"}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs font-medium">Industry Fit</span>
+                    <span className="text-xs">{analysis.investorMatch.industryFit}%</span>
+                  </div>
+                  <Progress value={analysis.investorMatch.industryFit} className="h-1" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs font-medium">Stage Match</span>
+                    <span className="text-xs">{analysis.investorMatch.stageMatch}%</span>
+                  </div>
+                  <Progress value={analysis.investorMatch.stageMatch} className="h-1" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs font-medium">Revenue Match</span>
+                    <span className="text-xs">{analysis.investorMatch.revenueMatch}%</span>
+                  </div>
+                  <Progress value={analysis.investorMatch.revenueMatch} className="h-1" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-xs font-medium">Valuation Match</span>
+                    <span className="text-xs">{analysis.investorMatch.valuationMatch}%</span>
+                  </div>
+                  <Progress value={analysis.investorMatch.valuationMatch} className="h-1" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Your Investment Criteria</h3>
+              {analysis.investorMatch.investorPreferences && (
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-32">Preferred Industries:</span>
+                    <span>
+                      {analysis.investorMatch.investorPreferences.preferredIndustries?.length > 0 
+                        ? analysis.investorMatch.investorPreferences.preferredIndustries.join(", ") 
+                        : "Any industry"}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-32">Preferred Stage:</span>
+                    <span className="capitalize">
+                      {analysis.investorMatch.investorPreferences.stagePreference || "Any stage"}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-32">Min Revenue:</span>
+                    <span>
+                      {analysis.investorMatch.investorPreferences.minRevenue === "0" 
+                        ? "No minimum" 
+                        : `$${parseInt(analysis.investorMatch.investorPreferences.minRevenue).toLocaleString()}`}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-32">Max Valuation:</span>
+                    <span>
+                      {analysis.investorMatch.investorPreferences.maxValuation === "no-limit" 
+                        ? "No limit" 
+                        : `$${parseInt(analysis.investorMatch.investorPreferences.maxValuation).toLocaleString()}`}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-32">Risk Tolerance:</span>
+                    <span>
+                      {analysis.investorMatch.investorPreferences.riskTolerance > 70 
+                        ? "High" 
+                        : analysis.investorMatch.investorPreferences.riskTolerance > 40 
+                        ? "Moderate" 
+                        : "Conservative"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mb-8">
         <RiskToRewardMeter 
