@@ -220,6 +220,9 @@ export const saveAnalysis = async (data: { userId: string; analysisData: Analysi
       throw new Error("Authentication required to save analysis");
     }
 
+    // Convert the analysis data to a JSON-compatible format
+    const jsonCompatibleData = JSON.parse(JSON.stringify(data.analysisData));
+
     // Save analysis to database
     const { data: savedData, error } = await supabase
       .from('analyses')
@@ -228,7 +231,7 @@ export const saveAnalysis = async (data: { userId: string; analysisData: Analysi
         startup_name: data.analysisData.startupName,
         investibility_score: data.analysisData.investibilityScore,
         overall_risk: data.analysisData.overallRisk,
-        data: data.analysisData
+        data: jsonCompatibleData
       })
       .select('id')
       .single();
@@ -508,7 +511,7 @@ const determineStartupStage = (startupData: any) => {
   // This is a simplified determination - would be more sophisticated in a real app
   
   // Extract numeric value from revenue string
-  const revenue = extractNumericValue(startupData.revenue);
+  const revenue = extractNumericValue(startupData.revenue || '0');
   
   if (revenue === 0) {
     return "pre-seed";
@@ -586,16 +589,16 @@ const adjustScoreBasedOnInvestorPreferences = (
   // Apply market size preference
   // If investor prefers large markets and startup has large TAM, increase score
   if (investorThesis.marketSizePreference > 70 && startupData.targetMarketSize) {
-    const targetMarketSize = startupData.targetMarketSize.toUpperCase();
-    if (targetMarketSize.includes("B") || parseInt(extractNumericValue(targetMarketSize.toString())) > 1000000000) {
+    const targetMarketSize = startupData.targetMarketSize.toString().toUpperCase();
+    if (targetMarketSize.includes("B") || parseInt(extractNumericValue(targetMarketSize).toString()) > 1000000000) {
       adjustedScore += 10;
     }
   }
   
   // If investor prefers niche markets and startup has niche focus, increase score
   if (investorThesis.marketSizePreference < 30 && startupData.targetMarketSize) {
-    const targetMarketSize = startupData.targetMarketSize.toUpperCase();
-    if (!targetMarketSize.includes("B") && parseInt(extractNumericValue(targetMarketSize.toString())) < 100000000) {
+    const targetMarketSize = startupData.targetMarketSize.toString().toUpperCase();
+    if (!targetMarketSize.includes("B") && parseInt(extractNumericValue(targetMarketSize).toString()) < 100000000) {
       adjustedScore += 10;
     }
   }
