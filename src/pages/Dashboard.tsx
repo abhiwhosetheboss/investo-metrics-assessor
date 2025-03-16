@@ -1,248 +1,300 @@
-
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { getAllAnalyses } from "@/utils/analysisUtils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart, LineChart, ArrowUpRight, Database, Brain } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getAllAnalyses, getSavedAnalyses, deleteSavedAnalysis } from "@/utils/analysisUtils";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AIModelSelector, { AIModel } from "@/components/AIModelSelector";
-import SharkTankDataCollector from "@/components/SharkTankDataCollector";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { BarChart, LineChart, MessageSquare, FileText, ChevronRight, BookOpen, Database, Trash2 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import AICustomization from "@/components/AICustomization";
+import TrainingData from "@/components/TrainingData";
 
-const Dashboard = () => {
-  const { data: analyses, isLoading, error } = useQuery({
-    queryKey: ['analyses'],
-    queryFn: getAllAnalyses
-  });
-  
-  const [activeTab, setActiveTab] = useState("analyses");
-  const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
-  const [sharkTankData, setSharkTankData] = useState<any[]>([]);
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<string>("recent");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [user, setUser] = useState<any>(null);
   
-  // Load saved model and data on initial render
+  // Check if user is authenticated
   useEffect(() => {
-    // Try to load saved model
-    const savedModel = localStorage.getItem("selectedAIModel");
-    if (savedModel) {
-      try {
-        setSelectedModel(JSON.parse(savedModel));
-      } catch (e) {
-        console.error("Failed to parse saved model", e);
-      }
-    }
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
     
-    // Try to load saved data
-    const savedData = localStorage.getItem("sharkTankData");
-    if (savedData) {
-      try {
-        setSharkTankData(JSON.parse(savedData));
-      } catch (e) {
-        console.error("Failed to parse saved data", e);
+    checkUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
       }
-    }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
   
-  const handleModelSelect = (model: AIModel) => {
-    setSelectedModel(model);
-    console.log("Selected model:", model);
-    
-    // In a real app, you would store this in context or state management
-    localStorage.setItem("selectedAIModel", JSON.stringify(model));
-    
-    toast({
-      title: "AI Model Updated",
-      description: `Now using ${model.name} for all new analyses.`,
-    });
-  };
+  // Get all analyses
+  const { data: recentAnalyses, isLoading: isLoadingRecent } = useQuery({
+    queryKey: ["analyses"],
+    queryFn: getAllAnalyses,
+  });
   
-  const handleDataCollected = (episodes: any[]) => {
-    setSharkTankData(episodes);
-    console.log("Collected episodes:", episodes);
-    
-    // In a real app, you would store this data or send it to your backend
-    localStorage.setItem("sharkTankData", JSON.stringify(episodes));
+  // Get saved analyses
+  const { data: savedAnalyses, isLoading: isLoadingSaved, refetch: refetchSaved } = useQuery({
+    queryKey: ["savedAnalyses"],
+    queryFn: getSavedAnalyses,
+    enabled: !!user, // Only fetch if user is authenticated
+  });
+  
+  const handleDeleteAnalysis = async (id: string) => {
+    try {
+      const result = await deleteSavedAnalysis(id);
+      
+      if (result.success) {
+        toast({
+          title: "Analysis deleted",
+          description: "The analysis has been successfully deleted.",
+        });
+        
+        // Refetch saved analyses
+        queryClient.invalidateQueries({ queryKey: ["savedAnalyses"] });
+      } else {
+        toast({
+          title: "Deletion failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Deletion failed",
+        description: "An error occurred while deleting the analysis.",
+        variant: "destructive",
+      });
+    }
   };
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-10 space-y-8">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-6 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-full" />
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          <p>Error loading dashboard data. Please try again later.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto py-10 space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Startup Analysis Dashboard</h1>
-        <div className="flex flex-col sm:flex-row gap-2">
-          {selectedModel && (
-            <div className="flex items-center text-sm bg-primary/10 text-primary px-3 py-1 rounded">
-              <Brain className="h-4 w-4 mr-1" />
-              Using: {selectedModel.name}
-            </div>
-          )}
-          <Link 
-            to="/" 
-            className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-          >
-            New Analysis
-          </Link>
-        </div>
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Manage your startup analyses and customize the AI model
+        </p>
       </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
-          <TabsTrigger value="analyses">
-            <BarChart className="h-4 w-4 mr-2" />
-            Analyses
-          </TabsTrigger>
-          <TabsTrigger value="ai-models">
-            <Brain className="h-4 w-4 mr-2" />
-            AI Models
-            {selectedModel && <span className="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>}
-          </TabsTrigger>
-          <TabsTrigger value="data">
-            <Database className="h-4 w-4 mr-2" />
-            Training Data
-            {sharkTankData.length > 0 && (
-              <span className="ml-2 text-xs bg-primary/20 px-1.5 rounded-full">{sharkTankData.length}</span>
-            )}
-          </TabsTrigger>
+
+      <Tabs defaultValue="recent" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="recent">Recent Analyses</TabsTrigger>
+          <TabsTrigger value="saved" disabled={!user}>Saved Analyses</TabsTrigger>
+          <TabsTrigger value="data">Training Data</TabsTrigger>
+          <TabsTrigger value="model">AI Model</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="analyses" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {analyses?.map((analysis) => (
-              <Card key={analysis.id} className="overflow-hidden hover:shadow-md transition-all">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle>{analysis.startupName}</CardTitle>
-                    <Badge 
-                      variant={analysis.investibilityScore > 70 ? "default" : 
-                        analysis.investibilityScore > 50 ? "secondary" : "outline"}
+        <TabsContent value="recent" className="space-y-4 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="bg-primary/5 border-dashed border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-primary">New Analysis</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-muted-foreground text-sm">
+                  Create a new startup analysis with AI
+                </p>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  className="w-full"
+                  onClick={() => navigate("/analyze")}
+                >
+                  Start Analysis
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {isLoadingRecent ? (
+              Array(3).fill(0).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader className="pb-3">
+                    <div className="h-5 bg-muted rounded w-3/4"></div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                  </CardContent>
+                  <CardFooter>
+                    <div className="h-10 bg-muted rounded w-full"></div>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : recentAnalyses && recentAnalyses.length > 0 ? (
+              recentAnalyses.map((analysis) => (
+                <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{analysis.startupName}</CardTitle>
+                      <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"}>
+                        {analysis.investibilityScore}/100
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-muted-foreground text-sm">
+                      Created {formatDistanceToNow(new Date(analysis.createdAt), { addSuffix: true })}
+                    </p>
+                    {analysis.businessModel && (
+                      <Badge variant="outline" className="mt-2">
+                        {analysis.businessModel.toUpperCase()}
+                      </Badge>
+                    )}
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => navigate(`/analysis/${analysis.id}`)}
                     >
-                      {analysis.investibilityScore}/100
-                    </Badge>
-                  </div>
+                      View Analysis
+                      <ChevronRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
+            ) : (
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>No Recent Analyses</CardTitle>
                   <CardDescription>
-                    Created {new Date(analysis.createdAt).toLocaleDateString()}
+                    You haven't created any analyses yet
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Risk Level:</span>
-                      <span className={
-                        analysis.overallRisk < 30 ? "text-green-500" :
-                        analysis.overallRisk < 50 ? "text-amber-500" :
-                        analysis.overallRisk < 70 ? "text-orange-500" : "text-red-500"
-                      }>
-                        {analysis.overallRisk < 30 ? "Low" :
-                        analysis.overallRisk < 50 ? "Moderate" :
-                        analysis.overallRisk < 70 ? "High" : "Very High"}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Top Category:</span>
-                      <span className="font-medium">
-                        {analysis.categories.sort((a, b) => b.value - a.value)[0].name}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Key Strength:</span>
-                      <span className="font-medium max-w-[180px] truncate">
-                        {analysis.strengths.sort((a, b) => {
-                          const impactOrder = { critical: 0, high: 1, medium: 2, low: 3 };
-                          return impactOrder[a.impact] - impactOrder[b.impact];
-                        })[0].text}
-                      </span>
-                    </div>
-                  </div>
+                  <p className="text-muted-foreground">
+                    Start by creating a new analysis from the dashboard
+                  </p>
                 </CardContent>
                 <CardFooter>
-                  <Link 
-                    to={`/analysis/${analysis.id}`}
-                    className="w-full inline-flex items-center justify-center gap-1 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md transition-colors"
+                  <Button
+                    onClick={() => navigate("/analyze")}
                   >
-                    View Full Analysis
-                    <ArrowUpRight className="h-4 w-4 ml-1" />
-                  </Link>
+                    Create Analysis
+                  </Button>
                 </CardFooter>
               </Card>
-            ))}
+            )}
           </div>
-          
-          {analyses?.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="bg-primary/10 p-4 rounded-full mb-4">
-                <BarChart className="h-10 w-10 text-primary" />
-              </div>
-              <h3 className="text-xl font-medium mb-2">No analyses yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Start by creating your first startup analysis
-              </p>
-              <Link 
-                to="/" 
-                className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-              >
-                <LineChart className="h-4 w-4 mr-2" />
-                New Analysis
-              </Link>
+        </TabsContent>
+        
+        <TabsContent value="saved" className="space-y-4 mt-6">
+          {!user ? (
+            <Alert>
+              <AlertTitle>Authentication Required</AlertTitle>
+              <AlertDescription>
+                Please sign in to view your saved analyses.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {isLoadingSaved ? (
+                Array(3).fill(0).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader className="pb-3">
+                      <div className="h-5 bg-muted rounded w-3/4"></div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="h-4 bg-muted rounded w-1/2 mb-2"></div>
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                    </CardContent>
+                    <CardFooter>
+                      <div className="h-10 bg-muted rounded w-full"></div>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : savedAnalyses && savedAnalyses.length > 0 ? (
+                savedAnalyses.map((analysis) => (
+                  <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{analysis.startupName}</CardTitle>
+                        <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"}>
+                          {analysis.investibilityScore}/100
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <p className="text-muted-foreground text-sm">
+                        Created {formatDistanceToNow(new Date(analysis.createdAt), { addSuffix: true })}
+                      </p>
+                      {analysis.businessModel && (
+                        <Badge variant="outline" className="mt-2">
+                          {analysis.businessModel.toUpperCase()}
+                        </Badge>
+                      )}
+                    </CardContent>
+                    <CardFooter className="flex justify-between gap-2">
+                      <Button
+                        variant="secondary"
+                        className="flex-1"
+                        onClick={() => navigate(`/analysis/${analysis.id}`)}
+                      >
+                        View
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteAnalysis(analysis.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>No Saved Analyses</CardTitle>
+                    <CardDescription>
+                      You haven't saved any analyses yet
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">
+                      Create a new analysis and use the "Save" button to store it for future reference
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      onClick={() => navigate("/analyze")}
+                    >
+                      Create Analysis
+                    </Button>
+                  </CardFooter>
+                </Card>
+              )}
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="ai-models">
-          <AIModelSelector 
-            onModelSelect={handleModelSelect} 
-          />
+        <TabsContent value="data" className="space-y-4 mt-6">
+          <TrainingData />
         </TabsContent>
-        
-        <TabsContent value="data">
-          <SharkTankDataCollector 
-            onDataCollected={handleDataCollected} 
-          />
+
+        <TabsContent value="model" className="space-y-4 mt-6">
+          <AICustomization />
         </TabsContent>
       </Tabs>
     </div>
   );
-};
-
-export default Dashboard;
+}

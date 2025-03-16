@@ -1,13 +1,14 @@
 
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { getAnalysisById } from "@/utils/analysisUtils";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getAnalysisById, saveAnalysis } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
+import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
 import InvestibilityScore from "@/components/InvestibilityScore";
 import RiskRating from "@/components/RiskRating";
 import StrengthsWeaknesses from "@/components/StrengthsWeaknesses";
@@ -16,10 +17,34 @@ import DataVisualizer from "@/components/DataVisualizer";
 import RiskToRewardMeter from "@/components/RiskToRewardMeter";
 import { useEffect, useState } from "react";
 import { AIModel } from "@/components/AIModelSelector";
+import { supabase } from "@/integrations/supabase/client";
 
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  
+  // Check if user is authenticated
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    };
+    
+    checkUser();
+    
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   // Load the selected model from localStorage on component mount
   useEffect(() => {
@@ -34,6 +59,42 @@ const Analysis = () => {
     queryFn: () => getAnalysisById(id || ''),
     enabled: !!id
   });
+
+  // Mutation for saving analysis
+  const saveMutation = useMutation({
+    mutationFn: (analysisData: any) => saveAnalysis(analysisData),
+    onSuccess: () => {
+      toast({
+        title: "Analysis saved",
+        description: "Your analysis has been saved successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error saving analysis",
+        description: error instanceof Error ? error.message : "Failed to save analysis",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSaveAnalysis = () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to save this analysis.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (analysis) {
+      saveMutation.mutate({
+        userId: user.id,
+        analysisData: analysis
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -101,6 +162,16 @@ const Analysis = () => {
           </div>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1"
+            onClick={handleSaveAnalysis}
+            disabled={saveMutation.isPending}
+          >
+            <Save className="h-4 w-4" />
+            {saveMutation.isPending ? "Saving..." : "Save Analysis"}
+          </Button>
           <Button variant="outline" size="sm" className="gap-1">
             <Download className="h-4 w-4" />
             Export
