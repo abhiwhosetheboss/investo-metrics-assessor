@@ -15,7 +15,7 @@ const Index = () => {
   const { toast } = useToast();
   
   const handleStartAnalysis = () => {
-    navigate("/dashboard");
+    navigate("/analyze");
   };
 
   const handleFormSubmit = (formData: any) => {
@@ -26,9 +26,9 @@ const Index = () => {
       description: "Your startup is being analyzed. You'll be redirected to the dashboard shortly.",
     });
     
-    // Redirect to dashboard after a short delay
+    // Redirect to analyze page after a short delay
     setTimeout(() => {
-      navigate("/dashboard");
+      navigate("/analyze");
     }, 1500);
   };
   

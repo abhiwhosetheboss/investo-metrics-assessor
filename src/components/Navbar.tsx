@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn } from "lucide-react";
@@ -27,14 +26,11 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Check authentication status on mount and when auth state changes
   useEffect(() => {
     const checkAuth = async () => {
-      // Get the current session
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
       
-      // Fallback to localStorage for backward compatibility
       if (!session) {
         const localAuth = localStorage.getItem("isAuthenticated") === "true";
         setIsAuthenticated(localAuth);
@@ -43,7 +39,6 @@ const Navbar = () => {
     
     checkAuth();
     
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log("Navbar: Auth state changed:", event);
@@ -55,7 +50,6 @@ const Navbar = () => {
       }
     );
     
-    // Also listen for storage events (for multi-tab support)
     const handleStorageChange = () => {
       console.log("Navbar: Storage changed, checking auth...");
       const localAuth = localStorage.getItem("isAuthenticated") === "true";
@@ -87,7 +81,7 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const handleStartAnalysis = () => {
-    navigate("/dashboard");
+    navigate("/analyze");
   };
 
   return (
@@ -108,7 +102,6 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
@@ -141,7 +134,6 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Mobile Navigation Toggle */}
           <div className="md:hidden flex items-center gap-4">
             {isAuthenticated ? (
               <UserMenu />
@@ -164,7 +156,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isOpen && (
           <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-md py-4 border-t border-b border-slate-200 dark:border-slate-700 animate-in">
             <div className="container px-6 space-y-4">
