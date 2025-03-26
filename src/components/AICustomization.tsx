@@ -1,100 +1,158 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Brain, CheckCircle, Settings, SparklesIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertCircle, Cpu, Gauge } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
+import { getTrainingStatus } from "@/utils/analysisUtils";
+import AIModelSelector from "./AIModelSelector";
 
 export default function AICustomization() {
-  const [selectedModel, setSelectedModel] = useState<string>("gpt-4");
-  const [confidenceThreshold, setConfidenceThreshold] = useState<number>(70);
-  const [enableAdvancedAnalytics, setEnableAdvancedAnalytics] = useState<boolean>(false);
+  const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
+  const modelTrained = trainingStatus.isModelTrained;
   
-  const handleModelChange = (value: string) => {
-    setSelectedModel(value);
-    localStorage.setItem("selectedAIModel", JSON.stringify({
-      name: value,
-      provider: value.includes("gpt") ? "OpenAI" : value.includes("gemini") ? "Google" : "Custom"
-    }));
-  };
+  // Check training status periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTrainingStatus(getTrainingStatus());
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
   
-  const handleSaveSettings = () => {
-    localStorage.setItem("aiConfidenceThreshold", confidenceThreshold.toString());
-    localStorage.setItem("aiAdvancedAnalytics", enableAdvancedAnalytics.toString());
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card className="md:col-span-2">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" /> AI Model Selection
+          </CardTitle>
+          <CardDescription>
+            Select and configure the AI model to be used for your startup analyses
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {modelTrained ? (
+            <Alert className="mb-4 bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                AI model is trained on {trainingStatus.dataPoints} data points and ready to use
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert className="mb-4">
+              <Settings className="h-4 w-4" />
+              <AlertDescription>
+                Please train the AI model in the Training Data tab before using it for analyses
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <AIModelSelector />
+        </CardContent>
+      </Card>
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Cpu className="h-5 w-5" />
-            AI Model Selection
+            <SparklesIcon className="h-5 w-5" /> AI Features
           </CardTitle>
           <CardDescription>
-            Choose which AI model to use for startup analysis
+            Configure which AI features to enable
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="model-select">Select Model</Label>
-            <Select value={selectedModel} onValueChange={handleModelChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="gpt-4">GPT-4 (Recommended)</SelectItem>
-                <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</SelectItem>
-                <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
-                <SelectItem value="custom-model">Custom VC Model</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2 pt-2">
-            <div className="flex justify-between">
-              <Label htmlFor="confidence-threshold">Confidence Threshold</Label>
-              <span className="text-sm text-muted-foreground">{confidenceThreshold}%</span>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="investor-match">Investor Match Analysis</Label>
+              <p className="text-xs text-muted-foreground">
+                Analyze how well startups match your investment criteria
+              </p>
             </div>
-            <Slider 
-              id="confidence-threshold"
-              min={50} 
-              max={95} 
-              step={5}
-              value={[confidenceThreshold]} 
-              onValueChange={(value) => setConfidenceThreshold(value[0])}
-            />
-            <p className="text-xs text-muted-foreground">
-              Higher threshold means analysis will be more conservative
-            </p>
+            <Switch id="investor-match" defaultChecked />
           </div>
           
-          <div className="flex items-center space-x-2 pt-2">
-            <Switch 
-              id="advanced-analytics" 
-              checked={enableAdvancedAnalytics}
-              onCheckedChange={setEnableAdvancedAnalytics}
-            />
-            <Label htmlFor="advanced-analytics">Enable Advanced Analytics</Label>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="risk-assessment">Advanced Risk Assessment</Label>
+              <p className="text-xs text-muted-foreground">
+                Detailed risk analysis for various aspects of the startup
+              </p>
+            </div>
+            <Switch id="risk-assessment" defaultChecked />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="suggestions">AI-powered Suggestions</Label>
+              <p className="text-xs text-muted-foreground">
+                Get tailored suggestions for improving startup viability
+              </p>
+            </div>
+            <Switch id="suggestions" defaultChecked />
           </div>
         </CardContent>
-        <CardFooter>
-          <Button onClick={handleSaveSettings}>Save Settings</Button>
-        </CardFooter>
       </Card>
       
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Model Performance</AlertTitle>
-        <AlertDescription>
-          Different models have different specialties. GPT-4 provides most comprehensive analysis
-          while Custom VC Model specializes in early-stage startups.
-        </AlertDescription>
-      </Alert>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" /> Model Performance
+          </CardTitle>
+          <CardDescription>
+            View and improve AI model performance
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {modelTrained && (
+            <>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Label>Data Points</Label>
+                  <Badge variant="outline">{trainingStatus.dataPoints}</Badge>
+                </div>
+                
+                <div className="flex justify-between">
+                  <Label>Model Version</Label>
+                  <Badge variant="outline">1.0</Badge>
+                </div>
+                
+                <div className="flex justify-between">
+                  <Label>Included Metrics</Label>
+                  <div className="flex gap-1">
+                    {trainingStatus.includedMetrics.map((metric, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {metric}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-2">
+                <p className="text-xs text-muted-foreground">
+                  The model improves with more training data. Visit the Training Data tab to add more startup data.
+                </p>
+              </div>
+            </>
+          )}
+          
+          {!modelTrained && (
+            <p className="text-muted-foreground text-sm">
+              Model has not been trained yet. Go to the Training Data tab to train the model.
+            </p>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" size="sm" className="w-full">
+            Add Custom Feedback
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

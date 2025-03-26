@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -218,7 +219,7 @@ export default function Dashboard() {
                     </CardFooter>
                   </Card>
                 ))
-              ) : savedAnalyses && savedAnalyses.length > 0 ? (
+              ) : savedAnalyses && Array.isArray(savedAnalyses) && savedAnalyses.length > 0 ? (
                 savedAnalyses.map((analysis) => (
                   <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
                     <CardHeader className="pb-3">

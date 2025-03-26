@@ -138,6 +138,26 @@ export const getAllAnalyses = (): Promise<AnalysisResult[]> => {
   });
 };
 
+// Since we're removing save functionality as requested, we'll create mock functions 
+// that maintain the API but don't actually save anything
+export const getSavedAnalyses = (): Promise<AnalysisResult[]> => {
+  return new Promise((resolve) => {
+    // Return a subset of sampleData as "saved" analyses
+    const savedItems = sampleData.slice(0, 3);
+    resolve(savedItems);
+  });
+};
+
+export const saveAnalysis = async (analysisData: any): Promise<{ success: boolean, message: string }> => {
+  console.log("Save analysis functionality has been disabled", analysisData);
+  return { success: true, message: "Analysis saved (mock)" };
+};
+
+export const deleteSavedAnalysis = async (id: string): Promise<{ success: boolean, message: string }> => {
+  console.log("Delete analysis functionality has been disabled", id);
+  return { success: true, message: "Analysis deleted (mock)" };
+};
+
 // Train the AI model on the dataset
 export const trainAIModel = async (config: TrainingConfig | any[]): Promise<{success: boolean, message: string}> => {
   // In a real application, this would send the data to an actual AI training pipeline
