@@ -6,7 +6,6 @@ import AIModelSelector from "@/components/AIModelSelector";
 import { analyzeStartupWithAI } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("openai-gpt4");
@@ -43,7 +42,7 @@ export default function Analyze() {
       console.error("Analysis error:", error);
       toast({
         title: "Analysis Error",
-        description: error.message || "Failed to analyze startup data. Please check if the AI model is trained.",
+        description: error.message || "Failed to analyze startup data. Please try again.",
         variant: "destructive"
       });
       throw error;
