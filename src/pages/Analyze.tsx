@@ -11,7 +11,7 @@ export default function Analyze() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleAnalysis = async (formData) => {
+  const handleAnalysis = async (formData: any) => {
     try {
       console.log("Starting analysis with data:", formData);
       toast({
@@ -32,7 +32,7 @@ export default function Analyze() {
       }
       
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Analysis error:", error);
       toast({
         title: "Analysis Error",

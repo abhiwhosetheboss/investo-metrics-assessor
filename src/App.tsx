@@ -3,19 +3,17 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
 import Navbar from "./components/Navbar";
 
-// Import pages
+// Import pages directly to avoid lazy loading issues
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
-// Lazy-loaded pages for better performance
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Analysis = lazy(() => import("./pages/Analysis"));
-const About = lazy(() => import("./pages/About"));
-const Analyze = lazy(() => import("./pages/Analyze"));
+import Dashboard from "./pages/Dashboard";
+import Analysis from "./pages/Analysis";
+import About from "./pages/About";
+import Analyze from "./pages/Analyze";
 
 // Loading component
 const PageLoader = () => (
@@ -39,6 +37,11 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // Log when app is initialized
+  useEffect(() => {
+    console.log("App initialized");
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -48,16 +51,14 @@ const App = () => {
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1 pt-16"> {/* Add padding-top to account for fixed navbar */}
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/analysis/:id" element={<Analysis />} />
-                  <Route path="/analyze" element={<Analyze />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/analysis/:id" element={<Analysis />} />
+                <Route path="/analyze" element={<Analyze />} />
+                <Route path="/about" element={<About />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
             </main>
           </div>
         </BrowserRouter>
