@@ -4,16 +4,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AnalysisInputForm from "@/components/AnalysisInputForm";
 import { analyzeStartupWithAI } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("default-model");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleAnalysis = async (formData) => {
     try {
+      console.log("Starting analysis with data:", formData);
+      toast({
+        title: "Analysis Started",
+        description: "Processing your startup data...",
+      });
+      
       const result = await analyzeStartupWithAI(formData, modelId);
+      
+      toast({
+        title: "Analysis Complete",
+        description: "Your startup analysis is ready to view.",
+      });
+      
+      // If the analysis was successful, navigate to the result
+      if (result && result.id) {
+        navigate(`/analysis/${result.id}`);
+      }
+      
       return result;
     } catch (error) {
+      console.error("Analysis error:", error);
       toast({
         title: "Analysis Error",
         description: error.message || "Failed to analyze startup data. Please check if the AI model is trained.",
