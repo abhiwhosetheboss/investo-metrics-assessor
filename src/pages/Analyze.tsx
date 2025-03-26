@@ -2,14 +2,21 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AnalysisInputForm from "@/components/AnalysisInputForm";
+import AIModelSelector from "@/components/AIModelSelector";
 import { analyzeStartupWithAI } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Analyze() {
-  const [modelId, setModelId] = useState("default-model");
+  const [modelId, setModelId] = useState("openai-gpt4");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const handleModelSelect = (model: any) => {
+    console.log("Model selected:", model);
+    setModelId(model.id);
+  };
 
   const handleAnalysis = async (formData: any) => {
     try {
@@ -52,8 +59,14 @@ export default function Analyze() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
-        <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1">
+          <AIModelSelector onModelSelect={handleModelSelect} className="h-full" />
+        </div>
+        
+        <div className="md:col-span-2">
+          <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+        </div>
       </div>
     </div>
   );

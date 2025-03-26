@@ -182,9 +182,12 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
       
       console.log("Starting analysis with data:", analysisData);
       
-      const result = onAnalyze 
-        ? await onAnalyze(analysisData)
-        : await analyzeStartupWithAI(analysisData, modelId);
+      let result;
+      if (onAnalyze) {
+        result = await onAnalyze(analysisData);
+      } else {
+        result = await analyzeStartupWithAI(analysisData, modelId);
+      }
       
       toast({
         title: "Analysis Complete",
@@ -776,3 +779,4 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
 };
 
 export default AnalysisInputForm;
+

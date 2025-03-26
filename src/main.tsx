@@ -24,7 +24,7 @@ try {
       <div style="padding: 20px; text-align: center;">
         <h2>Application Error</h2>
         <p>Sorry, the application failed to load. Please try refreshing the page.</p>
-        <pre style="background: #f1f1f1; padding: 10px; border-radius: 4px; text-align: left; margin-top: 20px;">
+        <pre style="background: #f1f1f1; padding: 10px; border-radius: 4px; text-align: left; margin-top: 20px; overflow: auto;">
           ${error instanceof Error ? error.message : 'Unknown error'}
         </pre>
       </div>
