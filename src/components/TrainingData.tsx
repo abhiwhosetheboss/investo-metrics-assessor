@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { AlertTriangle, Brain, CheckCheck, Database, FileText, ListFilter, Uploa
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import SharkTankDataCollector from "./SharkTankDataCollector";
 import TrainModelSection from "./TrainModelSection";
 import { getTrainingStatus, trainAIModel } from "@/utils/analysisUtils";
@@ -36,6 +36,7 @@ export default function TrainingData() {
   const [activeTab, setActiveTab] = useState("data");
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
   const [collectedData, setCollectedData] = useState(sharkTankData);
+  const { toast } = useToast();
   
   // Check training status periodically
   useEffect(() => {

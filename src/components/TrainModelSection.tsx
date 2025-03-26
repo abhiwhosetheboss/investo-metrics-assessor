@@ -14,9 +14,10 @@ import { trainAIModel, getTrainingStatus } from "@/utils/analysisUtils";
 
 interface TrainModelSectionProps {
   initialData?: any[];
+  onTrainingComplete?: () => void;
 }
 
-export default function TrainModelSection({ initialData = [] }: TrainModelSectionProps) {
+export default function TrainModelSection({ initialData = [], onTrainingComplete }: TrainModelSectionProps) {
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
   const [isTraining, setIsTraining] = useState(false);
   const [metrics, setMetrics] = useState({
@@ -56,6 +57,11 @@ export default function TrainModelSection({ initialData = [] }: TrainModelSectio
       
       // Update status
       setTrainingStatus(getTrainingStatus());
+      
+      // Call the onTrainingComplete callback if provided
+      if (onTrainingComplete) {
+        onTrainingComplete();
+      }
     } catch (error) {
       toast({
         title: "Training Failed",

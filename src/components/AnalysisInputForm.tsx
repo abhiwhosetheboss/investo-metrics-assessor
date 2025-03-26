@@ -18,6 +18,7 @@ import InvestorThesis from "./InvestorThesis";
 
 interface AnalysisInputFormProps {
   modelId: string;
+  onAnalyze?: (formData: any) => Promise<any>;
 }
 
 type FormValues = {
@@ -71,7 +72,7 @@ type InvestorThesisValues = {
   postInvestmentSuccess?: string;
 };
 
-const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
+const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -181,7 +182,9 @@ const AnalysisInputForm = ({ modelId }: AnalysisInputFormProps) => {
       
       console.log("Starting analysis with data:", analysisData);
       
-      const result = await analyzeStartupWithAI(analysisData, modelId);
+      const result = onAnalyze 
+        ? await onAnalyze(analysisData)
+        : await analyzeStartupWithAI(analysisData, modelId);
       
       toast({
         title: "Analysis Complete",

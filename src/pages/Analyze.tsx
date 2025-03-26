@@ -33,7 +33,7 @@ export default function Analyze() {
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+        <AnalysisInputForm modelId={modelId} />
       </div>
     </div>
   );
