@@ -20,6 +20,7 @@ import { getTrainingStatus, trainAIModel } from "@/utils/analysisUtils";
 export default function TrainingData() {
   const [activeTab, setActiveTab] = useState("data");
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
+  const [collectedData, setCollectedData] = useState([]);
   
   // Check training status periodically
   useEffect(() => {
@@ -29,6 +30,12 @@ export default function TrainingData() {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Handle data collection from SharkTankDataCollector
+  const handleDataCollected = (data) => {
+    setCollectedData(data);
+    console.log(`Collected ${data.length} records for training`);
+  };
   
   return (
     <div className="space-y-6">
@@ -40,7 +47,7 @@ export default function TrainingData() {
         </TabsList>
         
         <TabsContent value="data" className="space-y-6">
-          <SharkTankDataCollector />
+          <SharkTankDataCollector onDataCollected={handleDataCollected} />
         </TabsContent>
         
         <TabsContent value="train" className="space-y-6">

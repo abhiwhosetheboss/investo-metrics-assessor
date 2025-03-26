@@ -9,10 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { getTrainingStatus } from "@/utils/analysisUtils";
-import AIModelSelector from "./AIModelSelector";
+import AIModelSelector, { AIModel } from "./AIModelSelector";
 
 export default function AICustomization() {
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
+  const [selectedModel, setSelectedModel] = useState<AIModel | null>(null);
   const modelTrained = trainingStatus.isModelTrained;
   
   // Check training status periodically
@@ -23,6 +24,12 @@ export default function AICustomization() {
     
     return () => clearInterval(interval);
   }, []);
+  
+  // Handle model selection
+  const handleModelSelect = (model: AIModel) => {
+    setSelectedModel(model);
+    console.log("Selected model:", model.name);
+  };
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -52,7 +59,7 @@ export default function AICustomization() {
             </Alert>
           )}
           
-          <AIModelSelector />
+          <AIModelSelector onModelSelect={handleModelSelect} />
         </CardContent>
       </Card>
       
