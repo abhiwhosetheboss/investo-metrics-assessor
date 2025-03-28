@@ -40,11 +40,21 @@ export default function SharkTankDataCollector({
   const isMobile = useIsMobile();
   const pageSize = isMobile ? 5 : 10;
   
-  // Filter and paginate data
-  const filteredData = data.filter(item => 
-    item.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.industry.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and paginate data with safety checks
+  const filteredData = data.filter(item => {
+    // Check if item exists and has the required properties
+    if (!item || typeof item !== 'object') return false;
+    
+    const companyNameMatch = item.companyName && typeof item.companyName === 'string' 
+      ? item.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+      : false;
+    
+    const industryMatch = item.industry && typeof item.industry === 'string'
+      ? item.industry.toLowerCase().includes(searchTerm.toLowerCase())
+      : false;
+    
+    return companyNameMatch || industryMatch;
+  });
   
   const paginatedData = filteredData.slice((page - 1) * pageSize, page * pageSize);
   const totalPages = Math.ceil(filteredData.length / pageSize);

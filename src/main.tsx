@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Simple error boundary for catching render errors
+// Error boundary for catching and displaying render errors
 const renderApp = () => {
   try {
     // Ensure we have a root element
