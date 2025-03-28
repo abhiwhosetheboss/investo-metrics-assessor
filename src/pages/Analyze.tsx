@@ -63,11 +63,11 @@ export default function Analyze() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {isMobile ? (
           <>
-            <div className="col-span-1 order-2">
-              <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
-            </div>
             <div className="col-span-1 order-1">
               <AIModelSelector onModelSelect={handleModelSelect} className="h-full" />
+            </div>
+            <div className="col-span-1 order-2">
+              <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
             </div>
           </>
         ) : (
