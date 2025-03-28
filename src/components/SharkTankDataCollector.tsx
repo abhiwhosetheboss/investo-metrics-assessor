@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AlertTriangle, Check, Database, Filter, PieChart, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SharkTankData {
   id: string;
@@ -36,7 +37,8 @@ export default function SharkTankDataCollector({
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const isMobile = useIsMobile();
+  const pageSize = isMobile ? 5 : 10;
   
   // Filter and paginate data
   const filteredData = data.filter(item => 
@@ -70,7 +72,7 @@ export default function SharkTankDataCollector({
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center flex-wrap gap-2">
           <div>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" /> Shark Tank Dataset
@@ -83,19 +85,19 @@ export default function SharkTankDataCollector({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input
             placeholder="Search by company or industry"
             value={searchTerm}
             onChange={handleSearch}
             className="flex-1"
           />
-          <Button variant="outline" onClick={() => setSearchTerm("")}>
+          <Button variant="outline" onClick={() => setSearchTerm("")} className="shrink-0">
             Clear
           </Button>
         </div>
         
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -135,7 +137,7 @@ export default function SharkTankDataCollector({
         </div>
         
         {totalPages > 1 && (
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center mt-4">
             <Button 
               variant="outline" 
               size="sm"
@@ -159,7 +161,10 @@ export default function SharkTankDataCollector({
         )}
       </CardContent>
       <CardFooter className="border-t pt-6">
-        <Button className="w-full" onClick={() => onDataCollected(data)}>
+        <Button 
+          className="w-full" 
+          onClick={() => onDataCollected(data)}
+        >
           Use {data.length} Records for Training
         </Button>
       </CardFooter>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DataTable } from "@/components/ui/data-table";
 import { AlertTriangle, Brain, CheckCheck, Database, FileText, ListFilter, Upload, Users } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import SharkTankDataCollector from "./SharkTankDataCollector";
 import TrainModelSection from "./TrainModelSection";
 import { getTrainingStatus, trainAIModel } from "@/utils/analysisUtils";
+import { additionalEpisodes } from "@/utils/sampleData";
 
 // Pre-loaded Shark Tank data (542 episodes)
 const sharkTankData = Array.from({ length: 542 }, (_, i) => ({
@@ -32,10 +33,13 @@ const sharkTankData = Array.from({ length: 542 }, (_, i) => ({
   outcome: ['Success', 'Moderate Success', 'Failed', 'Unknown'][Math.floor(Math.random() * 4)]
 }));
 
+// Combine with additionalEpisodes from sampleData
+const combinedData = [...sharkTankData, ...additionalEpisodes];
+
 export default function TrainingData() {
   const [activeTab, setActiveTab] = useState("data");
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
-  const [collectedData, setCollectedData] = useState(sharkTankData);
+  const [collectedData, setCollectedData] = useState(combinedData);
   const { toast } = useToast();
   
   // Check training status periodically
@@ -51,12 +55,30 @@ export default function TrainingData() {
   const handleDataCollected = (data) => {
     setCollectedData(data);
     console.log(`Collected ${data.length} records for training`);
+    
+    // Store in localStorage to persist the selection
+    localStorage.setItem('trainingData', JSON.stringify({
+      count: data.length,
+      timestamp: new Date().toISOString()
+    }));
   };
+  
+  useEffect(() => {
+    // Load training data info from localStorage if available
+    const savedTrainingData = localStorage.getItem('trainingData');
+    if (!savedTrainingData) {
+      // Initialize localStorage with combined data
+      localStorage.setItem('trainingData', JSON.stringify({
+        count: combinedData.length,
+        timestamp: new Date().toISOString()
+      }));
+    }
+  }, []);
   
   return (
     <div className="space-y-6">
       <Tabs defaultValue="data" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="w-full">
           <TabsTrigger value="data">Training Data</TabsTrigger>
           <TabsTrigger value="train">Train Model</TabsTrigger>
           <TabsTrigger value="import">Import Data</TabsTrigger>
@@ -69,16 +91,16 @@ export default function TrainingData() {
                 <Database className="h-5 w-5" /> Shark Tank Dataset
               </CardTitle>
               <CardDescription>
-                542 episodes of Shark Tank data available for training
+                {combinedData.length} episodes of Shark Tank data available for training
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-sm text-muted-foreground mb-4">
-                This dataset contains information about 542 Shark Tank pitches, including industry, valuation, 
+                This dataset contains information about {combinedData.length} Shark Tank pitches, including industry, valuation, 
                 ask amount, deal outcomes, and more.
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="success">{collectedData.length} Records</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="success">{combinedData.length} Records</Badge>
                 <Badge variant="outline">14 Metrics</Badge>
                 <Badge variant="outline">8+ Years</Badge>
               </div>
@@ -87,22 +109,23 @@ export default function TrainingData() {
               <Button 
                 className="w-full"
                 onClick={() => {
-                  console.log("Using 542 Shark Tank episodes for training");
+                  console.log(`Using ${combinedData.length} Shark Tank episodes for training`);
                   toast({
                     title: "Dataset Loaded",
-                    description: "542 Shark Tank episodes ready for training.",
+                    description: `${combinedData.length} Shark Tank episodes ready for training.`,
                   });
+                  handleDataCollected(combinedData);
                 }}
               >
                 Use Dataset
               </Button>
             </CardFooter>
           </Card>
-          <SharkTankDataCollector onDataCollected={handleDataCollected} initialData={sharkTankData} />
+          <SharkTankDataCollector onDataCollected={handleDataCollected} initialData={combinedData} />
         </TabsContent>
         
         <TabsContent value="train" className="space-y-6">
-          <TrainModelSection initialData={sharkTankData} />
+          <TrainModelSection initialData={collectedData} />
         </TabsContent>
         
         <TabsContent value="import" className="space-y-6">
@@ -160,7 +183,7 @@ export default function TrainingData() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Data Points</p>
-                <p className="text-2xl font-bold">{trainingStatus.dataPoints || collectedData.length || 542}</p>
+                <p className="text-2xl font-bold">{trainingStatus.dataPoints || collectedData.length}</p>
               </div>
               
               <div className="space-y-1">

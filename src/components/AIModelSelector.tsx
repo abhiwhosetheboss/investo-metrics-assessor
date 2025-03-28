@@ -9,6 +9,7 @@ import { Brain, Cpu, ServerCog, Check } from "lucide-react";
 import TrainModelSection from "./TrainModelSection";
 import AnalysisInputForm from "./AnalysisInputForm";
 import { getTrainingStatus } from "@/utils/analysisUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface AIModel {
   id: string;
@@ -56,6 +57,7 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
   const [activeTab, setActiveTab] = useState<string>("select");
   const [isModelTrained, setIsModelTrained] = useState<boolean>(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   // Check for previously saved model on component mount
   useEffect(() => {
@@ -115,22 +117,89 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
         description: `Now using ${model.name} by ${model.provider} for analysis.`,
       });
       
-      // If model is trained, move to the analysis tab
-      if (isModelTrained) {
-        setActiveTab("analyze");
-      } else {
-        // Otherwise, move to the training tab
-        setActiveTab("train");
+      // If we're on mobile, just confirm and don't change tabs
+      if (!isMobile) {
+        // If model is trained, move to the analysis tab
+        if (isModelTrained) {
+          setActiveTab("analyze");
+        } else {
+          // Otherwise, move to the training tab
+          setActiveTab("train");
+        }
       }
     }
   };
 
-  const handleTrainingComplete = () => {
-    setIsModelTrained(true);
-    // Move to analysis tab after training completes
-    setActiveTab("analyze");
-  };
+  // For mobile, just show the model selection without the tabs
+  if (isMobile) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle>Select AI Model</CardTitle>
+          <CardDescription>Choose an AI model for startup analysis</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={selectedModelId}
+            onValueChange={handleModelChange}
+            className="space-y-4"
+          >
+            {availableModels.map((model) => {
+              const Icon = model.icon;
+              const isSelected = selectedModelId === model.id;
+              return (
+                <div
+                  key={model.id}
+                  className={`flex items-start space-x-3 border rounded-lg p-3 transition-colors ${
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : "border-muted hover:border-muted-foreground/20"
+                  }`}
+                >
+                  <RadioGroupItem
+                    value={model.id}
+                    id={`mobile-${model.id}`}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <Label
+                        htmlFor={`mobile-${model.id}`}
+                        className="text-base font-medium cursor-pointer"
+                      >
+                        {model.name}
+                      </Label>
+                      <Icon className="ml-2 h-4 w-4 text-muted-foreground" />
+                      {isSelected && isActivated && (
+                        <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                          <Check className="mr-1 h-3 w-3" />
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {model.description}
+                    </p>
+                    <p className="text-xs mt-1 text-muted-foreground/70">
+                      Provider: {model.provider}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </RadioGroup>
 
+          <Button onClick={handleConfirm} className="mt-6 w-full">
+            {isActivated && selectedModelId === availableModels.find(m => m.id === selectedModelId)?.id 
+              ? "Update Model Selection" 
+              : "Use Selected Model"}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Desktop version with tabs
   return (
     <Card className={className}>
       <CardHeader>
@@ -206,11 +275,28 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
           </TabsContent>
           
           <TabsContent value="train">
-            <TrainModelSection onTrainingComplete={handleTrainingComplete} />
+            <div className="p-6 text-center">
+              <h3 className="text-lg font-medium mb-2">Train Your Model</h3>
+              <p className="text-muted-foreground mb-4">
+                Go to the Dashboard and select the Training Data tab to train your model on Shark Tank data.
+              </p>
+              <Button onClick={() => window.location.href = "/dashboard"}>
+                Go to Dashboard
+              </Button>
+            </div>
           </TabsContent>
           
           <TabsContent value="analyze">
-            <AnalysisInputForm modelId={selectedModelId} />
+            <div className="p-6 text-center">
+              <h3 className="text-lg font-medium mb-2">Model Ready for Analysis</h3>
+              <p className="text-muted-foreground mb-4">
+                Your model is trained and ready to analyze startup data. Fill out the form to get started.
+              </p>
+              <div className="flex items-center justify-center">
+                <Check className="mr-2 h-5 w-5 text-green-500" />
+                <span className="text-green-600 font-medium">Ready for analysis</span>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>

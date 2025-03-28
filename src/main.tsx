@@ -35,5 +35,5 @@ const renderApp = () => {
   }
 };
 
-// Use setTimeout to ensure DOM is fully loaded
-setTimeout(renderApp, 0);
+// Execute renderApp synchronously to avoid any timing issues
+renderApp();

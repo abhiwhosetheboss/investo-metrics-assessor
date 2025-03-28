@@ -6,11 +6,13 @@ import AIModelSelector from "@/components/AIModelSelector";
 import { analyzeStartupWithAI } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("openai-gpt4");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleModelSelect = (model: any) => {
     console.log("Model selected:", model);
@@ -50,22 +52,34 @@ export default function Analyze() {
   };
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 space-y-6 md:space-y-8">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">Startup Analysis</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">Startup Analysis</h1>
         <p className="text-muted-foreground">
           Enter your startup details to get a comprehensive AI-powered analysis
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <AIModelSelector onModelSelect={handleModelSelect} className="h-full" />
-        </div>
-        
-        <div className="md:col-span-2">
-          <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        {isMobile ? (
+          <>
+            <div className="col-span-1">
+              <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+            </div>
+            <div className="col-span-1">
+              <AIModelSelector onModelSelect={handleModelSelect} className="h-full" />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="md:col-span-1">
+              <AIModelSelector onModelSelect={handleModelSelect} className="h-full" />
+            </div>
+            <div className="md:col-span-2">
+              <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
