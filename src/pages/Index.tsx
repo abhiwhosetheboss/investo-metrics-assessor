@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -154,25 +155,8 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Main Content - Startup Analysis Form */}
-      <section className="py-16 bg-slate-50 dark:bg-slate-900/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">Analyze Your Startup</h2>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Fill out the form below to get a comprehensive analysis of your startup's investibility.
-                </p>
-              </div>
-              <StartupForm onSubmit={handleFormSubmit} />
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Sample Reports Section */}
-      <section id="samples-section" className="py-16 bg-white dark:bg-slate-950">
+      {/* Sample Reports Section - MOVED UP */}
+      <section id="samples-section" className="py-16 bg-slate-50 dark:bg-slate-950">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8">
@@ -233,6 +217,23 @@ const Index = () => {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Main Content - Startup Analysis Form - MOVED DOWN */}
+      <section className="py-16 bg-white dark:bg-slate-900/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-2">Analyze Your Startup</h2>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Fill out the form below to get a comprehensive analysis of your startup's investibility.
+                </p>
+              </div>
+              <StartupForm onSubmit={handleFormSubmit} />
             </div>
           </div>
         </div>
