@@ -5,8 +5,11 @@ import AnalysisInputForm from "@/components/AnalysisInputForm";
 import AIModelSelector from "@/components/AIModelSelector";
 import { analyzeStartupWithAI } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { sampleData } from "@/utils/sampleData";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("openai-gpt4");
@@ -51,6 +54,9 @@ export default function Analyze() {
     }
   };
 
+  // Only show the first 4 sample reports
+  const featuredSamples = sampleData.slice(0, 4);
+
   return (
     <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 space-y-6 md:space-y-8">
       <div className="flex flex-col space-y-2">
@@ -80,6 +86,69 @@ export default function Analyze() {
             </div>
           </>
         )}
+      </div>
+
+      {/* Sample Reports Section */}
+      <div className="mt-12">
+        <div className="flex flex-col space-y-2 mb-6">
+          <h2 className="text-2xl font-bold">Sample Reports</h2>
+          <p className="text-muted-foreground">
+            View example analyses to see what insights our platform provides
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {featuredSamples.map((sample) => (
+            <Card key={sample.id} className="hover:shadow-md transition-all">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg">{sample.startupName}</CardTitle>
+                <CardDescription className="line-clamp-2">
+                  {sample.investibilityScore > 75 
+                    ? "Highly investible startup with strong potential" 
+                    : sample.investibilityScore > 60 
+                    ? "Promising startup with moderate risk factors"
+                    : "Startup with significant risk factors to consider"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500">Investibility Score:</span>
+                  <span className={`font-medium ${
+                    sample.investibilityScore > 75 
+                      ? 'text-green-600' 
+                      : sample.investibilityScore > 60 
+                      ? 'text-yellow-600' 
+                      : 'text-red-600'
+                  }`}>{sample.investibilityScore}/100</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500">Risk Level:</span>
+                  <span className={`font-medium ${
+                    sample.overallRisk < 35 
+                      ? 'text-green-600' 
+                      : sample.overallRisk < 50 
+                      ? 'text-yellow-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {sample.overallRisk < 35 ? 'Low' : sample.overallRisk < 50 ? 'Moderate' : 'High'}
+                  </span>
+                </div>
+                <Button asChild className="w-full mt-2">
+                  <Link to={`/analysis/${sample.id}`}>View Analysis</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="flex justify-center mt-6">
+          <Button asChild variant="outline">
+            <Link to="/dashboard">
+              View All Sample Analyses
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
