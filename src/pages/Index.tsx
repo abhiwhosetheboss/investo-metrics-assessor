@@ -1,16 +1,14 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StartupForm from "@/components/StartupForm";
 import RiskToRewardMeter from "@/components/RiskToRewardMeter";
 import { BarChart4, Scale, Users, LineChart, ArrowRight, Brain, Rocket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { sampleData } from "@/utils/sampleData";
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("form");
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -32,15 +30,8 @@ const Index = () => {
     }, 1500);
   };
   
-  // Fixed function to properly handle tab switching
-  const handleViewExamples = () => {
-    setActiveTab("examples");
-    // Scroll to the tabs section for better UX
-    const tabsElement = document.querySelector('[role="tablist"]');
-    if (tabsElement) {
-      tabsElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
+  // Show only the first 4 sample reports
+  const featuredSamples = sampleData.slice(0, 4);
   
   return (
     <div className="min-h-screen">
@@ -60,7 +51,10 @@ const Index = () => {
                   Start Analysis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleViewExamples}>
+                <Button size="lg" variant="outline" onClick={() => {
+                  // Scroll to samples section for better UX
+                  document.getElementById('samples-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}>
                   View Examples
                 </Button>
               </div>
@@ -160,157 +154,86 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Main Content */}
-      <section className="py-16 bg-slate-50 dark:bg-slate-900/50" id="examples-section">
+      {/* Main Content - Startup Analysis Form */}
+      <section className="py-16 bg-slate-50 dark:bg-slate-900/50">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <Tabs defaultValue="form" value={activeTab} className="space-y-8" onValueChange={setActiveTab}>
-              <div className="flex justify-center">
-                <TabsList className="grid grid-cols-2 w-full max-w-md">
-                  <TabsTrigger value="form">Startup Analysis</TabsTrigger>
-                  <TabsTrigger value="examples">Sample Reports</TabsTrigger>
-                </TabsList>
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-2">Analyze Your Startup</h2>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Fill out the form below to get a comprehensive analysis of your startup's investibility.
+                </p>
               </div>
-              
-              <TabsContent value="form" className="space-y-4">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold mb-2">Analyze Your Startup</h2>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Fill out the form below to get a comprehensive analysis of your startup's investibility.
-                  </p>
-                </div>
-                <StartupForm onSubmit={handleFormSubmit} />
-              </TabsContent>
-              
-              <TabsContent value="examples" className="space-y-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold mb-2">Sample Reports</h2>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    View example analyses to see what insights Investometer provides.
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Scrub Daddy from Shark Tank US */}
-                  <Card className="hover:shadow-md transition-all">
-                    <CardHeader>
-                      <CardTitle>Scrub Daddy</CardTitle>
-                      <CardDescription>Revolutionary cleaning product from Shark Tank US</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-green-600">92/100</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-green-600">Low</span>
-                      </div>
-                      <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/scrub-daddy">View Full Analysis</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* PeeSafe Snitch from Shark Tank India */}
-                  <Card className="hover:shadow-md transition-all">
-                    <CardHeader>
-                      <CardTitle>PeeSafe Snitch</CardTitle>
-                      <CardDescription>Innovative hygiene product from Shark Tank India</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-yellow-600">68/100</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-yellow-600">Moderate</span>
-                      </div>
-                      <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/peeschute-snitch">View Full Analysis</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Moderate from Shark Tank India */}
-                  <Card className="hover:shadow-md transition-all">
-                    <CardHeader>
-                      <CardTitle>Moderate</CardTitle>
-                      <CardDescription>AI content moderation platform from Shark Tank India</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-green-600">78/100</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-yellow-600">Moderate</span>
-                      </div>
-                      <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/moderate">View Full Analysis</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Bombs Away Bath from Shark Tank US */}
-                  <Card className="hover:shadow-md transition-all">
-                    <CardHeader>
-                      <CardTitle>Bombs Away Bath</CardTitle>
-                      <CardDescription>Creative bath products from Shark Tank US</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-green-600">82/100</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-green-600">Low</span>
-                      </div>
-                      <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/bombs-away">View Full Analysis</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                  
-                  {/* Original example kept for reference */}
-                  <Card className="hover:shadow-md transition-all md:col-span-2">
-                    <CardHeader>
-                      <CardTitle>LogisticsHub</CardTitle>
-                      <CardDescription>Supply chain optimization platform with industry veterans</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Investibility Score:</span>
-                        <span className="font-medium text-green-600">82/100</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk Level:</span>
-                        <span className="font-medium text-green-600">Low</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-slate-500">Risk-to-Reward Ratio:</span>
-                        <span className="font-medium text-green-600">2.48</span>
-                      </div>
-                      <Button asChild className="w-full mt-4">
-                        <Link to="/analysis/startup-3">View Full Analysis</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="flex justify-center mt-8">
-                  <Button asChild>
-                    <Link to="/dashboard">
-                      View All Sample Analyses
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
+              <StartupForm onSubmit={handleFormSubmit} />
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Sample Reports Section */}
+      <section id="samples-section" className="py-16 bg-white dark:bg-slate-950">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">Sample Reports</h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                View example analyses to see what insights Investometer provides.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredSamples.map((sample) => (
+                <Card key={sample.id} className="hover:shadow-md transition-all">
+                  <CardHeader>
+                    <CardTitle>{sample.startupName}</CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {sample.investibilityScore > 75 
+                        ? "Highly investible startup with strong potential" 
+                        : sample.investibilityScore > 60 
+                        ? "Promising startup with moderate risk factors"
+                        : "Startup with significant risk factors to consider"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500">Investibility Score:</span>
+                      <span className={`font-medium ${
+                        sample.investibilityScore > 75 
+                          ? 'text-green-600' 
+                          : sample.investibilityScore > 60 
+                          ? 'text-yellow-600' 
+                          : 'text-red-600'
+                      }`}>{sample.investibilityScore}/100</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500">Risk Level:</span>
+                      <span className={`font-medium ${
+                        sample.overallRisk < 35 
+                          ? 'text-green-600' 
+                          : sample.overallRisk < 50 
+                          ? 'text-yellow-600' 
+                          : 'text-red-600'
+                      }`}>
+                        {sample.overallRisk < 35 ? 'Low' : sample.overallRisk < 50 ? 'Moderate' : 'High'}
+                      </span>
+                    </div>
+                    <Button asChild className="w-full mt-4">
+                      <Link to={`/analysis/${sample.id}`}>View Full Analysis</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="flex justify-center mt-8">
+              <Button asChild>
+                <Link to="/dashboard">
+                  View All Sample Analyses
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
