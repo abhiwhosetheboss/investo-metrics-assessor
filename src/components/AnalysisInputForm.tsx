@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -13,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
 import { Brain, Loader2, Building2, Users, BookOpen, Briefcase, LineChart, DollarSign, ShoppingCart, Heart, ClipboardList } from "lucide-react";
 
