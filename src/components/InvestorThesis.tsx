@@ -88,10 +88,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             value={thesis.minRevenue}
             onValueChange={(value) => onChange("minRevenue", value)}
           >
-            <SelectTrigger id="minRevenue" className="bg-white dark:bg-slate-900">
+            <SelectTrigger id="minRevenue">
               <SelectValue placeholder="Select minimum revenue" />
             </SelectTrigger>
-            <SelectContent className="bg-popover">
+            <SelectContent>
               <SelectItem value="0">Pre-revenue is fine</SelectItem>
               <SelectItem value="10000">$10K+ ARR</SelectItem>
               <SelectItem value="50000">$50K+ ARR</SelectItem>
@@ -109,10 +109,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             value={thesis.maxValuation}
             onValueChange={(value) => onChange("maxValuation", value)}
           >
-            <SelectTrigger id="maxValuation" className="bg-white dark:bg-slate-900">
+            <SelectTrigger id="maxValuation">
               <SelectValue placeholder="Select maximum valuation" />
             </SelectTrigger>
-            <SelectContent className="bg-popover">
+            <SelectContent>
               <SelectItem value="1000000">Up to $1M</SelectItem>
               <SelectItem value="3000000">Up to $3M</SelectItem>
               <SelectItem value="5000000">Up to $5M</SelectItem>
@@ -143,10 +143,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             value={thesis.expectedValuationIncrease || ""}
             onValueChange={(value) => onChange("expectedValuationIncrease", value)}
           >
-            <SelectTrigger id="expectedValuationIncrease" className="bg-white dark:bg-slate-900">
+            <SelectTrigger id="expectedValuationIncrease">
               <SelectValue placeholder="Select expected increase" />
             </SelectTrigger>
-            <SelectContent className="bg-popover">
+            <SelectContent>
               <SelectItem value="2x">2x</SelectItem>
               <SelectItem value="3x">3x</SelectItem>
               <SelectItem value="5x">5x</SelectItem>
@@ -163,10 +163,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
           value={thesis.stagePreference}
           onValueChange={(value) => onChange("stagePreference", value)}
         >
-          <SelectTrigger id="stagePreference" className="bg-white dark:bg-slate-900">
+          <SelectTrigger id="stagePreference">
             <SelectValue placeholder="Select preferred stage" />
           </SelectTrigger>
-          <SelectContent className="bg-popover">
+          <SelectContent>
             {stageOptions.map((stage) => (
               <SelectItem key={stage} value={stage.toLowerCase()}>
                 {stage}
@@ -182,10 +182,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
           value={thesis.postInvestmentSuccess || ""}
           onValueChange={(value) => onChange("postInvestmentSuccess", value)}
         >
-          <SelectTrigger id="postInvestmentSuccess" className="bg-white dark:bg-slate-900">
+          <SelectTrigger id="postInvestmentSuccess">
             <SelectValue placeholder="Select primary success metric" />
           </SelectTrigger>
-          <SelectContent className="bg-popover">
+          <SelectContent>
             {successMetricOptions.map((metric) => (
               <SelectItem key={metric} value={metric.toLowerCase()}>
                 {metric}
