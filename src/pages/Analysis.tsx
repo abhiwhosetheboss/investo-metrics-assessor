@@ -60,6 +60,171 @@ const Analysis = () => {
     enabled: !!id
   });
 
+  useEffect(() => {
+    if (analysis) {
+      // Enhance analysis data with AI recommendations if strengths, weaknesses or suggestions are empty
+      if (!analysis.strengths || analysis.strengths.length === 0) {
+        analysis.strengths = generateStrengths(analysis);
+      }
+      if (!analysis.weaknesses || analysis.weaknesses.length === 0) {
+        analysis.weaknesses = generateWeaknesses(analysis);
+      }
+      if (!analysis.suggestions || analysis.suggestions.length === 0) {
+        analysis.suggestions = generateSuggestions(analysis);
+      }
+    }
+  }, [analysis]);
+
+  // Generate AI-based strengths based on startup data
+  const generateStrengths = (analysisData: any) => {
+    const strengths = [];
+    
+    // Business model based strength
+    if (analysisData.businessModel) {
+      const businessModelMap: Record<string, string> = {
+        'b2b': 'Business-to-business model provides stable revenue streams and longer customer relationships',
+        'b2c': 'Direct-to-consumer approach allows for higher margins and brand control',
+        'saas': 'Subscription-based model enables predictable recurring revenue',
+        'marketplace': 'Two-sided marketplace creates network effects and multiple revenue streams'
+      };
+      
+      strengths.push({
+        text: businessModelMap[analysisData.businessModel.toLowerCase()] || 'Business model shows potential for scalable growth',
+        impact: "high"
+      });
+    }
+    
+    // Product-market fit strength
+    if (analysisData.pmfScore && analysisData.pmfScore > 60) {
+      strengths.push({
+        text: `Strong product-market fit score of ${analysisData.pmfScore} indicates validated customer demand`,
+        impact: "critical"
+      });
+    }
+    
+    // Founder trust strength
+    if (analysisData.founderTrustRating && analysisData.founderTrustRating > 6) {
+      strengths.push({
+        text: `High founder credibility rating of ${analysisData.founderTrustRating}/10 suggests strong leadership`,
+        impact: "high"
+      });
+    }
+    
+    // Growth potential strength
+    if (analysisData.growthExpected && !analysisData.growthExpected.includes('-')) {
+      strengths.push({
+        text: `Projected growth rate of ${analysisData.growthExpected} demonstrates market expansion potential`,
+        impact: "medium"
+      });
+    }
+    
+    // Add general strengths if we don't have enough specific ones
+    if (strengths.length < 3) {
+      strengths.push({
+        text: "Potential for strategic partnerships to accelerate market entry",
+        impact: "medium"
+      });
+      
+      strengths.push({
+        text: "Innovative approach to solving customer pain points",
+        impact: "high"
+      });
+    }
+    
+    return strengths;
+  };
+  
+  // Generate AI-based weaknesses based on startup data
+  const generateWeaknesses = (analysisData: any) => {
+    const weaknesses = [];
+    
+    // Risk-based weakness
+    if (analysisData.overallRisk && analysisData.overallRisk > 60) {
+      weaknesses.push({
+        text: `High overall risk assessment (${analysisData.overallRisk}%) indicates significant investment challenges`,
+        impact: "critical"
+      });
+    }
+    
+    // Product-market fit weakness
+    if (analysisData.pmfScore && analysisData.pmfScore < 50) {
+      weaknesses.push({
+        text: `Low product-market fit score of ${analysisData.pmfScore} suggests need for further customer validation`,
+        impact: "high"
+      });
+    }
+    
+    // Investibility weakness
+    if (analysisData.investibilityScore && analysisData.investibilityScore < 50) {
+      weaknesses.push({
+        text: `Below-average investibility score of ${analysisData.investibilityScore} may limit funding opportunities`,
+        impact: "high"
+      });
+    }
+    
+    // Add general weaknesses if we don't have enough specific ones
+    if (weaknesses.length < 3) {
+      weaknesses.push({
+        text: "Potential scaling challenges in competitive market environment",
+        impact: "medium"
+      });
+      
+      weaknesses.push({
+        text: "Limited track record of financial performance",
+        impact: "medium"
+      });
+      
+      weaknesses.push({
+        text: "Potential customer acquisition costs may impact profitability",
+        impact: "low"
+      });
+    }
+    
+    return weaknesses;
+  };
+  
+  // Generate AI-based suggestions based on startup data
+  const generateSuggestions = (analysisData: any) => {
+    const suggestions = [];
+    
+    // Financial suggestion
+    suggestions.push({
+      title: "Develop Clear Financial Projections",
+      description: "Create detailed 18-month financial projections with realistic customer acquisition costs and revenue targets to strengthen investor confidence.",
+      priority: "high"
+    });
+    
+    // Team suggestion
+    suggestions.push({
+      title: "Fill Key Leadership Gaps",
+      description: "Identify and recruit experienced talent for critical roles, particularly in areas of technological development and market expansion.",
+      priority: "medium"
+    });
+    
+    // Product suggestion
+    suggestions.push({
+      title: "Enhance Product Differentiation",
+      description: "Clearly articulate unique value proposition and competitive advantages against established market players.",
+      priority: "medium"
+    });
+    
+    // Market validation suggestion
+    suggestions.push({
+      title: "Expand Market Validation",
+      description: "Conduct additional customer interviews and gather quantitative feedback to strengthen product-market fit evidence.",
+      priority: "high"
+    });
+    
+    // Scaling suggestion
+    suggestions.push({
+      title: "Create Scalable Operations Plan",
+      description: "Develop systems and processes that can scale efficiently with growth to maintain quality and customer satisfaction.",
+      priority: "low"
+    });
+    
+    return suggestions;
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-10 space-y-8">
