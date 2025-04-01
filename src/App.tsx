@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { MobileDisclaimer } from "./components/MobileDisclaimer";
+import { BetaDisclaimer } from "./components/BetaDisclaimer";
 
 // Import pages directly to avoid lazy loading issues
 import Index from "./pages/Index";
@@ -41,6 +41,7 @@ const App = () => {
             <Navbar />
             <main className="flex-1 pt-16 px-4"> {/* Added px-4 for better mobile padding */}
               <MobileDisclaimer />
+              <BetaDisclaimer />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<Dashboard />} />

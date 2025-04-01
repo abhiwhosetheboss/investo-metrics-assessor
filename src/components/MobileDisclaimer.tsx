@@ -10,7 +10,7 @@ export function MobileDisclaimer() {
   if (!isMobile) return null;
 
   return (
-    <Alert variant="warning" className="mb-4 bg-amber-50">
+    <Alert className="mb-4 bg-amber-50 border-amber-200">
       <Laptop className="h-4 w-4 mr-2" />
       <AlertDescription className="text-xs">
         For the best viewing experience, please use a laptop or PC.

@@ -84,6 +84,10 @@ const Navbar = () => {
     navigate("/analyze");
   };
 
+  const toggleMobileMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
   return (
     <header 
       className={cn(
@@ -148,7 +152,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={toggleMobileMenu}
               aria-label="Toggle Menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -157,7 +161,7 @@ const Navbar = () => {
         </div>
 
         {isOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-md py-4 border-t border-b border-slate-200 dark:border-slate-700 animate-in">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 shadow-md py-4 border-t border-b border-slate-200 dark:border-slate-700 animate-in z-50">
             <div className="container px-6 space-y-4">
               {navItems.map((item) => (
                 <Link
