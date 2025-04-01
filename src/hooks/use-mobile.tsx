@@ -17,11 +17,13 @@ export function useIsMobile() {
     
     // Set up event listener for window resize
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    
+    // Use a callback for performance
     const onChange = () => {
       checkMobile()
     }
     
-    // Modern API
+    // Modern API with fallback
     if (mql.addEventListener) {
       mql.addEventListener("change", onChange)
     } else {

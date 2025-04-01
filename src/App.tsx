@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
+import { MobileDisclaimer } from "./components/MobileDisclaimer";
 
 // Import pages directly to avoid lazy loading issues
 import Index from "./pages/Index";
@@ -38,7 +39,8 @@ const App = () => {
         <BrowserRouter>
           <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-1 pt-16"> {/* Add padding-top to account for fixed navbar */}
+            <main className="flex-1 pt-16 px-4"> {/* Added px-4 for better mobile padding */}
+              <MobileDisclaimer />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<Dashboard />} />
