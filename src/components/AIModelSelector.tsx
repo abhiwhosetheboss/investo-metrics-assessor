@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -10,6 +11,7 @@ import TrainModelSection from "./TrainModelSection";
 import AnalysisInputForm from "./AnalysisInputForm";
 import { getTrainingStatus } from "@/utils/analysisUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useNavigate } from "react-router-dom";
 
 export interface AIModel {
   id: string;
@@ -58,6 +60,7 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
   const [isModelTrained, setIsModelTrained] = useState<boolean>(false);
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Check for previously saved model on component mount
   useEffect(() => {
@@ -130,7 +133,14 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
     }
   };
 
-  // For mobile, just show the model selection without the tabs
+  // Navigate to dashboard training section
+  const goToTraining = () => {
+    navigate('/dashboard');
+    // Use localStorage to indicate we want the "data" tab open
+    localStorage.setItem('dashboardTab', 'data');
+  };
+
+  // For mobile, show the model selection and training options
   if (isMobile) {
     return (
       <Card className={className}>
@@ -194,6 +204,26 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
               ? "Update Model Selection" 
               : "Use Selected Model"}
           </Button>
+          
+          {isActivated && (
+            <div className="mt-4 space-y-4">
+              <div className="p-4 border rounded-md bg-muted/20">
+                <h3 className="text-sm font-medium mb-2">Model Status: {isModelTrained ? "Trained" : "Not Trained"}</h3>
+                {!isModelTrained && (
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Your model needs to be trained before you can analyze startups.
+                  </p>
+                )}
+                <Button 
+                  variant={isModelTrained ? "outline" : "default"}
+                  className="w-full"
+                  onClick={goToTraining}
+                >
+                  {isModelTrained ? "Retrain Model" : "Train Model Now"}
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -280,7 +310,7 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
               <p className="text-muted-foreground mb-4">
                 Go to the Dashboard and select the Training Data tab to train your model on Shark Tank data.
               </p>
-              <Button onClick={() => window.location.href = "/dashboard"}>
+              <Button onClick={goToTraining}>
                 Go to Dashboard
               </Button>
             </div>

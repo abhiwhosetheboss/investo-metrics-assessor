@@ -17,6 +17,7 @@ import SharkTankDataCollector from "./SharkTankDataCollector";
 import TrainModelSection from "./TrainModelSection";
 import { getTrainingStatus, trainAIModel } from "@/utils/analysisUtils";
 import { additionalEpisodes } from "@/utils/sampleData";
+import { useNavigate } from "react-router-dom";
 
 // Pre-loaded Shark Tank data (542 episodes)
 const sharkTankData = Array.from({ length: 542 }, (_, i) => ({
@@ -41,6 +42,7 @@ export default function TrainingData() {
   const [trainingStatus, setTrainingStatus] = useState(getTrainingStatus());
   const [collectedData, setCollectedData] = useState(combinedData);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Check training status periodically
   useEffect(() => {
@@ -61,6 +63,21 @@ export default function TrainingData() {
       count: data.length,
       timestamp: new Date().toISOString()
     }));
+    
+    // Show toast notification
+    toast({
+      title: "Training Data Updated",
+      description: `${data.length} records selected for model training.`,
+    });
+  };
+
+  // Handle use dataset button click
+  const handleUseDataset = () => {
+    console.log(`Using ${combinedData.length} Shark Tank episodes for training`);
+    handleDataCollected(combinedData);
+    
+    // Change to train tab after data is loaded
+    setActiveTab("train");
   };
   
   useEffect(() => {
@@ -108,14 +125,7 @@ export default function TrainingData() {
             <CardFooter>
               <Button 
                 className="w-full"
-                onClick={() => {
-                  console.log(`Using ${combinedData.length} Shark Tank episodes for training`);
-                  toast({
-                    title: "Dataset Loaded",
-                    description: `${combinedData.length} Shark Tank episodes ready for training.`,
-                  });
-                  handleDataCollected(combinedData);
-                }}
+                onClick={handleUseDataset}
               >
                 Use Dataset
               </Button>
@@ -125,7 +135,13 @@ export default function TrainingData() {
         </TabsContent>
         
         <TabsContent value="train" className="space-y-6">
-          <TrainModelSection initialData={collectedData} />
+          <TrainModelSection initialData={collectedData} onTrainingComplete={() => {
+            toast({
+              title: "Model Training Complete",
+              description: "Your AI model has been successfully trained and is ready to analyze startups.",
+            });
+            setTimeout(() => navigate("/analyze"), 1500);
+          }} />
         </TabsContent>
         
         <TabsContent value="import" className="space-y-6">

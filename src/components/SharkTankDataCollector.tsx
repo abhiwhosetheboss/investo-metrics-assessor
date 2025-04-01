@@ -9,6 +9,7 @@ import { AlertTriangle, Check, Database, Filter, PieChart, RefreshCw } from "luc
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SharkTankData {
   id: string;
@@ -38,6 +39,7 @@ export default function SharkTankDataCollector({
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const pageSize = isMobile ? 5 : 10;
   
   // Filter and paginate data with safety checks
@@ -77,6 +79,15 @@ export default function SharkTankDataCollector({
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setPage(1); // Reset to first page on search
+  };
+  
+  // Handle using records for training
+  const handleUseForTraining = () => {
+    onDataCollected(data);
+    toast({
+      title: "Data Selected",
+      description: `${data.length} records will be used for AI model training.`,
+    });
   };
   
   return (
@@ -173,7 +184,7 @@ export default function SharkTankDataCollector({
       <CardFooter className="border-t pt-6">
         <Button 
           className="w-full" 
-          onClick={() => onDataCollected(data)}
+          onClick={handleUseForTraining}
         >
           Use {data.length} Records for Training
         </Button>

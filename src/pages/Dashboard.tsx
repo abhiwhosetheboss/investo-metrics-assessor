@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +54,16 @@ export default function Dashboard() {
     enabled: !!user, // Only fetch if user is authenticated
   });
   
+  // Check for requested tab from localStorage on component mount
+  useEffect(() => {
+    const requestedTab = localStorage.getItem('dashboardTab');
+    if (requestedTab) {
+      setActiveTab(requestedTab);
+      // Clear after using
+      localStorage.removeItem('dashboardTab');
+    }
+  }, []);
+  
   const handleDeleteAnalysis = async (id: string) => {
     try {
       const result = await deleteSavedAnalysis(id);
@@ -92,7 +101,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <Tabs defaultValue="recent" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="recent">Recent Analyses</TabsTrigger>
           <TabsTrigger value="saved" disabled={!user}>Saved Analyses</TabsTrigger>

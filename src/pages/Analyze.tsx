@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AnalysisInputForm from "@/components/AnalysisInputForm";
 import AIModelSelector from "@/components/AIModelSelector";
-import { analyzeStartupWithAI } from "@/utils/analysisUtils";
+import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,17 +13,40 @@ import { ArrowRight } from "lucide-react";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("openai-gpt4");
+  const [isModelTrained, setIsModelTrained] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    // Check if model is trained on component mount
+    const trainStatus = getTrainingStatus();
+    setIsModelTrained(trainStatus.isModelTrained);
+  }, []);
+
   const handleModelSelect = (model: any) => {
     console.log("Model selected:", model);
     setModelId(model.id);
+    
+    // Check if model is trained after selection
+    const trainStatus = getTrainingStatus();
+    setIsModelTrained(trainStatus.isModelTrained);
   };
 
   const handleAnalysis = async (formData: any) => {
     try {
+      // Check if model is trained before analysis
+      if (!isModelTrained) {
+        toast({
+          title: "Model Not Trained",
+          description: "Please train your AI model before analyzing startups.",
+          variant: "destructive"
+        });
+        navigate("/dashboard");
+        localStorage.setItem('dashboardTab', 'data');
+        return null;
+      }
+      
       console.log("Starting analysis with data:", formData);
       toast({
         title: "Analysis Started",
@@ -74,6 +97,27 @@ export default function Analyze() {
             </div>
             <div className="col-span-1 order-2">
               <AnalysisInputForm modelId={modelId} onAnalyze={handleAnalysis} />
+              
+              {/* Mobile warning about model training if not trained */}
+              {!isModelTrained && (
+                <Card className="mt-4 border-yellow-400/50 bg-yellow-50/50 dark:bg-yellow-900/20">
+                  <CardContent className="pt-6">
+                    <p className="text-sm text-amber-800 dark:text-amber-400 mb-3">
+                      Your AI model must be trained before analyzing startups.
+                    </p>
+                    <Button 
+                      variant="warning"
+                      className="w-full"
+                      onClick={() => {
+                        navigate('/dashboard');
+                        localStorage.setItem('dashboardTab', 'data');
+                      }}
+                    >
+                      Train Model First
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </>
         ) : (
