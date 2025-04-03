@@ -39,6 +39,7 @@ export interface AnalysisResult {
   founderTrustRating?: number;
   pmfScore?: number;
   growthExpected?: string;
+  industry?: string;  // Added this property to fix the TypeScript error
   postInvestmentMetrics?: {
     growthRate?: string;
     valuationIncrease?: string;
