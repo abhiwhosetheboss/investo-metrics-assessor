@@ -2,10 +2,12 @@
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Plus, X, Check } from "lucide-react";
 
 interface InvestorThesisProps {
   thesis: {
@@ -39,7 +41,45 @@ const successMetricOptions = [
   "Revenue Growth", "User Acquisition", "Market Share", "Profitability", "Exit Value"
 ];
 
+const revenueOptions = [
+  { value: "0", label: "Pre-revenue is fine" },
+  { value: "10000", label: "$10K+ ARR" },
+  { value: "50000", label: "$50K+ ARR" },
+  { value: "100000", label: "$100K+ ARR" },
+  { value: "500000", label: "$500K+ ARR" },
+  { value: "1000000", label: "$1M+ ARR" },
+  { value: "5000000", label: "$5M+ ARR" }
+];
+
+const valuationOptions = [
+  { value: "1000000", label: "Up to $1M" },
+  { value: "3000000", label: "Up to $3M" },
+  { value: "5000000", label: "Up to $5M" },
+  { value: "10000000", label: "Up to $10M" },
+  { value: "20000000", label: "Up to $20M" },
+  { value: "50000000", label: "Up to $50M" },
+  { value: "100000000", label: "Up to $100M" },
+  { value: "no-limit", label: "No limit" }
+];
+
+const valuationIncreaseOptions = [
+  { value: "2x", label: "2x" },
+  { value: "3x", label: "3x" },
+  { value: "5x", label: "5x" },
+  { value: "10x", label: "10x" },
+  { value: "100x", label: "100x or more" }
+];
+
 const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
+  const [industryInput, setIndustryInput] = React.useState("");
+
+  const handleIndustryAdd = () => {
+    if (industryInput.trim() && !thesis.preferredIndustries.includes(industryInput.trim())) {
+      onChange("preferredIndustries", [...thesis.preferredIndustries, industryInput.trim()]);
+      setIndustryInput("");
+    }
+  };
+
   const handleIndustryToggle = (industry: string) => {
     const currentIndustries = [...thesis.preferredIndustries];
     
@@ -48,6 +88,13 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
     } else {
       onChange("preferredIndustries", [...currentIndustries, industry]);
     }
+  };
+
+  const handleIndustryRemove = (industry: string) => {
+    onChange(
+      "preferredIndustries", 
+      thesis.preferredIndustries.filter(item => item !== industry)
+    );
   };
 
   return (
@@ -63,66 +110,125 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <Label>Preferred Industries</Label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
+        
+        {/* Industry selection */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {industryOptions.map((industry) => (
-            <div key={industry} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`industry-${industry}`} 
-                checked={thesis.preferredIndustries.includes(industry)}
-                onCheckedChange={() => handleIndustryToggle(industry)}
-              />
-              <Label htmlFor={`industry-${industry}`} className="text-sm font-normal">
-                {industry}
-              </Label>
+            <div 
+              key={industry} 
+              onClick={() => handleIndustryToggle(industry)}
+              className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                thesis.preferredIndustries.includes(industry) 
+                  ? "bg-primary/10 border-primary" 
+                  : "bg-background hover:bg-accent"
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-sm flex items-center justify-center ${
+                thesis.preferredIndustries.includes(industry) 
+                  ? "bg-primary text-primary-foreground" 
+                  : "border border-input"
+              }`}>
+                {thesis.preferredIndustries.includes(industry) && <Check className="h-3 w-3" />}
+              </div>
+              <span className="text-sm">{industry}</span>
             </div>
           ))}
         </div>
+
+        {/* Custom industry input */}
+        <div className="flex items-center gap-2 mt-2">
+          <Input
+            placeholder="Add custom industry..."
+            value={industryInput}
+            onChange={(e) => setIndustryInput(e.target.value)}
+            className="flex-1"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleIndustryAdd();
+              }
+            }}
+          />
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="icon"
+            onClick={handleIndustryAdd}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Selected industries badges */}
+        {thesis.preferredIndustries.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {thesis.preferredIndustries.map(industry => (
+              <Badge key={industry} variant="secondary" className="pl-2 pr-1 py-1 flex items-center gap-1">
+                {industry}
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-4 w-4 ml-1 hover:bg-transparent"
+                  onClick={() => handleIndustryRemove(industry)}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="minRevenue">Minimum Revenue Expectation</Label>
-          <Select
-            value={thesis.minRevenue}
-            onValueChange={(value) => onChange("minRevenue", value)}
-          >
-            <SelectTrigger id="minRevenue">
-              <SelectValue placeholder="Select minimum revenue" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">Pre-revenue is fine</SelectItem>
-              <SelectItem value="10000">$10K+ ARR</SelectItem>
-              <SelectItem value="50000">$50K+ ARR</SelectItem>
-              <SelectItem value="100000">$100K+ ARR</SelectItem>
-              <SelectItem value="500000">$500K+ ARR</SelectItem>
-              <SelectItem value="1000000">$1M+ ARR</SelectItem>
-              <SelectItem value="5000000">$5M+ ARR</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 gap-2">
+            {revenueOptions.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => onChange("minRevenue", option.value)}
+                className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                  thesis.minRevenue === option.value
+                    ? "bg-primary/10 border-primary"
+                    : "bg-background hover:bg-accent"
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                  thesis.minRevenue === option.value
+                    ? "border-4 border-primary"
+                    : "border border-input"
+                }`} />
+                <span className="text-sm">{option.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="maxValuation">Maximum Valuation</Label>
-          <Select
-            value={thesis.maxValuation}
-            onValueChange={(value) => onChange("maxValuation", value)}
-          >
-            <SelectTrigger id="maxValuation">
-              <SelectValue placeholder="Select maximum valuation" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1000000">Up to $1M</SelectItem>
-              <SelectItem value="3000000">Up to $3M</SelectItem>
-              <SelectItem value="5000000">Up to $5M</SelectItem>
-              <SelectItem value="10000000">Up to $10M</SelectItem>
-              <SelectItem value="20000000">Up to $20M</SelectItem>
-              <SelectItem value="50000000">Up to $50M</SelectItem>
-              <SelectItem value="100000000">Up to $100M</SelectItem>
-              <SelectItem value="no-limit">No limit</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 gap-2 h-[300px] overflow-y-auto pr-1">
+            {valuationOptions.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => onChange("maxValuation", option.value)}
+                className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                  thesis.maxValuation === option.value
+                    ? "bg-primary/10 border-primary"
+                    : "bg-background hover:bg-accent"
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                  thesis.maxValuation === option.value
+                    ? "border-4 border-primary"
+                    : "border border-input"
+                }`} />
+                <span className="text-sm">{option.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -139,60 +245,75 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
 
         <div className="space-y-2">
           <Label htmlFor="expectedValuationIncrease">Expected Valuation Increase</Label>
-          <Select
-            value={thesis.expectedValuationIncrease || ""}
-            onValueChange={(value) => onChange("expectedValuationIncrease", value)}
-          >
-            <SelectTrigger id="expectedValuationIncrease">
-              <SelectValue placeholder="Select expected increase" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="2x">2x</SelectItem>
-              <SelectItem value="3x">3x</SelectItem>
-              <SelectItem value="5x">5x</SelectItem>
-              <SelectItem value="10x">10x</SelectItem>
-              <SelectItem value="100x">100x or more</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 gap-2">
+            {valuationIncreaseOptions.map((option) => (
+              <div
+                key={option.value}
+                onClick={() => onChange("expectedValuationIncrease", option.value)}
+                className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                  thesis.expectedValuationIncrease === option.value
+                    ? "bg-primary/10 border-primary"
+                    : "bg-background hover:bg-accent"
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                  thesis.expectedValuationIncrease === option.value
+                    ? "border-4 border-primary"
+                    : "border border-input"
+                }`} />
+                <span className="text-sm">{option.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="stagePreference">Preferred Investment Stage</Label>
-        <Select
-          value={thesis.stagePreference}
-          onValueChange={(value) => onChange("stagePreference", value)}
-        >
-          <SelectTrigger id="stagePreference">
-            <SelectValue placeholder="Select preferred stage" />
-          </SelectTrigger>
-          <SelectContent>
-            {stageOptions.map((stage) => (
-              <SelectItem key={stage} value={stage.toLowerCase()}>
-                {stage}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {stageOptions.map((stage) => (
+            <div
+              key={stage}
+              onClick={() => onChange("stagePreference", stage.toLowerCase())}
+              className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                thesis.stagePreference === stage.toLowerCase()
+                  ? "bg-primary/10 border-primary"
+                  : "bg-background hover:bg-accent"
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                thesis.stagePreference === stage.toLowerCase()
+                  ? "border-4 border-primary"
+                  : "border border-input"
+              }`} />
+              <span className="text-sm">{stage}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="postInvestmentSuccess">Key Success Metric</Label>
-        <Select
-          value={thesis.postInvestmentSuccess || ""}
-          onValueChange={(value) => onChange("postInvestmentSuccess", value)}
-        >
-          <SelectTrigger id="postInvestmentSuccess">
-            <SelectValue placeholder="Select primary success metric" />
-          </SelectTrigger>
-          <SelectContent>
-            {successMetricOptions.map((metric) => (
-              <SelectItem key={metric} value={metric.toLowerCase()}>
-                {metric}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          {successMetricOptions.map((metric) => (
+            <div
+              key={metric}
+              onClick={() => onChange("postInvestmentSuccess", metric.toLowerCase())}
+              className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                thesis.postInvestmentSuccess === metric.toLowerCase()
+                  ? "bg-primary/10 border-primary"
+                  : "bg-background hover:bg-accent"
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                thesis.postInvestmentSuccess === metric.toLowerCase()
+                  ? "border-4 border-primary"
+                  : "border border-input"
+              }`} />
+              <span className="text-sm">{metric}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -208,6 +329,7 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             max={100}
             step={1}
             onValueChange={(value) => onChange("riskTolerance", value[0])}
+            className="my-4"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Conservative</span>
@@ -227,6 +349,7 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             max={100}
             step={1}
             onValueChange={(value) => onChange("teamImportance", value[0])}
+            className="my-4"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Less critical</span>
@@ -246,6 +369,7 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
             max={100}
             step={1}
             onValueChange={(value) => onChange("marketSizePreference", value[0])}
+            className="my-4"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Niche markets</span>
@@ -255,10 +379,10 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
       </div>
 
       <div className="flex items-center space-x-2 pt-2">
-        <Checkbox 
+        <Switch 
           id="requiresRevenue" 
           checked={thesis.requiresRevenue}
-          onCheckedChange={(checked) => onChange("requiresRevenue", checked)}
+          onCheckedChange={(checked) => onChange("requiresRevenue", checked === true)}
         />
         <Label htmlFor="requiresRevenue">Must have revenue</Label>
       </div>
