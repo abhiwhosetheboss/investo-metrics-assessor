@@ -34,10 +34,6 @@ const industryOptions = [
   "Gaming", "Mobile", "Clean Tech", "Biotech", "AgTech"
 ];
 
-const stageOptions = [
-  "Pre-seed", "Seed", "Series A", "Series B", "Series C+", "Growth", "Any"
-];
-
 const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
   const [industryInput, setIndustryInput] = useState("");
   const [activeTab, setActiveTab] = useState("popular");
@@ -120,7 +116,7 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
                 value={industryInput}
                 onChange={(e) => setIndustryInput(e.target.value)}
                 className="flex-1"
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     handleIndustryAdd();
@@ -210,26 +206,13 @@ const InvestorThesis = ({ thesis, onChange }: InvestorThesisProps) => {
 
       <div className="space-y-2">
         <Label htmlFor="stagePreference">Preferred Investment Stage</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {stageOptions.map((stage) => (
-            <div
-              key={stage}
-              onClick={() => onChange("stagePreference", stage.toLowerCase())}
-              className={`flex items-center gap-2 p-2 rounded-md border cursor-pointer transition-colors ${
-                thesis.stagePreference === stage.toLowerCase()
-                  ? "bg-primary/10 border-primary"
-                  : "bg-background hover:bg-accent"
-              }`}
-            >
-              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
-                thesis.stagePreference === stage.toLowerCase()
-                  ? "border-4 border-primary"
-                  : "border border-input"
-              }`} />
-              <span className="text-sm">{stage}</span>
-            </div>
-          ))}
-        </div>
+        <Input
+          id="stagePreference"
+          placeholder="e.g. Seed, Series A, Growth"
+          value={thesis.stagePreference}
+          onChange={(e) => onChange("stagePreference", e.target.value)}
+        />
+        <p className="text-xs text-muted-foreground">Enter your preferred investment stage</p>
       </div>
 
       <div className="space-y-2">

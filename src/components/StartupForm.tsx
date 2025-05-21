@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FormSection from "./FormSection";
@@ -17,7 +16,6 @@ import {
   BarChart4, 
   Users, 
   LineChart, 
-  UserCog, 
   Building2, 
   DollarSign, 
   Target, 
@@ -40,17 +38,7 @@ interface StartupFormData {
   marketValidation: string;
   targetMarketSize: string;
   
-  // Founder-Market Fit
-  founderExperience: string;
-  educationBackground: string;
-  previousStartups: string;
-  domainExpertise: number;
-  
-  // Founder Capabilities
-  technicalSkills: number;
-  businessSkills: number;
-  resilience: number;
-  adaptability: number;
+  // Removed types for the removed tabs
   
   // Team Composition
   teamSize: string;
@@ -113,14 +101,6 @@ const defaultFormData: StartupFormData = {
   customerFeedback: "",
   marketValidation: "",
   targetMarketSize: "",
-  founderExperience: "",
-  educationBackground: "",
-  previousStartups: "",
-  domainExpertise: 50,
-  technicalSkills: 50,
-  businessSkills: 50,
-  resilience: 50,
-  adaptability: 50,
   teamSize: "",
   teamExperience: "",
   teamDynamics: "",
@@ -381,147 +361,12 @@ const StartupForm = ({ onSubmit }: StartupFormProps) => {
             </div>
           </FormSection>
 
-          {/* Founder-Market Fit */}
-          <FormSection 
-            title="Founder-Market Fit" 
-            description="Experience and background relevant to your market"
-            icon={<UserCog className="h-5 w-5 text-primary" />}
-            index={2}
-          >
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="founderExperience">Relevant Experience</Label>
-                <Textarea
-                  id="founderExperience"
-                  name="founderExperience"
-                  value={formData.founderExperience}
-                  onChange={handleInputChange}
-                  placeholder="Describe relevant experience in this industry"
-                  className="min-h-[80px]"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="educationBackground">Education Background</Label>
-                <Textarea
-                  id="educationBackground"
-                  name="educationBackground"
-                  value={formData.educationBackground}
-                  onChange={handleInputChange}
-                  placeholder="Relevant education and certifications"
-                  className="min-h-[80px]"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="previousStartups">Previous Startups</Label>
-                <Textarea
-                  id="previousStartups"
-                  name="previousStartups"
-                  value={formData.previousStartups}
-                  onChange={handleInputChange}
-                  placeholder="List previous startups and outcomes"
-                  className="min-h-[80px]"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="domainExpertise">Domain Expertise</Label>
-                  <span className="text-sm text-muted-foreground">{formData.domainExpertise}/100</span>
-                </div>
-                <Slider
-                  id="domainExpertise"
-                  value={[formData.domainExpertise]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => handleSliderChange("domainExpertise", value)}
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Novice</span>
-                  <span>Expert</span>
-                </div>
-              </div>
-            </div>
-          </FormSection>
-
-          {/* Founder Capabilities */}
-          <FormSection 
-            title="Founder Capabilities" 
-            description="Assessment of founder skills and attributes"
-            icon={<UserCog className="h-5 w-5 text-primary" />}
-            index={3}
-          >
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="technicalSkills">Technical Skills</Label>
-                  <span className="text-sm text-muted-foreground">{formData.technicalSkills}/100</span>
-                </div>
-                <Slider
-                  id="technicalSkills"
-                  value={[formData.technicalSkills]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => handleSliderChange("technicalSkills", value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="businessSkills">Business Skills</Label>
-                  <span className="text-sm text-muted-foreground">{formData.businessSkills}/100</span>
-                </div>
-                <Slider
-                  id="businessSkills"
-                  value={[formData.businessSkills]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => handleSliderChange("businessSkills", value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="resilience">Resilience</Label>
-                  <span className="text-sm text-muted-foreground">{formData.resilience}/100</span>
-                </div>
-                <Slider
-                  id="resilience"
-                  value={[formData.resilience]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => handleSliderChange("resilience", value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label htmlFor="adaptability">Adaptability</Label>
-                  <span className="text-sm text-muted-foreground">{formData.adaptability}/100</span>
-                </div>
-                <Slider
-                  id="adaptability"
-                  value={[formData.adaptability]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) => handleSliderChange("adaptability", value)}
-                />
-              </div>
-            </div>
-          </FormSection>
-
-          {/* Team Composition */}
+          {/* Team Composition - KEPT */}
           <FormSection 
             title="Team Composition" 
             description="Information about your team"
             icon={<Users className="h-5 w-5 text-primary" />}
-            index={4}
+            index={2}
           >
             <div className="space-y-6">
               <div className="space-y-2">
@@ -577,7 +422,7 @@ const StartupForm = ({ onSubmit }: StartupFormProps) => {
             title="Financials" 
             description="Key financial metrics and projections"
             icon={<DollarSign className="h-5 w-5 text-primary" />}
-            index={5}
+            index={3}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
@@ -653,45 +498,31 @@ const StartupForm = ({ onSubmit }: StartupFormProps) => {
             title="Exit Strategy" 
             description="Your vision for eventually exiting the company"
             icon={<Target className="h-5 w-5 text-primary" />}
-            index={6}
+            index={4}
           >
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="expectedExitTime">Expected Exit Timeline</Label>
-                <Select
+                <Input
+                  id="expectedExitTime"
+                  name="expectedExitTime"
                   value={formData.expectedExitTime}
-                  onValueChange={(value) => handleSelectChange("expectedExitTime", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select timeline" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {exitTimeOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={handleInputChange}
+                  placeholder="e.g. 3-5 years"
+                />
+                <p className="text-xs text-muted-foreground">Examples: 1-2 years, 3-5 years, 5-7 years, 7-10 years, 10+ years</p>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="exitType">Exit Type</Label>
-                <Select
+                <Input
+                  id="exitType"
+                  name="exitType"
                   value={formData.exitType}
-                  onValueChange={(value) => handleSelectChange("exitType", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select exit type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {exitTypeOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={handleInputChange}
+                  placeholder="e.g. acquisition, ipo, merger"
+                />
+                <p className="text-xs text-muted-foreground">Examples: acquisition, ipo, merger, unknown</p>
               </div>
               
               <div className="space-y-2">
@@ -712,45 +543,31 @@ const StartupForm = ({ onSubmit }: StartupFormProps) => {
             title="Emotional Indicators" 
             description="Subjective feelings about the company"
             icon={<HeartPulse className="h-5 w-5 text-primary" />}
-            index={7}
+            index={5}
           >
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="investorSentiment">Investor Sentiment</Label>
-                <Select
+                <Input
+                  id="investorSentiment"
+                  name="investorSentiment"
                   value={formData.investorSentiment}
-                  onValueChange={(value) => handleSelectChange("investorSentiment", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select sentiment" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sentimentOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={handleInputChange}
+                  placeholder="e.g. positive, negative, neutral"
+                />
+                <p className="text-xs text-muted-foreground">Examples: very negative, negative, neutral, positive, very positive</p>
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="marketBuzz">Market Buzz</Label>
-                <Select
+                <Input
+                  id="marketBuzz"
+                  name="marketBuzz"
                   value={formData.marketBuzz}
-                  onValueChange={(value) => handleSelectChange("marketBuzz", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select buzz level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {buzzOptions.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={handleInputChange}
+                  placeholder="e.g. low, moderate, high"
+                />
+                <p className="text-xs text-muted-foreground">Examples: none, low, moderate, high, viral</p>
               </div>
               
               <div className="space-y-2">
