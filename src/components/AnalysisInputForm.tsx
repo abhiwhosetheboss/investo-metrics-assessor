@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -9,8 +10,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
@@ -43,14 +42,10 @@ type FormValues = {
   ebitda: string;
   unitEconomics: string;
   
-  // Team & Founder
+  // Team & Founder - removed the fields you specified
   foundersEducation: string;
   foundersHistory: string;
-  founderMarketFit: number;
-  founderTrustRating: number;
-  hungerLevel: number;
   teamSize: string;
-  teamCapability: number;
   
   // Operations
   supplyChain: string;
@@ -77,14 +72,6 @@ const industryOptions = [
   "Gaming", "Mobile", "Clean Tech", "Biotech", "AgTech"
 ];
 
-const stageOptions = [
-  "Pre-seed", "Seed", "Series A", "Series B", "Series C+", "Growth", "Any"
-];
-
-const successMetricOptions = [
-  "Revenue Growth", "User Acquisition", "Market Share", "Profitability", "Exit Value"
-];
-
 const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { toast } = useToast();
@@ -109,11 +96,8 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
       unitEconomics: "",
       foundersEducation: "",
       foundersHistory: "",
-      founderMarketFit: 5,
-      founderTrustRating: 5,
-      hungerLevel: 5,
+      // Removed the fields you specified
       teamSize: "",
-      teamCapability: 5,
       supplyChain: "",
       customerCount: "",
       investmentThesis: "",
@@ -178,17 +162,11 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
         socialMediaEngagement: data.socialMediaEngagement,
         foundersEducation: data.foundersEducation,
         foundersHistory: data.foundersHistory,
-        founderMarketFit: data.founderMarketFit,
-        founderTrustRating: data.founderTrustRating,
-        hungerLevel: data.hungerLevel,
-        teamCapability: data.teamCapability,
-        supplyChain: data.supplyChain,
-        customerCount: data.customerCount,
-        domainExpertise: data.founderMarketFit * 10,
-        keyRolesFilled: data.teamCapability > 7,
-        technicalSkills: data.teamCapability * 10,
-        businessSkills: data.teamCapability * 10,
-        passionLevel: data.hungerLevel * 10,
+        // Removed the fields you specified
+        keyRolesFilled: false,
+        technicalSkills: 0,
+        businessSkills: 0,
+        passionLevel: 0,
         investorThesis: {
           investmentThesis: data.investmentThesis,
           preferredIndustries: data.preferredIndustries,
@@ -578,84 +556,6 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
 
               <FormField
                 control={form.control}
-                name="founderMarketFit"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Founder-Market Fit</FormLabel>
-                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
-                    </div>
-                    <FormControl>
-                      <Slider
-                        value={[field.value]}
-                        min={1}
-                        max={10}
-                        step={1}
-                        onValueChange={(vals) => field.onChange(vals[0])}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      How well do the founders understand this market?
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="founderTrustRating"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Founder Trust & Potential</FormLabel>
-                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
-                    </div>
-                    <FormControl>
-                      <Slider
-                        value={[field.value]}
-                        min={1}
-                        max={10}
-                        step={1}
-                        onValueChange={(vals) => field.onChange(vals[0])}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Self-assessment of trustworthiness and potential
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="hungerLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Founder Hunger Level</FormLabel>
-                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
-                    </div>
-                    <FormControl>
-                      <Slider
-                        value={[field.value]}
-                        min={1}
-                        max={10}
-                        step={1}
-                        onValueChange={(vals) => field.onChange(vals[0])}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      How motivated and committed are the founders?
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
                 name="teamSize"
                 render={({ field }) => (
                   <FormItem>
@@ -665,32 +565,6 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                     </FormControl>
                     <FormDescription>
                       Number of team members
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="teamCapability"
-                render={({ field }) => (
-                  <FormItem>
-                    <div className="flex justify-between">
-                      <FormLabel>Team Capability</FormLabel>
-                      <span className="text-sm text-muted-foreground">{field.value}/10</span>
-                    </div>
-                    <FormControl>
-                      <Slider
-                        value={[field.value]}
-                        min={1}
-                        max={10}
-                        step={1}
-                        onValueChange={(vals) => field.onChange(vals[0])}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Overall capability of your team
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -799,23 +673,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                     <FormItem>
                       <FormLabel>Minimum Revenue Expectation</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select minimum revenue" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0">Pre-revenue is fine</SelectItem>
-                            <SelectItem value="10000">$10K+ ARR</SelectItem>
-                            <SelectItem value="50000">$50K+ ARR</SelectItem>
-                            <SelectItem value="100000">$100K+ ARR</SelectItem>
-                            <SelectItem value="500000">$500K+ ARR</SelectItem>
-                            <SelectItem value="1000000">$1M+ ARR</SelectItem>
-                            <SelectItem value="5000000">$5M+ ARR</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input placeholder="e.g. $10K ARR" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -829,24 +687,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                     <FormItem>
                       <FormLabel>Maximum Valuation</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select maximum valuation" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1000000">Up to $1M</SelectItem>
-                            <SelectItem value="3000000">Up to $3M</SelectItem>
-                            <SelectItem value="5000000">Up to $5M</SelectItem>
-                            <SelectItem value="10000000">Up to $10M</SelectItem>
-                            <SelectItem value="20000000">Up to $20M</SelectItem>
-                            <SelectItem value="50000000">Up to $50M</SelectItem>
-                            <SelectItem value="100000000">Up to $100M</SelectItem>
-                            <SelectItem value="no-limit">No limit</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input placeholder="e.g. $10M" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -879,21 +720,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                     <FormItem>
                       <FormLabel>Expected Valuation Increase</FormLabel>
                       <FormControl>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select expected increase" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="2x">2x</SelectItem>
-                            <SelectItem value="3x">3x</SelectItem>
-                            <SelectItem value="5x">5x</SelectItem>
-                            <SelectItem value="10x">10x</SelectItem>
-                            <SelectItem value="100x">100x or more</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Input placeholder="e.g. 3x, 5x, 10x" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -908,21 +735,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                   <FormItem>
                     <FormLabel>Preferred Investment Stage</FormLabel>
                     <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select preferred stage" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {stageOptions.map((stage) => (
-                            <SelectItem key={stage} value={stage.toLowerCase()}>
-                              {stage}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="e.g. Seed, Series A, Growth" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -936,21 +749,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                   <FormItem>
                     <FormLabel>Key Success Metric</FormLabel>
                     <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select primary success metric" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {successMetricOptions.map((metric) => (
-                            <SelectItem key={metric} value={metric.toLowerCase()}>
-                              {metric}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="e.g. Revenue Growth, Market Share" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
