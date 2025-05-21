@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import AnalysisInputForm from "@/components/AnalysisInputForm";
@@ -38,6 +37,8 @@ export default function Analyze() {
 
   const handleAnalysis = async (formData: any) => {
     try {
+      console.log("handleAnalysis called with data:", formData);
+      
       // Check if model is trained before analysis
       if (!isModelTrained) {
         toast({
@@ -57,6 +58,7 @@ export default function Analyze() {
       });
       
       const result = await analyzeStartupWithAI(formData, modelId);
+      console.log("Analysis result:", result);
       
       toast({
         title: "Analysis Complete",
@@ -66,9 +68,10 @@ export default function Analyze() {
       // If the analysis was successful, navigate to the result
       if (result && result.id) {
         navigate(`/analysis/${result.id}`);
+        return result;
+      } else {
+        throw new Error("Analysis result missing ID");
       }
-      
-      return result;
     } catch (error: any) {
       console.error("Analysis error:", error);
       toast({

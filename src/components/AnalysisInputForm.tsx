@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider"; // Added missing Slider import
+import { Slider } from "@/components/ui/slider"; 
 import { analyzeStartupWithAI, getTrainingStatus } from "@/utils/analysisUtils";
 import { Brain, Loader2, Building2, Users, BookOpen, Briefcase, LineChart, DollarSign, ShoppingCart, Heart, ClipboardList } from "lucide-react";
 
@@ -127,15 +127,7 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      const trainStatus = getTrainingStatus();
-      if (!trainStatus.isModelTrained) {
-        toast({
-          title: "Error",
-          description: "Please train the AI model before running analysis",
-          variant: "destructive"
-        });
-        return;
-      }
+      console.log("Form submitted with data:", data);
       
       setIsAnalyzing(true);
       
@@ -162,7 +154,6 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
         socialMediaEngagement: data.socialMediaEngagement,
         foundersEducation: data.foundersEducation,
         foundersHistory: data.foundersHistory,
-        // Removed the fields you specified
         keyRolesFilled: false,
         technicalSkills: 0,
         businessSkills: 0,
@@ -188,6 +179,9 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
       let result;
       if (onAnalyze) {
         result = await onAnalyze(analysisData);
+        if (!result) {
+          throw new Error("Analysis failed to return a result");
+        }
       } else {
         result = await analyzeStartupWithAI(analysisData, modelId);
       }
@@ -197,9 +191,14 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
         description: "Your startup analysis is ready to view."
       });
       
-      localStorage.setItem(`analysis-${result.id}`, JSON.stringify(result));
+      console.log("Analysis result:", result);
       
-      navigate(`/analysis/${result.id}`);
+      if (result && result.id) {
+        localStorage.setItem(`analysis-${result.id}`, JSON.stringify(result));
+        navigate(`/analysis/${result.id}`);
+      } else {
+        throw new Error("Analysis returned without a valid ID");
+      }
     } catch (error) {
       console.error("Analysis error:", error);
       toast({
