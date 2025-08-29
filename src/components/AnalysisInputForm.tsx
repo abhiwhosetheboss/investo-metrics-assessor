@@ -646,23 +646,43 @@ const AnalysisInputForm = ({ modelId, onAnalyze }: AnalysisInputFormProps) => {
                 )}
               />
 
-              <div className="space-y-2">
-                <FormLabel>Preferred Industries</FormLabel>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
-                  {industryOptions.map((industry) => (
-                    <div key={industry} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`industry-${industry}`}
-                        checked={form.getValues("preferredIndustries")?.includes(industry)}
-                        onCheckedChange={() => handleIndustryToggle(industry)}
-                      />
-                      <Label htmlFor={`industry-${industry}`} className="text-sm font-normal">
-                        {industry}
-                      </Label>
+              <FormField
+                control={form.control}
+                name="preferredIndustries"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preferred Industries</FormLabel>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                      {industryOptions.map((industry) => (
+                        <div key={industry} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`industry-${industry}`}
+                            checked={field.value?.includes(industry) || false}
+                            onCheckedChange={(checked) => {
+                              const currentIndustries = field.value || [];
+                              if (checked) {
+                                field.onChange([...currentIndustries, industry]);
+                              } else {
+                                field.onChange(currentIndustries.filter(i => i !== industry));
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`industry-${industry}`} 
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            {industry}
+                          </Label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <FormDescription>
+                      Select the industries you prefer to invest in
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
