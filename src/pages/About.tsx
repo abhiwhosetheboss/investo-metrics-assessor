@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, BarChart4, Scale, LineChart, Target, Users, Heart, Mail, Github, Linkedin } from "lucide-react";
+import { BrainCircuit, BarChart4, Scale, LineChart, Target, Users, Heart, Mail } from "lucide-react";
 
 const About = () => {
   return (
@@ -38,19 +38,14 @@ const About = () => {
                   Hello :) I'm <span className="font-semibold text-primary">Abhinav</span>, an 18 year old trying to figure out a way to make AI accessible to Angels, Startups and Investors to better quantize the numbers and financials of a Company. Feel free to reach out anytime for any suggestions and/or queries
                 </p>
               </div>
-              <div className="flex justify-center space-x-4 pt-4">
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Contact</span>
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                  <Github className="w-4 h-4" />
-                  <span>GitHub</span>
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center space-x-2">
-                  <Linkedin className="w-4 h-4" />
-                  <span>LinkedIn</span>
-                </Button>
+              <div className="flex justify-center items-center space-x-2 pt-4">
+                <Mail className="w-5 h-5 text-primary" />
+                <a 
+                  href="mailto:trabhinav69@gmail.com"
+                  className="text-primary hover:text-accent transition-colors font-medium"
+                >
+                  trabhinav69@gmail.com
+                </a>
               </div>
             </CardContent>
           </Card>
