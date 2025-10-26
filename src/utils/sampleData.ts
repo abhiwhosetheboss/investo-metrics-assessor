@@ -5,6 +5,7 @@ export const sampleData: AnalysisResult[] = [
   {
     id: "scrub-daddy",
     startupName: "Scrub Daddy",
+    industry: "Consumer Goods",
     investibilityScore: 92,
     overallRisk: 28,
     businessModel: "b2c",
@@ -89,94 +90,96 @@ export const sampleData: AnalysisResult[] = [
     createdAt: "2023-12-05T14:30:00Z"
   },
   {
-    id: "peeschute-snitch",
-    startupName: "PeeSafe Snitch",
-    investibilityScore: 68,
-    overallRisk: 48,
+    id: "reddit-ipo",
+    startupName: "Reddit",
+    industry: "Social Media",
+    investibilityScore: 85,
+    overallRisk: 35,
     businessModel: "b2c",
-    founderTrustRating: 7,
-    pmfScore: 72,
-    growthExpected: "40% YoY",
+    founderTrustRating: 9,
+    pmfScore: 88,
+    growthExpected: "65% YoY",
     riskFactors: [
       {
         name: "Market Risk",
-        score: 40,
-        description: "Addressing a real need, but consumer adoption of innovations in this space can be slow."
+        score: 30,
+        description: "Established platform with strong community engagement, but facing competition from newer social platforms."
       },
       {
         name: "Team Risk",
-        score: 35,
-        description: "Experienced founders with complementary skills but limited track record in manufacturing."
+        score: 25,
+        description: "Experienced leadership team with proven ability to scale and monetize user-generated content platforms."
       },
       {
         name: "Financial Risk",
-        score: 55,
-        description: "Higher financial risk due to manufacturing costs and competitive pricing needed for market entry."
+        score: 40,
+        description: "Solid revenue growth through advertising and premium subscriptions, but profitability remains a challenge."
       },
       {
         name: "Technology Risk",
-        score: 45,
-        description: "Innovative design but with concerns about durability and consistent quality."
+        score: 35,
+        description: "Robust platform infrastructure with proven ability to handle massive traffic, though moderation at scale remains challenging."
       }
     ],
     strengths: [
       {
-        text: "Solves a universal and persistent hygiene problem",
+        text: "430+ million monthly active users across thousands of communities",
+        impact: "critical"
+      },
+      {
+        text: "Strong network effects with deeply engaged user base averaging 30+ minutes per visit",
         impact: "high"
       },
       {
-        text: "Part of established brand with existing distribution channels",
+        text: "Diversified revenue streams including advertising, Reddit Premium, and avatar marketplace",
         impact: "high"
-      },
-      {
-        text: "Potential for recurring revenue through disposable components",
-        impact: "medium"
       }
     ],
     weaknesses: [
       {
-        text: "Cultural taboos and reluctance to discuss the problem openly",
+        text: "Reliance on advertising revenue (98% of total) creates vulnerability to economic downturns",
         impact: "high"
       },
       {
-        text: "Price point might be high for mass market adoption",
+        text: "Content moderation challenges and potential regulatory scrutiny",
         impact: "medium"
       },
       {
-        text: "Competing with established behaviors and simpler alternatives",
+        text: "User privacy concerns and resistance to increased monetization",
         impact: "medium"
       }
     ],
     suggestions: [
       {
-        title: "Educational Marketing Campaign",
-        description: "Develop marketing that normalizes discussion around the problem and educates consumers on the health benefits.",
+        title: "Accelerate Premium Subscriptions",
+        description: "Expand Reddit Premium features and introduce tiered subscription models to reduce advertising dependency.",
         priority: "high"
       },
       {
-        title: "Strategic Pricing Tiers",
-        description: "Create different pricing tiers to capture various market segments, with premium and economy options.",
-        priority: "medium"
+        title: "AI-Powered Content Discovery",
+        description: "Leverage machine learning to improve content recommendation and user retention while maintaining authentic community feel.",
+        priority: "high"
       },
       {
-        title: "Institutional Partnerships",
-        description: "Partner with travel companies, hospitals, and public facility managers to drive B2B adoption alongside consumer sales.",
+        title: "International Expansion",
+        description: "Invest in localization and regional content moderation to capture growth in non-US markets.",
         priority: "medium"
       }
     ],
     categories: [
-      { name: "Product-Market Fit", value: 72 },
-      { name: "Founder-Market Fit", value: 75 },
-      { name: "Team Composition", value: 70 },
-      { name: "Financials", value: 65 },
-      { name: "Exit Strategy", value: 60 },
-      { name: "Intangibles", value: 75 }
+      { name: "Product-Market Fit", value: 88 },
+      { name: "Founder-Market Fit", value: 90 },
+      { name: "Team Composition", value: 85 },
+      { name: "Financials", value: 80 },
+      { name: "Exit Strategy", value: 85 },
+      { name: "Intangibles", value: 85 }
     ],
-    createdAt: "2023-09-18T10:45:00Z"
+    createdAt: "2024-03-21T10:00:00Z"
   },
   {
     id: "moderate",
     startupName: "Moderate",
+    industry: "AI/SaaS",
     investibilityScore: 78,
     overallRisk: 38,
     businessModel: "b2b",
@@ -263,6 +266,7 @@ export const sampleData: AnalysisResult[] = [
   {
     id: "bombs-away",
     startupName: "Bombs Away Bath",
+    industry: "Beauty & Wellness",
     investibilityScore: 82,
     overallRisk: 32,
     businessModel: "b2c",
