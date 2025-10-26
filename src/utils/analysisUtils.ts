@@ -30,7 +30,7 @@ export interface AnalysisResult {
     value: number;
     description?: string;
   }[];
-  createdAt: string;
+  createdAt?: string;
   aiModel?: {
     name: string;
     provider: string;

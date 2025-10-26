@@ -86,8 +86,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 85 },
       { name: "Exit Strategy", value: 90 },
       { name: "Intangibles", value: 95 }
-    ],
-    createdAt: "2023-12-05T14:30:00Z"
+    ]
   },
   {
     id: "reddit-ipo",
@@ -173,8 +172,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 80 },
       { name: "Exit Strategy", value: 85 },
       { name: "Intangibles", value: 85 }
-    ],
-    createdAt: "2024-03-21T10:00:00Z"
+    ]
   },
   {
     id: "moderate",
@@ -260,8 +258,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 70 },
       { name: "Exit Strategy", value: 75 },
       { name: "Intangibles", value: 80 }
-    ],
-    createdAt: "2023-11-22T09:15:00Z"
+    ]
   },
   {
     id: "bombs-away",
@@ -347,8 +344,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 80 },
       { name: "Exit Strategy", value: 75 },
       { name: "Intangibles", value: 85 }
-    ],
-    createdAt: "2023-10-30T15:45:00Z"
+    ]
   },
   {
     id: "startup-1",
@@ -433,8 +429,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 60 },
       { name: "Exit Strategy", value: 70 },
       { name: "Intangibles", value: 85 }
-    ],
-    createdAt: "2023-10-15T14:30:00Z"
+    ]
   },
   {
     id: "startup-2",
@@ -519,8 +514,7 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 50 },
       { name: "Exit Strategy", value: 70 },
       { name: "Intangibles", value: 80 }
-    ],
-    createdAt: "2023-09-20T10:15:00Z"
+    ]
   },
   {
     id: "startup-3",
@@ -605,8 +599,179 @@ export const sampleData: AnalysisResult[] = [
       { name: "Financials", value: 75 },
       { name: "Exit Strategy", value: 80 },
       { name: "Intangibles", value: 75 }
+    ]
+  },
+  {
+    id: "failed-metaverse",
+    startupName: "MetaverseNow",
+    industry: "Virtual Reality",
+    investibilityScore: 32,
+    overallRisk: 78,
+    businessModel: "b2c",
+    founderTrustRating: 4,
+    pmfScore: 35,
+    growthExpected: "10% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 80,
+        description: "Entering oversaturated metaverse market with declining consumer interest and no clear differentiation."
+      },
+      {
+        name: "Team Risk",
+        score: 75,
+        description: "Inexperienced founding team with no prior exits and limited domain expertise in VR/AR."
+      },
+      {
+        name: "Financial Risk",
+        score: 85,
+        description: "Burning through cash rapidly with minimal revenue and unrealistic financial projections."
+      },
+      {
+        name: "Technology Risk",
+        score: 70,
+        description: "Technology relies heavily on third-party platforms with no proprietary innovation."
+      }
     ],
-    createdAt: "2023-11-05T09:45:00Z"
+    strengths: [
+      {
+        text: "Passionate founding team with commitment to the vision",
+        impact: "low"
+      },
+      {
+        text: "Some early user engagement on social media",
+        impact: "low"
+      },
+      {
+        text: "Partnership discussions with one small gaming studio",
+        impact: "medium"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "No clear product-market fit with declining user retention",
+        impact: "critical"
+      },
+      {
+        text: "Burning $150K/month with only $5K MRR",
+        impact: "critical"
+      },
+      {
+        text: "Founders have equity disputes and unclear roles",
+        impact: "high"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Pivot or Shutdown Decision",
+        description: "Critically evaluate whether a pivot is viable or if resources should be preserved by shutting down operations.",
+        priority: "high"
+      },
+      {
+        title: "Immediate Cost Reduction",
+        description: "Cut burn rate by at least 70% immediately to extend runway while exploring pivot options.",
+        priority: "high"
+      },
+      {
+        title: "Clarify Team Structure",
+        description: "Address founder equity disputes and establish clear roles with written agreements.",
+        priority: "high"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 35 },
+      { name: "Founder-Market Fit", value: 30 },
+      { name: "Team Composition", value: 40 },
+      { name: "Financials", value: 20 },
+      { name: "Exit Strategy", value: 25 },
+      { name: "Intangibles", value: 35 }
+    ]
+  },
+  {
+    id: "struggling-foodtech",
+    startupName: "FreshBite Delivery",
+    industry: "Food Tech",
+    investibilityScore: 41,
+    overallRisk: 72,
+    businessModel: "b2c",
+    founderTrustRating: 5,
+    pmfScore: 48,
+    growthExpected: "5% YoY",
+    riskFactors: [
+      {
+        name: "Market Risk",
+        score: 75,
+        description: "Highly competitive market dominated by well-funded players with established logistics networks."
+      },
+      {
+        name: "Team Risk",
+        score: 65,
+        description: "Team lacks operations expertise critical for food delivery logistics and has high turnover."
+      },
+      {
+        name: "Financial Risk",
+        score: 80,
+        description: "Negative unit economics with customer acquisition costs exceeding lifetime value."
+      },
+      {
+        name: "Technology Risk",
+        score: 60,
+        description: "Technology platform is functional but lacks features of major competitors."
+      }
+    ],
+    strengths: [
+      {
+        text: "Focus on healthy meal options appeals to health-conscious consumers",
+        impact: "medium"
+      },
+      {
+        text: "Partnership with 50+ local restaurants in target area",
+        impact: "medium"
+      },
+      {
+        text: "Some positive customer reviews for food quality",
+        impact: "low"
+      }
+    ],
+    weaknesses: [
+      {
+        text: "Customer acquisition cost is $120 while LTV is only $85",
+        impact: "critical"
+      },
+      {
+        text: "Operating in only one city with no viable expansion plan",
+        impact: "high"
+      },
+      {
+        text: "75% customer churn rate after first order due to delivery delays",
+        impact: "critical"
+      }
+    ],
+    suggestions: [
+      {
+        title: "Fix Unit Economics Immediately",
+        description: "Address fundamental profitability issues by either increasing order values, reducing delivery costs, or adjusting pricing.",
+        priority: "high"
+      },
+      {
+        title: "Improve Delivery Operations",
+        description: "Hire operations expert to fix delivery delays and reduce churn from current 75% to at least 40%.",
+        priority: "high"
+      },
+      {
+        title: "Narrow Focus to Niche",
+        description: "Instead of competing broadly, focus exclusively on premium healthy meal delivery for corporate lunch programs.",
+        priority: "medium"
+      }
+    ],
+    categories: [
+      { name: "Product-Market Fit", value: 48 },
+      { name: "Founder-Market Fit", value: 40 },
+      { name: "Team Composition", value: 35 },
+      { name: "Financials", value: 25 },
+      { name: "Exit Strategy", value: 30 },
+      { name: "Intangibles", value: 45 }
+    ]
   }
 ];
 
