@@ -157,9 +157,6 @@ export default function Dashboard() {
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-muted-foreground text-sm">
-                      Created {formatDistanceToNow(new Date(analysis.createdAt), { addSuffix: true })}
-                    </p>
                     {analysis.businessModel && (
                       <Badge variant="outline" className="mt-2">
                         {analysis.businessModel.toUpperCase()}
@@ -240,9 +237,6 @@ export default function Dashboard() {
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0">
-                      <p className="text-muted-foreground text-sm">
-                        Created {formatDistanceToNow(new Date(analysis.createdAt), { addSuffix: true })}
-                      </p>
                       {analysis.businessModel && (
                         <Badge variant="outline" className="mt-2">
                           {analysis.businessModel.toUpperCase()}
