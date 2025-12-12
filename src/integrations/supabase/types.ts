@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stock_analyses: {
+        Row: {
+          business_model: string | null
+          categories: Json | null
+          company_name: string
+          created_at: string
+          founder_trust_rating: number | null
+          growth_expected: string | null
+          id: string
+          industry: string | null
+          investibility_score: number
+          last_updated: string
+          market_data: Json | null
+          overall_risk: number
+          pmf_score: number | null
+          risk_factors: Json | null
+          strengths: Json | null
+          suggestions: Json | null
+          symbol: string
+          weaknesses: Json | null
+        }
+        Insert: {
+          business_model?: string | null
+          categories?: Json | null
+          company_name: string
+          created_at?: string
+          founder_trust_rating?: number | null
+          growth_expected?: string | null
+          id?: string
+          industry?: string | null
+          investibility_score?: number
+          last_updated?: string
+          market_data?: Json | null
+          overall_risk?: number
+          pmf_score?: number | null
+          risk_factors?: Json | null
+          strengths?: Json | null
+          suggestions?: Json | null
+          symbol: string
+          weaknesses?: Json | null
+        }
+        Update: {
+          business_model?: string | null
+          categories?: Json | null
+          company_name?: string
+          created_at?: string
+          founder_trust_rating?: number | null
+          growth_expected?: string | null
+          id?: string
+          industry?: string | null
+          investibility_score?: number
+          last_updated?: string
+          market_data?: Json | null
+          overall_risk?: number
+          pmf_score?: number | null
+          risk_factors?: Json | null
+          strengths?: Json | null
+          suggestions?: Json | null
+          symbol?: string
+          weaknesses?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

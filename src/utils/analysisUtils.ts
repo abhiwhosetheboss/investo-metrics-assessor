@@ -79,64 +79,114 @@ let trainingStatus = {
   includedMetrics: [] as string[]
 };
 
-// In a real application, this would make an API call to an AI model
-export const getAnalysisById = (id: string): Promise<AnalysisResult> => {
-  return new Promise((resolve) => {
-    // Simulate API delay
-    setTimeout(() => {
-      let result = sampleData.find(item => item.id === id) || generateMockAnalysis(id);
-      
-      // Add AI model information if one is selected
-      const storedModel = localStorage.getItem("selectedAIModel");
-      if (storedModel) {
-        const model = JSON.parse(storedModel);
-        result = {
-          ...result,
-          aiModel: {
-            name: model.name,
-            provider: model.provider
-          }
-        };
+// Fetch analysis from database first, then fall back to sample data
+export const getAnalysisById = async (id: string): Promise<AnalysisResult> => {
+  // Try to fetch from database first
+  try {
+    const { data, error } = await supabase
+      .from('stock_analyses')
+      .select('*')
+      .eq('symbol', id.toUpperCase())
+      .maybeSingle();
+
+    if (data && !error) {
+      return {
+        id: data.symbol.toLowerCase(),
+        startupName: `${data.company_name} (${data.symbol})`,
+        industry: data.industry || undefined,
+        investibilityScore: data.investibility_score,
+        overallRisk: data.overall_risk,
+        businessModel: data.business_model || undefined,
+        founderTrustRating: data.founder_trust_rating || undefined,
+        pmfScore: data.pmf_score || undefined,
+        growthExpected: data.growth_expected || undefined,
+        riskFactors: (data.risk_factors as any[]) || [],
+        strengths: (data.strengths as any[]) || [],
+        weaknesses: (data.weaknesses as any[]) || [],
+        suggestions: (data.suggestions as any[]) || [],
+        categories: (data.categories as any[]) || [],
+      };
+    }
+  } catch (err) {
+    console.log('Database fetch failed, using sample data:', err);
+  }
+
+  // Fall back to sample data
+  let result = sampleData.find(item => item.id === id) || generateMockAnalysis(id);
+  
+  // Add AI model information if one is selected
+  const storedModel = localStorage.getItem("selectedAIModel");
+  if (storedModel) {
+    const model = JSON.parse(storedModel);
+    result = {
+      ...result,
+      aiModel: {
+        name: model.name,
+        provider: model.provider
       }
-      
-      // Add post-investment metrics if those were included in training
-      const includedMetrics = localStorage.getItem("includedMetrics");
-      if (includedMetrics) {
-        const metrics = JSON.parse(includedMetrics);
-        
-        const postInvestmentMetrics: any = {};
-        
-        if (metrics.includes('growth')) {
-          postInvestmentMetrics.growthRate = `${Math.floor(30 + Math.random() * 70)}%`;
-        }
-        
-        if (metrics.includes('valuationIncrease')) {
-          const valIncrease = ['2x', '3x', '5x', '10x', '15x'];
-          postInvestmentMetrics.valuationIncrease = valIncrease[Math.floor(Math.random() * valIncrease.length)];
-        }
-        
-        if (metrics.includes('postInvestmentSuccess')) {
-          postInvestmentMetrics.successProbability = Math.floor(50 + Math.random() * 40);
-        }
-        
-        if (Object.keys(postInvestmentMetrics).length > 0) {
-          result.postInvestmentMetrics = postInvestmentMetrics;
-        }
-      }
-      
-      resolve(result);
-    }, 800);
-  });
+    };
+  }
+  
+  // Add post-investment metrics if those were included in training
+  const includedMetrics = localStorage.getItem("includedMetrics");
+  if (includedMetrics) {
+    const metrics = JSON.parse(includedMetrics);
+    
+    const postInvestmentMetrics: any = {};
+    
+    if (metrics.includes('growth')) {
+      postInvestmentMetrics.growthRate = `${Math.floor(30 + Math.random() * 70)}%`;
+    }
+    
+    if (metrics.includes('valuationIncrease')) {
+      const valIncrease = ['2x', '3x', '5x', '10x', '15x'];
+      postInvestmentMetrics.valuationIncrease = valIncrease[Math.floor(Math.random() * valIncrease.length)];
+    }
+    
+    if (metrics.includes('postInvestmentSuccess')) {
+      postInvestmentMetrics.successProbability = Math.floor(50 + Math.random() * 40);
+    }
+    
+    if (Object.keys(postInvestmentMetrics).length > 0) {
+      result.postInvestmentMetrics = postInvestmentMetrics;
+    }
+  }
+  
+  return result;
 };
 
-// Get all analyses (for dashboard)
-export const getAllAnalyses = (): Promise<AnalysisResult[]> => {
-  return new Promise((resolve) => {
-    // Simulate API delay
-    setTimeout(() => {
-      resolve(sampleData);
-    }, 800);
-  });
+// Get all analyses - fetch from database first, then fall back to sample data
+export const getAllAnalyses = async (): Promise<AnalysisResult[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('stock_analyses')
+      .select('*')
+      .order('investibility_score', { ascending: false });
+
+    if (data && data.length > 0 && !error) {
+      return data.map(stock => ({
+        id: stock.symbol.toLowerCase(),
+        startupName: `${stock.company_name} (${stock.symbol})`,
+        industry: stock.industry || undefined,
+        investibilityScore: stock.investibility_score,
+        overallRisk: stock.overall_risk,
+        businessModel: stock.business_model || undefined,
+        founderTrustRating: stock.founder_trust_rating || undefined,
+        pmfScore: stock.pmf_score || undefined,
+        growthExpected: stock.growth_expected || undefined,
+        riskFactors: (stock.risk_factors as any[]) || [],
+        strengths: (stock.strengths as any[]) || [],
+        weaknesses: (stock.weaknesses as any[]) || [],
+        suggestions: (stock.suggestions as any[]) || [],
+        categories: (stock.categories as any[]) || [],
+      }));
+    }
+  } catch (err) {
+    console.log('Database fetch failed, using sample data:', err);
+  }
+
+  // Fall back to sample data
+  return sampleData;
 };
 
 // Since we're removing save functionality as requested, we'll create mock functions 
