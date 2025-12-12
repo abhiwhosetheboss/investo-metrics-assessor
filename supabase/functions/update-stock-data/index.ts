@@ -74,7 +74,7 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
   const dividendYield = basicFinancials?.metric?.dividendYieldIndicatedAnnual || 0;
   const roe = basicFinancials?.metric?.roeTTM || basicFinancials?.metric?.roeRfy || 15;
   const grossMargin = basicFinancials?.metric?.grossMarginTTM || basicFinancials?.metric?.grossMargin5Y || 40;
-  const debtEquity = basicFinancials?.metric?.totalDebt\/totalEquityQuarterly || 0.5;
+  const debtEquity = basicFinancials?.metric?.totalDebtToTotalEquityQuarterly || 0.5;
   const beta = basicFinancials?.metric?.beta || 1;
   
   // Calculate investibility score (0-100)
