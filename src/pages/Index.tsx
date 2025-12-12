@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import StartupForm from "@/components/StartupForm";
 import RiskToRewardMeter from "@/components/RiskToRewardMeter";
 import { BarChart4, Scale, Users, LineChart, ArrowRight, Brain, Rocket } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -222,24 +221,23 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Main Content - Startup Analysis Form - MOVED DOWN */}
-      <section className="py-16 bg-white dark:bg-slate-900/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <div className="space-y-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">Analyze Your Startup</h2>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Fill out the form below to get a comprehensive analysis of your startup's investibility.
-                </p>
-              </div>
-              <StartupForm onSubmit={handleFormSubmit} />
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
-
-export default Index;
+      {/* Final CTA Section */}
+       <section className="py-16 bg-white dark:bg-slate-900 border-t border-slate-200/60 dark:border-slate-800/60">
+         <div className="container mx-auto px-4">
+           <div className="max-w-3xl mx-auto text-center space-y-4">
+             <h2 className="text-3xl font-bold mb-2">Ready to Analyze Your Startup?</h2>
+             <p className="text-slate-600 dark:text-slate-400">
+               When youre ready to go deeper, start a full analysis and get the same level of insight as the sample reports above.
+             </p>
+             <Button size="lg" className="mt-2" onClick={handleStartAnalysis}>
+               Start Full Analysis
+               <ArrowRight className="ml-2 h-4 w-4" />
+             </Button>
+           </div>
+         </div>
+       </section>
+     </div>
+   );
+ };
+ 
+ export default Index;
