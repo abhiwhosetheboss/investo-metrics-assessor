@@ -271,9 +271,11 @@ const Analysis = () => {
           </Link>
           <h1 className="text-3xl font-bold">{analysis.startupName}</h1>
           <div className="flex flex-wrap items-center gap-2 mt-1">
+          {analysis.createdAt && (
             <p className="text-muted-foreground">
               Analysis created on {new Date(analysis.createdAt).toLocaleDateString()}
             </p>
+          )}
             
             {businessModel && (
               <Badge variant="outline" className="flex items-center gap-1">
