@@ -54,10 +54,20 @@ const Suggestions = ({ suggestions, className }: SuggestionsProps) => {
     }
   };
 
+  const safeSuggestions = suggestions || [];
+
+  if (safeSuggestions.length === 0) {
+    return (
+      <div className={cn("text-center py-8 text-muted-foreground", className)}>
+        <p>No improvement suggestions available for this analysis.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="space-y-4">
-        {suggestions.map((suggestion, index) => (
+        {safeSuggestions.map((suggestion, index) => (
           <div 
             key={index}
             className={cn(
