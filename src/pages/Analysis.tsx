@@ -60,20 +60,6 @@ const Analysis = () => {
     enabled: !!id
   });
 
-  useEffect(() => {
-    if (analysis) {
-      // Enhance analysis data with AI recommendations if strengths, weaknesses or suggestions are empty
-      if (!analysis.strengths || analysis.strengths.length === 0) {
-        analysis.strengths = generateStrengths(analysis);
-      }
-      if (!analysis.weaknesses || analysis.weaknesses.length === 0) {
-        analysis.weaknesses = generateWeaknesses(analysis);
-      }
-      if (!analysis.suggestions || analysis.suggestions.length === 0) {
-        analysis.suggestions = generateSuggestions(analysis);
-      }
-    }
-  }, [analysis]);
 
   // Generate AI-based strengths based on startup data
   const generateStrengths = (analysisData: any) => {
@@ -255,10 +241,19 @@ const Analysis = () => {
     );
   }
 
-  // Get business model from analysis data
-  const businessModel = analysis.businessModel ? analysis.businessModel.toUpperCase() : "Unknown";
-
-  return (
+   // Prepare derived values from analysis data
+   const businessModel = analysis.businessModel ? analysis.businessModel.toUpperCase() : "Unknown";
+   const strengthsData = analysis.strengths && analysis.strengths.length > 0
+     ? analysis.strengths
+     : generateStrengths(analysis);
+   const weaknessesData = analysis.weaknesses && analysis.weaknesses.length > 0
+     ? analysis.weaknesses
+     : generateWeaknesses(analysis);
+   const suggestionsData = analysis.suggestions && analysis.suggestions.length > 0
+     ? analysis.suggestions
+     : generateSuggestions(analysis);
+ 
+   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
@@ -499,7 +494,7 @@ const Analysis = () => {
           </TabsList>
           <TabsContent value="strengths">
             <StrengthsWeaknesses 
-              strengths={analysis.strengths} 
+              strengths={strengthsData} 
               weaknesses={[]}
               showWeaknesses={false}
             />
@@ -507,12 +502,12 @@ const Analysis = () => {
           <TabsContent value="weaknesses">
             <StrengthsWeaknesses 
               strengths={[]}
-              weaknesses={analysis.weaknesses} 
+              weaknesses={weaknessesData} 
               showStrengths={false}
             />
           </TabsContent>
           <TabsContent value="suggestions">
-            <Suggestions suggestions={analysis.suggestions} />
+            <Suggestions suggestions={suggestionsData} />
           </TabsContent>
         </Tabs>
       </div>
