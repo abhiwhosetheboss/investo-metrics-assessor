@@ -7,7 +7,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, LineChart, MessageSquare, FileText, ChevronRight, BookOpen, Database, Trash2 } from "lucide-react";
+import { BarChart, LineChart, MessageSquare, FileText, ChevronRight, BookOpen, Database, Trash2, RefreshCw, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,6 +63,62 @@ export default function Dashboard() {
       localStorage.removeItem('dashboardTab');
     }
   }, []);
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // Check last updated time from database
+  useEffect(() => {
+    const checkLastUpdated = async () => {
+      try {
+        const { data } = await supabase
+          .from('stock_analyses')
+          .select('last_updated')
+          .order('last_updated', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (data?.last_updated) {
+          setLastUpdated(new Date(data.last_updated));
+        }
+      } catch (err) {
+        console.log('Could not fetch last updated time');
+      }
+    };
+    checkLastUpdated();
+  }, [recentAnalyses]);
+
+  const handleRefreshData = async () => {
+    setIsRefreshing(true);
+    try {
+      toast({
+        title: "Updating stock data...",
+        description: "Fetching latest market data. This may take a few minutes.",
+      });
+
+      const { data, error } = await supabase.functions.invoke('update-stock-data');
+      
+      if (error) throw error;
+
+      toast({
+        title: "Update complete",
+        description: `Updated ${data?.updated || 0} stocks with latest market data.`,
+      });
+
+      // Refetch analyses
+      queryClient.invalidateQueries({ queryKey: ["analyses"] });
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error refreshing data:', err);
+      toast({
+        title: "Update failed",
+        description: "Failed to refresh stock data. Please check your API key and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   
   const handleDeleteAnalysis = async (id: string) => {
     try {
@@ -94,11 +150,29 @@ export default function Dashboard() {
 
   return (
     <div className="container mx-auto py-10 space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Manage your startup analyses and customize the AI model
-        </p>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Top 50 US stocks analysis based on P&L and balance sheet data
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          {lastUpdated && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}</span>
+            </div>
+          )}
+          <Button 
+            variant="outline" 
+            onClick={handleRefreshData}
+            disabled={isRefreshing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Updating...' : 'Refresh Data'}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
