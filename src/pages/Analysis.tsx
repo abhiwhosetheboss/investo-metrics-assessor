@@ -241,19 +241,26 @@ const Analysis = () => {
     );
   }
 
-   // Prepare derived values from analysis data
-   const businessModel = analysis.businessModel ? analysis.businessModel.toUpperCase() : "Unknown";
-   const strengthsData = analysis.strengths && analysis.strengths.length > 0
-     ? analysis.strengths
-     : generateStrengths(analysis);
-   const weaknessesData = analysis.weaknesses && analysis.weaknesses.length > 0
-     ? analysis.weaknesses
-     : generateWeaknesses(analysis);
-   const suggestionsData = analysis.suggestions && analysis.suggestions.length > 0
-     ? analysis.suggestions
-     : generateSuggestions(analysis);
- 
-   return (
+  // Prepare derived values from analysis data
+  const businessModel = analysis.businessModel ? analysis.businessModel.toUpperCase() : "Unknown";
+  const strengthsData = analysis.strengths && analysis.strengths.length > 0
+    ? analysis.strengths
+    : generateStrengths(analysis);
+  const weaknessesData = analysis.weaknesses && analysis.weaknesses.length > 0
+    ? analysis.weaknesses
+    : generateWeaknesses(analysis);
+  const suggestionsData = analysis.suggestions && analysis.suggestions.length > 0
+    ? analysis.suggestions
+    : generateSuggestions(analysis);
+
+  console.log('Evaluation insights data', {
+    id,
+    strengthsLength: strengthsData.length,
+    weaknessesLength: weaknessesData.length,
+    suggestionsLength: suggestionsData.length,
+  });
+
+  return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
