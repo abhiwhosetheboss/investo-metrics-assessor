@@ -493,30 +493,64 @@ const Analysis = () => {
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-medium mb-6">Evaluation Insights</h2>
-        <Tabs defaultValue="strengths" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-6">
-            <TabsTrigger value="strengths">Key Strengths</TabsTrigger>
-            <TabsTrigger value="weaknesses">Key Weaknesses</TabsTrigger>
-            <TabsTrigger value="suggestions">Improvement Suggestions</TabsTrigger>
-          </TabsList>
-          <TabsContent value="strengths">
-            <StrengthsWeaknesses 
-              strengths={strengthsData} 
-              weaknesses={[]}
-              showWeaknesses={false}
-            />
-          </TabsContent>
-          <TabsContent value="weaknesses">
-            <StrengthsWeaknesses 
-              strengths={[]}
-              weaknesses={weaknessesData} 
-              showStrengths={false}
-            />
-          </TabsContent>
-          <TabsContent value="suggestions">
-            <Suggestions suggestions={suggestionsData} />
-          </TabsContent>
-        </Tabs>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Strengths Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-5 w-5" />
+              Key Strengths
+            </h3>
+            <ul className="space-y-3">
+              {strengthsData.map((strength, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                  </span>
+                  <span>{strength.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Weaknesses Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-red-600 dark:text-red-400">
+              <XCircle className="h-5 w-5" />
+              Key Weaknesses
+            </h3>
+            <ul className="space-y-3">
+              {weaknessesData.map((weakness, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mt-0.5">
+                    <XCircle className="h-3 w-3 text-red-600 dark:text-red-400" />
+                  </span>
+                  <span>{weakness.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Suggestions Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <TrendingUp className="h-5 w-5" />
+              Improvement Areas
+            </h3>
+            <ul className="space-y-3">
+              {suggestionsData.map((suggestion, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mt-0.5">
+                    <TrendingUp className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  </span>
+                  <div>
+                    <span className="font-medium">{suggestion.title}</span>
+                    <p className="text-muted-foreground text-xs mt-0.5">{suggestion.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
