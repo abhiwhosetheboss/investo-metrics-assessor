@@ -15,7 +15,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { title: "Home", href: "/", icon: ChevronRight },
-  { title: "Dashboard", href: "/dashboard", icon: BarChart3 },
+  { title: "Stocks", href: "/dashboard", icon: BarChart3 },
+  { title: "Startups", href: "/analyze", icon: LineChart },
   { title: "About", href: "/about", icon: Info }
 ];
 
@@ -81,7 +82,7 @@ const Navbar = () => {
   }, [location.pathname]);
 
   const handleStartAnalysis = () => {
-    navigate("/analyze");
+    navigate("/dashboard");
   };
 
   const toggleMobileMenu = () => {
@@ -133,7 +134,7 @@ const Navbar = () => {
                 className="rounded-full px-6"
                 onClick={handleStartAnalysis}
               >
-                Start Analysis
+                Analyze Stocks
               </Button>
             </div>
           </div>
@@ -182,7 +183,7 @@ const Navbar = () => {
                 className="w-full mt-4 rounded-full"
                 onClick={handleStartAnalysis}
               >
-                Start Analysis
+                Analyze Stocks
               </Button>
             </div>
           </div>
