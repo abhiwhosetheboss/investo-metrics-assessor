@@ -238,12 +238,12 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="select" className="flex-1">1. Select Model</TabsTrigger>
-            <TabsTrigger value="train" className="flex-1" disabled={!isActivated}>
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="select">1. Select Model</TabsTrigger>
+            <TabsTrigger value="train" disabled={!isActivated}>
               2. Train Model
             </TabsTrigger>
-            <TabsTrigger value="analyze" className="flex-1" disabled={!isActivated || !isModelTrained}>
+            <TabsTrigger value="analyze" disabled={!isActivated || !isModelTrained}>
               3. Analyze
             </TabsTrigger>
           </TabsList>
