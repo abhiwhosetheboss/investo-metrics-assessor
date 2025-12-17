@@ -24,10 +24,10 @@ export interface AIModel {
 
 const availableModels: AIModel[] = [
   {
-    id: "openai-gpt4",
-    name: "GPT-4o",
+    id: "openai-gpt5",
+    name: "GPT-5",
     provider: "OpenAI",
-    description: "Advanced model for investment analysis with deep financial knowledge.",
+    description: "Latest flagship model for advanced investment analysis with superior financial reasoning.",
     icon: Brain,
     apiEndpoint: "https://api.openai.com/v1/chat/completions"
   },
