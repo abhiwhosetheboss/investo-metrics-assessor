@@ -223,11 +223,30 @@ export default function Dashboard() {
               recentAnalyses.map((analysis) => (
                 <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">{analysis.startupName}</CardTitle>
-                      <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"}>
-                        {analysis.investibilityScore}/100
-                      </Badge>
+                    <div className="flex items-center gap-3">
+                      {/* Company Logo */}
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
+                        <img 
+                          src={`https://logo.clearbit.com/${analysis.startupName.toLowerCase().replace(/\s+/g, '')}.com`}
+                          alt={`${analysis.startupName} logo`}
+                          className="w-6 h-6 object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <span className="hidden text-sm font-bold text-primary">
+                          {analysis.startupName.substring(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-lg truncate">{analysis.startupName}</CardTitle>
+                          <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} className="shrink-0">
+                            {analysis.investibilityScore}/100
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
@@ -300,45 +319,64 @@ export default function Dashboard() {
                   </Card>
                 ))
               ) : savedAnalyses && Array.isArray(savedAnalyses) && savedAnalyses.length > 0 ? (
-                savedAnalyses.map((analysis) => (
-                  <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
-                    <CardHeader className="pb-3">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{analysis.startupName}</CardTitle>
-                        <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"}>
-                          {analysis.investibilityScore}/100
-                        </Badge>
+              savedAnalyses.map((analysis) => (
+                <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-3">
+                      {/* Company Logo */}
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
+                        <img 
+                          src={`https://logo.clearbit.com/${analysis.startupName.toLowerCase().replace(/\s+/g, '')}.com`}
+                          alt={`${analysis.startupName} logo`}
+                          className="w-6 h-6 object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <span className="hidden text-sm font-bold text-primary">
+                          {analysis.startupName.substring(0, 2).toUpperCase()}
+                        </span>
                       </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      {analysis.businessModel && (
-                        <Badge variant="outline" className="mt-2">
-                          {analysis.businessModel.toUpperCase()}
-                        </Badge>
-                      )}
-                    </CardContent>
-                    <CardFooter className="flex justify-between gap-2">
-                      <Button
-                        variant="secondary"
-                        className="flex-1"
-                        onClick={() => navigate(`/analysis/${analysis.id}`)}
-                      >
-                        View
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteAnalysis(analysis.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <CardTitle className="text-lg truncate">{analysis.startupName}</CardTitle>
+                          <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} className="shrink-0">
+                            {analysis.investibilityScore}/100
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {analysis.businessModel && (
+                      <Badge variant="outline" className="mt-2">
+                        {analysis.businessModel.toUpperCase()}
+                      </Badge>
+                    )}
+                  </CardContent>
+                  <CardFooter className="flex justify-between gap-2">
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onClick={() => navigate(`/analysis/${analysis.id}`)}
+                    >
+                      View
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteAnalysis(analysis.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))
               ) : (
                 <Card className="col-span-full">
                   <CardHeader>

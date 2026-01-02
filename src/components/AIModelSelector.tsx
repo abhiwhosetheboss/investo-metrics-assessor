@@ -237,15 +237,67 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
         <CardDescription>Select, train, and use an AI model for startup analysis</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="select">1. Select Model</TabsTrigger>
-            <TabsTrigger value="train" disabled={!isActivated}>
-              2. Train Model
-            </TabsTrigger>
-            <TabsTrigger value="analyze" disabled={!isActivated || !isModelTrained}>
-              3. Analyze
-            </TabsTrigger>
+        {/* Step Progress Indicator */}
+        <div className="flex items-center justify-between mb-8 px-2">
+          {/* Step 1 */}
+          <div className="flex flex-col items-center flex-1">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+              activeTab === "select" 
+                ? "bg-primary text-primary-foreground" 
+                : isActivated 
+                  ? "bg-green-500 text-white" 
+                  : "bg-muted text-muted-foreground"
+            }`}>
+              {isActivated && activeTab !== "select" ? <Check className="h-5 w-5" /> : "1"}
+            </div>
+            <span className={`text-xs mt-2 font-medium ${activeTab === "select" ? "text-primary" : "text-muted-foreground"}`}>
+              Select Model
+            </span>
+          </div>
+          
+          {/* Connector Line 1-2 */}
+          <div className={`h-0.5 flex-1 mx-2 ${isActivated ? "bg-green-500" : "bg-muted"}`} />
+          
+          {/* Step 2 */}
+          <div className="flex flex-col items-center flex-1">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+              activeTab === "train" 
+                ? "bg-primary text-primary-foreground" 
+                : isModelTrained 
+                  ? "bg-green-500 text-white" 
+                  : "bg-muted text-muted-foreground"
+            }`}>
+              {isModelTrained && activeTab !== "train" ? <Check className="h-5 w-5" /> : "2"}
+            </div>
+            <span className={`text-xs mt-2 font-medium ${activeTab === "train" ? "text-primary" : "text-muted-foreground"}`}>
+              Train Model
+            </span>
+          </div>
+          
+          {/* Connector Line 2-3 */}
+          <div className={`h-0.5 flex-1 mx-2 ${isModelTrained ? "bg-green-500" : "bg-muted"}`} />
+          
+          {/* Step 3 */}
+          <div className="flex flex-col items-center flex-1">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+              activeTab === "analyze" 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-muted text-muted-foreground"
+            }`}>
+              3
+            </div>
+            <span className={`text-xs mt-2 font-medium ${activeTab === "analyze" ? "text-primary" : "text-muted-foreground"}`}>
+              Analyze
+            </span>
+          </div>
+        </div>
+
+        {/* Hidden Tabs for Content Switching */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
+          <TabsList className="hidden">
+            <TabsTrigger value="select">Select</TabsTrigger>
+            <TabsTrigger value="train">Train</TabsTrigger>
+            <TabsTrigger value="analyze">Analyze</TabsTrigger>
           </TabsList>
           
           <TabsContent value="select">
@@ -329,6 +381,33 @@ const AIModelSelector = ({ onModelSelect, className }: AIModelSelectorProps) => 
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Step Navigation Buttons */}
+        <div className="flex justify-between mt-6 pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (activeTab === "train") setActiveTab("select");
+              if (activeTab === "analyze") setActiveTab("train");
+            }}
+            disabled={activeTab === "select"}
+          >
+            Previous Step
+          </Button>
+          <Button
+            onClick={() => {
+              if (activeTab === "select" && isActivated) setActiveTab("train");
+              if (activeTab === "train" && isModelTrained) setActiveTab("analyze");
+            }}
+            disabled={
+              (activeTab === "select" && !isActivated) ||
+              (activeTab === "train" && !isModelTrained) ||
+              activeTab === "analyze"
+            }
+          >
+            Next Step
+          </Button>
+        </div>
       </CardContent>
       <CardFooter>
         <div className="w-full text-center text-sm text-muted-foreground">
