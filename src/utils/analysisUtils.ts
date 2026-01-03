@@ -283,7 +283,7 @@ export const getTrainingStatus = (): typeof trainingStatus => {
   return { ...trainingStatus };
 };
 
-// This function would be replaced with actual API calls to the AI model in a real app
+// Call the OpenAI-powered edge function for real AI analysis
 export const analyzeStartupWithAI = async (startupData: any, modelId: string): Promise<AnalysisResult> => {
   // Check if model is trained
   const trainStatus = getTrainingStatus();
@@ -293,85 +293,47 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
     throw new Error("Please train the AI model before running analysis");
   }
   
-  // In a real application, you would:
-  // 1. Get the AI model details based on modelId
-  // 2. Make an API call to the appropriate endpoint (OpenAI, Hugging Face, etc.)
-  // 3. Process the response and return it
-  
-  // For now, we'll simulate this with a delay and more intelligent mock data
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Get the model info if available
-      const storedModel = localStorage.getItem("selectedAIModel");
-      const modelInfo = storedModel ? JSON.parse(storedModel) : null;
+  try {
+    // Call the edge function that uses OpenAI
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-startup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({
+        startupData,
+        modelId
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Analysis failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    // Add investor match analysis if investor thesis was provided
+    if (startupData.investorThesis) {
+      const thesis = startupData.investorThesis;
+      const investorMatch = calculateInvestorMatch(startupData, thesis);
+      result.investorMatch = investorMatch;
       
-      // Generate a more customized analysis based on input data
-      const result = generateSmartAnalysis(startupData);
-      
-      // Add the startup name from the input data
-      result.startupName = startupData.name || "Unnamed Startup";
-      
-      // Add AI model information if available
-      if (modelInfo) {
-        result.aiModel = {
-          name: modelInfo.name,
-          provider: modelInfo.provider
-        };
-      }
-      
-      // Add post-investment metrics based on what was included in training
-      const includedMetrics = localStorage.getItem("includedMetrics");
-      if (includedMetrics) {
-        const metrics = JSON.parse(includedMetrics);
-        
-        const postInvestmentMetrics: any = {};
-        
-        if (metrics.includes('growth')) {
-          // Estimate potential growth based on startup data
-          const baseGrowth = startupData.pmfScore && startupData.pmfScore > 70 ? 50 : 30;
-          postInvestmentMetrics.growthRate = `${baseGrowth + Math.floor(Math.random() * 30)}%`;
-        }
-        
-        if (metrics.includes('valuationIncrease')) {
-          // Estimate valuation increase based on startup data
-          let valMultiplier = 3;
-          if (startupData.revenue && !startupData.revenue.includes("0")) valMultiplier += 2;
-          if (startupData.domainExpertise > 70) valMultiplier += 1;
-          postInvestmentMetrics.valuationIncrease = `${valMultiplier}x`;
-        }
-        
-        if (metrics.includes('postInvestmentSuccess')) {
-          // Calculate success probability based on startup data
-          let baseProb = 50;
-          if (startupData.pmfScore) baseProb += (startupData.pmfScore - 50) / 5;
-          if (startupData.teamExperience && startupData.teamExperience.length > 20) baseProb += 5;
-          if (startupData.keyRolesFilled) baseProb += 5;
-          postInvestmentMetrics.successProbability = Math.min(Math.max(Math.floor(baseProb), 20), 95);
-        }
-        
-        if (Object.keys(postInvestmentMetrics).length > 0) {
-          result.postInvestmentMetrics = postInvestmentMetrics;
-        }
-      }
-      
-      // Add investor match analysis if investor thesis was provided
-      if (startupData.investorThesis) {
-        const thesis = startupData.investorThesis;
-        const investorMatch = calculateInvestorMatch(startupData, thesis);
-        result.investorMatch = investorMatch;
-        
-        // Adjust investibility score based on investor preferences
-        result.investibilityScore = adjustScoreBasedOnInvestorPreferences(
-          result.investibilityScore, 
-          investorMatch,
-          startupData,
-          thesis
-        );
-      }
-      
-      resolve(result);
-    }, 2000);
-  });
+      // Adjust investibility score based on investor preferences
+      result.investibilityScore = adjustScoreBasedOnInvestorPreferences(
+        result.investibilityScore, 
+        investorMatch,
+        startupData,
+        thesis
+      );
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('Error calling analyze-startup edge function:', error);
+    throw error;
+  }
 };
 
 // Calculate how well the startup matches with investor preferences
