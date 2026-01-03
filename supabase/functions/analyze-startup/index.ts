@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +15,9 @@ serve(async (req) => {
   }
 
   try {
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    if (!lovableApiKey) {
+      console.error('LOVABLE_API_KEY is not configured');
+      throw new Error('AI service is not configured');
     }
 
     const { startupData, modelId } = await req.json();
@@ -53,7 +54,7 @@ Return ONLY valid JSON with this exact structure:
 
     const userPrompt = `Analyze this startup for investment potential:
 
-Startup Name: ${startupData.name}
+Startup Name: ${startupData.name || 'Unnamed Startup'}
 Business Model: ${startupData.businessModel}
 
 FINANCIAL METRICS:
@@ -89,30 +90,30 @@ INVESTOR PREFERENCES:
 
 Provide a thorough analysis considering all available data points.`;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Calling Lovable AI gateway...');
+    
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        max_completion_tokens: 4096,
-        response_format: { type: "json_object" }
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('Lovable AI error:', response.status, errorText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ 
-          error: 'OpenAI rate limit exceeded. Please wait a moment and try again.',
+          error: 'Rate limit exceeded. Please wait a moment and try again.',
           code: 'RATE_LIMIT'
         }), {
           status: 429,
@@ -120,29 +121,35 @@ Provide a thorough analysis considering all available data points.`;
         });
       }
       
-      if (response.status === 401) {
+      if (response.status === 402) {
         return new Response(JSON.stringify({ 
-          error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY secret.',
-          code: 'INVALID_KEY'
+          error: 'AI credits exhausted. Please add funds to continue.',
+          code: 'PAYMENT_REQUIRED'
         }), {
-          status: 401,
+          status: 402,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      throw new Error(`AI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const analysisContent = data.choices[0].message.content;
+    console.log('Lovable AI response received');
     
-    console.log('OpenAI response received');
+    const analysisContent = data.choices[0].message.content;
     
     let analysis;
     try {
-      analysis = JSON.parse(analysisContent);
+      // Extract JSON from response (handle markdown code blocks)
+      let jsonStr = analysisContent;
+      const jsonMatch = analysisContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[1].trim();
+      }
+      analysis = JSON.parse(jsonStr);
     } catch (parseError) {
-      console.error('Failed to parse OpenAI response:', analysisContent);
+      console.error('Failed to parse AI response:', analysisContent);
       throw new Error('Failed to parse AI response');
     }
 
@@ -151,7 +158,7 @@ Provide a thorough analysis considering all available data points.`;
 
     const result = {
       id: analysisId,
-      startupName: startupData.name,
+      startupName: startupData.name || 'Unnamed Startup',
       businessModel: startupData.businessModel,
       pmfScore: startupData.pmfScore,
       growthExpected: startupData.growthExpected,
@@ -170,11 +177,13 @@ Provide a thorough analysis considering all available data points.`;
       founderTrustRating: analysis.founderTrustRating,
       postInvestmentMetrics: analysis.postInvestmentMetrics,
       aiModel: {
-        name: 'GPT-5',
-        provider: 'OpenAI'
+        name: 'Gemini 2.5 Flash',
+        provider: 'Lovable AI'
       },
       createdAt: new Date().toISOString()
     };
+
+    console.log('Analysis complete, returning result');
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
