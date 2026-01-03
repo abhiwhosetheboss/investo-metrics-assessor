@@ -294,7 +294,9 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
   }
   
   try {
-    // Call the edge function that uses OpenAI
+    console.log('Calling analyze-startup edge function with data:', startupData);
+    
+    // Call the edge function that uses OpenAI (server-side, API key is secure)
     const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-startup`, {
       method: 'POST',
       headers: {
@@ -307,12 +309,24 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
       }),
     });
 
+    const responseData = await response.json().catch(() => ({}));
+    console.log('Edge function response status:', response.status, 'data:', responseData);
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Analysis failed with status ${response.status}`);
+      // Handle specific error codes with user-friendly messages
+      if (response.status === 429 || responseData.code === 'RATE_LIMIT') {
+        throw new Error('OpenAI rate limit exceeded. Please wait a minute and try again.');
+      }
+      if (response.status === 401 || responseData.code === 'INVALID_KEY') {
+        throw new Error('Invalid OpenAI API key. Please verify your OPENAI_API_KEY is correctly configured.');
+      }
+      if (response.status === 500) {
+        throw new Error(responseData.error || 'Server error during analysis. Check edge function logs for details.');
+      }
+      throw new Error(responseData.error || `Analysis failed with status ${response.status}`);
     }
 
-    const result = await response.json();
+    const result = responseData;
     
     // Add investor match analysis if investor thesis was provided
     if (startupData.investorThesis) {
