@@ -109,7 +109,28 @@ Provide a thorough analysis considering all available data points.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ 
+          error: 'OpenAI rate limit exceeded. Please wait a moment and try again.',
+          code: 'RATE_LIMIT'
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      if (response.status === 401) {
+        return new Response(JSON.stringify({ 
+          error: 'Invalid OpenAI API key. Please check your OPENAI_API_KEY secret.',
+          code: 'INVALID_KEY'
+        }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
