@@ -1,4 +1,7 @@
-project_id = "lfjzjqebvvbpflcpdlux"
+project_id = "maouxxwhjkaudaaowyka"
 
 [functions.update-stock-data]
+verify_jwt = false
+
+[functions.analyze-startup]
 verify_jwt = false
