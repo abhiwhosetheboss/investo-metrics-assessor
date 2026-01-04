@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,10 +7,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogIn, UserPlus, User, Mail, Lock } from "lucide-react";
+import { LogIn, UserPlus, User, Mail, Lock, Chrome } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -79,6 +79,35 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     },
   });
   
+  const handleGoogleSignIn = async () => {
+    setIsSubmitting(true);
+    setAuthError(null);
+    
+    try {
+      console.log("Attempting Google sign in...");
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      
+      if (error) {
+        console.error("Google sign in error:", error);
+        throw error;
+      }
+    } catch (error: any) {
+      console.error("Google sign in error:", error);
+      setAuthError(error.message || "Failed to sign in with Google");
+      toast({
+        title: "Google sign in failed",
+        description: error.message || "Failed to sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
+  };
+
   const onLoginSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     setAuthError(null);
@@ -320,6 +349,24 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
+                
+                <div className="relative my-4">
+                  <Separator />
+                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+                    or continue with
+                  </span>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full gap-2" 
+                  onClick={handleGoogleSignIn}
+                  disabled={isSubmitting}
+                >
+                  <Chrome className="h-4 w-4" />
+                  Sign in with Google
+                </Button>
               </form>
             </Form>
           </TabsContent>
@@ -411,6 +458,24 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
                 />
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Creating account..." : "Sign Up"}
+                </Button>
+                
+                <div className="relative my-4">
+                  <Separator />
+                  <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+                    or continue with
+                  </span>
+                </div>
+                
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full gap-2" 
+                  onClick={handleGoogleSignIn}
+                  disabled={isSubmitting}
+                >
+                  <Chrome className="h-4 w-4" />
+                  Sign up with Google
                 </Button>
               </form>
             </Form>
