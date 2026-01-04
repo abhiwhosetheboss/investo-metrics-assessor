@@ -162,6 +162,7 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
         email: values.email,
         password: values.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             name: values.name,
           },
