@@ -342,6 +342,41 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
         thesis
       );
     }
+
+    // Save analysis to database if user is authenticated
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { error: insertError } = await supabase
+          .from('analyses')
+          .insert({
+            user_id: session.user.id,
+            startup_name: startupData.name || startupData.startupName || 'Unnamed Startup',
+            industry: startupData.industry,
+            business_model: startupData.businessModel,
+            investibility_score: result.investibilityScore,
+            overall_risk: result.overallRisk,
+            founder_trust_rating: result.founderTrustRating,
+            pmf_score: result.pmfScore,
+            growth_expected: result.growthExpected,
+            strengths: result.strengths,
+            weaknesses: result.weaknesses,
+            suggestions: result.suggestions,
+            risk_factors: result.riskFactors,
+            categories: result.categories,
+            raw_input: startupData,
+          });
+        
+        if (insertError) {
+          console.error('Error saving analysis to database:', insertError);
+        } else {
+          console.log('Analysis saved to database successfully');
+        }
+      }
+    } catch (saveError) {
+      console.error('Error saving analysis:', saveError);
+      // Don't throw - analysis still succeeded, just didn't save
+    }
     
     return result;
   } catch (error) {
