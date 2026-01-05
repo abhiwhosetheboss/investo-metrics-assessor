@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      analyses: {
+        Row: {
+          business_model: string | null
+          categories: Json | null
+          created_at: string
+          founder_trust_rating: number | null
+          growth_expected: string | null
+          id: string
+          industry: string | null
+          investibility_score: number | null
+          market_data: Json | null
+          overall_risk: number | null
+          pmf_score: number | null
+          raw_input: Json | null
+          risk_factors: Json | null
+          startup_name: string
+          strengths: Json | null
+          suggestions: Json | null
+          updated_at: string
+          user_id: string
+          weaknesses: Json | null
+        }
+        Insert: {
+          business_model?: string | null
+          categories?: Json | null
+          created_at?: string
+          founder_trust_rating?: number | null
+          growth_expected?: string | null
+          id?: string
+          industry?: string | null
+          investibility_score?: number | null
+          market_data?: Json | null
+          overall_risk?: number | null
+          pmf_score?: number | null
+          raw_input?: Json | null
+          risk_factors?: Json | null
+          startup_name: string
+          strengths?: Json | null
+          suggestions?: Json | null
+          updated_at?: string
+          user_id: string
+          weaknesses?: Json | null
+        }
+        Update: {
+          business_model?: string | null
+          categories?: Json | null
+          created_at?: string
+          founder_trust_rating?: number | null
+          growth_expected?: string | null
+          id?: string
+          industry?: string | null
+          investibility_score?: number | null
+          market_data?: Json | null
+          overall_risk?: number | null
+          pmf_score?: number | null
+          raw_input?: Json | null
+          risk_factors?: Json | null
+          startup_name?: string
+          strengths?: Json | null
+          suggestions?: Json | null
+          updated_at?: string
+          user_id?: string
+          weaknesses?: Json | null
+        }
+        Relationships: []
+      }
       stock_analyses: {
         Row: {
           business_model: string | null

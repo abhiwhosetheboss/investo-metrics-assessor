@@ -8,22 +8,38 @@ import { useNavigate, Link } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { sampleData } from "@/utils/sampleData";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Brain, Trophy, Rocket, AlertTriangle, Info } from "lucide-react";
+import { ArrowRight, Brain, Trophy, Rocket, AlertTriangle, Info, LogIn } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Analyze() {
   const [modelId, setModelId] = useState("openai-gpt4");
   const [isModelTrained, setIsModelTrained] = useState(false);
   const [activeTab, setActiveTab] = useState("form");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    // Check if model is trained on component mount
+    // Check authentication status
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Check if model is trained
     const trainStatus = getTrainingStatus();
     setIsModelTrained(trainStatus.isModelTrained);
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleModelSelect = (model: any) => {
@@ -36,6 +52,17 @@ export default function Analyze() {
   };
 
   const handleAnalysis = async (formData: any) => {
+    // Check authentication first
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to analyze startups.",
+        variant: "destructive"
+      });
+      navigate("/login");
+      return null;
+    }
+
     try {
       console.log("handleAnalysis called with data:", formData);
       
@@ -112,6 +139,33 @@ export default function Analyze() {
         </TabsList>
         
         <TabsContent value="form" className="space-y-6">
+          {/* Show login prompt if not authenticated */}
+          {isAuthenticated === false && (
+            <Card className="border-blue-400/50 bg-blue-50/50 dark:bg-blue-900/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <LogIn className="h-5 w-5 text-blue-500 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium text-blue-800 dark:text-blue-400">
+                      Sign In Required
+                    </p>
+                    <p className="text-sm text-blue-800/80 dark:text-blue-400/80 mb-3">
+                      Please sign in to analyze startups and save your reports.
+                    </p>
+                    <Button 
+                      variant="default"
+                      className="w-full sm:w-auto"
+                      onClick={() => navigate('/login')}
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In to Continue
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {isMobile ? (
               <>

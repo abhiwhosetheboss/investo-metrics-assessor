@@ -127,7 +127,10 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <UserMenu />
               ) : (
-                <AuthModal buttonVariant="ghost" />
+                <Button variant="ghost" onClick={() => navigate("/login")}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
               )}
               
               <Button 
@@ -143,11 +146,9 @@ const Navbar = () => {
             {isAuthenticated ? (
               <UserMenu />
             ) : (
-              <AuthModal>
-                <Button variant="ghost" size="sm" className="gap-1">
-                  <LogIn className="h-4 w-4" />
-                </Button>
-              </AuthModal>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>
+                <LogIn className="h-4 w-4" />
+              </Button>
             )}
             
             <Button
