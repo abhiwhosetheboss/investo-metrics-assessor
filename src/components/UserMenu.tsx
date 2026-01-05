@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   DropdownMenu, 
@@ -13,6 +12,7 @@ import { User, LogOut, Settings, History } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
 interface UserData {
   name: string;
@@ -21,123 +21,59 @@ interface UserData {
 
 const UserMenu = () => {
   const [user, setUser] = useState<UserData | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check auth when component mounts
-    const checkAuth = async () => {
-      try {
-        console.log("Checking auth state...");
-        
-        // First try to get session from Supabase
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session && session.user) {
-          // User is authenticated in Supabase
-          console.log("User authenticated in Supabase:", session.user);
-          setUser({
-            email: session.user.email || "",
-            name: session.user.user_metadata?.name || "User"
-          });
-        } else {
-          console.log("No Supabase session, checking localStorage...");
-          // Fallback to localStorage for backward compatibility
-          const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-          if (isAuthenticated) {
-            const userData = localStorage.getItem("user");
-            if (userData) {
-              try {
-                const parsedUser = JSON.parse(userData);
-                console.log("User found in localStorage:", parsedUser);
-                setUser(parsedUser);
-              } catch (error) {
-                console.error("Failed to parse user data:", error);
-                // Reset invalid user data
-                localStorage.removeItem("user");
-                localStorage.removeItem("isAuthenticated");
-                setUser(null);
-              }
-            } else {
-              console.log("No user data in localStorage");
-              setUser(null);
-            }
-          } else {
-            console.log("Not authenticated");
-            setUser(null);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setUser(null);
-      }
-    };
-    
-    checkAuth();
-    
-    // Setup auth state change listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.email);
+        console.log("UserMenu: Auth state changed:", event, session?.user?.email);
+        setSession(session);
         
-        if (event === 'SIGNED_IN' && session) {
+        if (session?.user) {
           setUser({
             email: session.user.email || "",
-            name: session.user.user_metadata?.name || "User"
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || "User"
           });
-          
-          // Update localStorage for backward compatibility
-          localStorage.setItem("isAuthenticated", "true");
-          localStorage.setItem("user", JSON.stringify({
-            email: session.user.email || "",
-            name: session.user.user_metadata?.name || "User"
-          }));
-        } else if (event === 'SIGNED_OUT') {
+        } else {
           setUser(null);
-          
-          // Clear localStorage for backward compatibility
-          localStorage.removeItem("isAuthenticated");
-          localStorage.removeItem("user");
         }
+        setIsLoading(false);
       }
     );
-    
-    // Also listen for storage events (for multi-tab support)
-    const handleStorageChange = () => {
-      console.log("Storage changed, checking auth...");
-      checkAuth();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("UserMenu: Initial session check:", session?.user?.email);
+      setSession(session);
+      
+      if (session?.user) {
+        setUser({
+          email: session.user.email || "",
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || "User"
+        });
+      }
+      setIsLoading(false);
+    });
+
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
   
   const handleLogout = async () => {
     try {
       console.log("Logging out...");
-      
-      // Sign out from Supabase
       await supabase.auth.signOut();
-      
-      // Also clear localStorage for backward compatibility
-      localStorage.removeItem("isAuthenticated");
-      localStorage.removeItem("user");
-      
-      setUser(null);
       
       toast({
         title: "Logged out",
         description: "You have been logged out successfully",
       });
       
-      // Trigger storage event for other tabs
-      window.dispatchEvent(new Event('storage'));
-      
-      // Navigate to home page without full page reload
       navigate("/");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -149,8 +85,16 @@ const UserMenu = () => {
     }
   };
   
-  if (!user) {
-    console.log("No user, not rendering UserMenu");
+  // Show loading state briefly
+  if (isLoading) {
+    return (
+      <Avatar className="h-8 w-8 animate-pulse">
+        <AvatarFallback>...</AvatarFallback>
+      </Avatar>
+    );
+  }
+  
+  if (!user || !session) {
     return null;
   }
   
@@ -158,14 +102,19 @@ const UserMenu = () => {
     .split(" ")
     .map(name => name[0])
     .join("")
-    .toUpperCase();
+    .toUpperCase()
+    .slice(0, 2);
   
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none">
-        <Avatar className="h-8 w-8">
-          <AvatarFallback>{initials}</AvatarFallback>
-        </Avatar>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
+          <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex flex-col gap-1">
