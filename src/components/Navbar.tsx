@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AuthModal from "./AuthModal";
 import UserMenu from "./UserMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
 
 interface NavItem {
@@ -123,12 +124,13 @@ const Navbar = () => {
               </Link>
             ))}
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
               {isAuthenticated ? (
                 <UserMenu />
               ) : (
-                <Button variant="ghost" onClick={() => navigate("/login")}>
-                  <LogIn className="h-4 w-4 mr-2" />
+                <Button variant="ghost" onClick={() => navigate("/login")} className="group">
+                  <LogIn className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
                   Sign In
                 </Button>
               )}
@@ -142,7 +144,8 @@ const Navbar = () => {
             </div>
           </div>
 
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             {isAuthenticated ? (
               <UserMenu />
             ) : (
