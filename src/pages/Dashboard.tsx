@@ -7,12 +7,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, LineChart, MessageSquare, FileText, ChevronRight, BookOpen, Database, Trash2, RefreshCw, Clock } from "lucide-react";
+import { BarChart, LineChart, MessageSquare, FileText, ChevronRight, BookOpen, Database, Trash2, RefreshCw, Clock, Sparkles } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AICustomization from "@/components/AICustomization";
 import TrainingData from "@/components/TrainingData";
+import { CompanyLogo } from "@/components/CompanyLogo";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -149,17 +150,23 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
+    <div className="container mx-auto py-10 space-y-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col space-y-2">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <Badge variant="secondary" className="gap-1">
+              <Sparkles className="h-3 w-3" />
+              AI Powered
+            </Badge>
+          </div>
           <p className="text-muted-foreground">
             Top 50 US stocks analysis based on P&L and balance sheet data
           </p>
         </div>
         <div className="flex items-center gap-3">
           {lastUpdated && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
               <Clock className="h-4 w-4" />
               <span>Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}</span>
             </div>
@@ -168,6 +175,7 @@ export default function Dashboard() {
             variant="outline" 
             onClick={handleRefreshData}
             disabled={isRefreshing}
+            className="shadow-sm hover:shadow-md transition-all"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'Updating...' : 'Refresh Data'}
@@ -184,10 +192,13 @@ export default function Dashboard() {
         </TabsList>
         
         <TabsContent value="recent" className="space-y-4 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="bg-primary/5 border-dashed border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="group bg-gradient-to-br from-primary/5 to-primary/10 border-dashed border-primary/30 cursor-pointer hover:border-primary/50 hover:shadow-lg transition-all duration-300">
               <CardHeader className="pb-3">
-                <CardTitle className="text-primary">New Analysis</CardTitle>
+                <CardTitle className="text-primary flex items-center gap-2">
+                  <Sparkles className="h-5 w-5" />
+                  New Analysis
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <p className="text-muted-foreground text-sm">
@@ -196,7 +207,7 @@ export default function Dashboard() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full"
+                  className="w-full shadow-md hover:shadow-lg transition-all"
                   onClick={() => navigate("/analyze")}
                 >
                   Start Analysis
@@ -220,29 +231,26 @@ export default function Dashboard() {
                 </Card>
               ))
             ) : recentAnalyses && recentAnalyses.length > 0 ? (
-              recentAnalyses.map((analysis) => (
-                <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
+              recentAnalyses.map((analysis, index) => (
+                <Card 
+                  key={analysis.id} 
+                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-border/50"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
-                      {/* Company Logo */}
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
-                        <img 
-                          src={`https://logo.clearbit.com/${analysis.startupName.toLowerCase().replace(/\s+/g, '')}.com`}
-                          alt={`${analysis.startupName} logo`}
-                          className="w-6 h-6 object-contain"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <span className="hidden text-sm font-bold text-primary">
-                          {analysis.startupName.substring(0, 2).toUpperCase()}
-                        </span>
-                      </div>
+                      <CompanyLogo 
+                        symbol={analysis.id} 
+                        companyName={analysis.startupName}
+                        size="md"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start gap-2">
-                          <CardTitle className="text-lg truncate">{analysis.startupName}</CardTitle>
-                          <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} className="shrink-0">
+                          <CardTitle className="text-lg truncate group-hover:text-primary transition-colors">{analysis.startupName}</CardTitle>
+                          <Badge 
+                            variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} 
+                            className="shrink-0 font-bold"
+                          >
                             {analysis.investibilityScore}/100
                           </Badge>
                         </div>
@@ -259,11 +267,11 @@ export default function Dashboard() {
                   <CardFooter>
                     <Button
                       variant="secondary"
-                      className="w-full"
+                      className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all"
                       onClick={() => navigate(`/analysis/${analysis.id}`)}
                     >
                       View Analysis
-                      <ChevronRight className="h-4 w-4 ml-2" />
+                      <ChevronRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </CardFooter>
                 </Card>
@@ -319,29 +327,26 @@ export default function Dashboard() {
                   </Card>
                 ))
               ) : savedAnalyses && Array.isArray(savedAnalyses) && savedAnalyses.length > 0 ? (
-              savedAnalyses.map((analysis) => (
-                <Card key={analysis.id} className="cursor-pointer hover:bg-accent/10 transition-colors">
+              savedAnalyses.map((analysis, index) => (
+                <Card 
+                  key={analysis.id} 
+                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-border/50"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
-                      {/* Company Logo */}
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/10 shrink-0">
-                        <img 
-                          src={`https://logo.clearbit.com/${analysis.startupName.toLowerCase().replace(/\s+/g, '')}.com`}
-                          alt={`${analysis.startupName} logo`}
-                          className="w-6 h-6 object-contain"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <span className="hidden text-sm font-bold text-primary">
-                          {analysis.startupName.substring(0, 2).toUpperCase()}
-                        </span>
-                      </div>
+                      <CompanyLogo 
+                        symbol={analysis.id} 
+                        companyName={analysis.startupName}
+                        size="md"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start gap-2">
-                          <CardTitle className="text-lg truncate">{analysis.startupName}</CardTitle>
-                          <Badge variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} className="shrink-0">
+                          <CardTitle className="text-lg truncate group-hover:text-primary transition-colors">{analysis.startupName}</CardTitle>
+                          <Badge 
+                            variant={analysis.investibilityScore > 70 ? "success" : analysis.investibilityScore > 40 ? "warning" : "destructive"} 
+                            className="shrink-0 font-bold"
+                          >
                             {analysis.investibilityScore}/100
                           </Badge>
                         </div>
@@ -358,15 +363,16 @@ export default function Dashboard() {
                   <CardFooter className="flex justify-between gap-2">
                     <Button
                       variant="secondary"
-                      className="flex-1"
+                      className="flex-1 group-hover:bg-primary group-hover:text-primary-foreground transition-all"
                       onClick={() => navigate(`/analysis/${analysis.id}`)}
                     >
                       View
-                      <ChevronRight className="h-4 w-4 ml-1" />
+                      <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                     </Button>
                     <Button
                       variant="destructive"
                       size="icon"
+                      className="hover:scale-105 transition-transform"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteAnalysis(analysis.id);

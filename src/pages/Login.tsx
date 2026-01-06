@@ -107,19 +107,29 @@ export default function Login() {
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const currentUrl = window.location.origin;
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${currentUrl}/dashboard`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
 
       if (error) throw error;
+      
+      // If no redirect URL is returned, OAuth may not be configured
+      if (!data?.url) {
+        throw new Error("Google OAuth is not configured. Please set up Google OAuth in your backend settings.");
+      }
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google");
       toast({
         title: "Google sign in failed",
-        description: err.message || "Please try again.",
+        description: err.message || "Google OAuth may not be configured. Please contact support.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -127,21 +137,30 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
+      </div>
+      
+      <div className="w-full max-w-md relative z-10 animate-fade-in">
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="h-4 w-4" />
+          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-4 group">
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </Link>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <LineChart className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Investometer</h1>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="relative">
+              <LineChart className="h-10 w-10 text-primary" />
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Investometer</h1>
           </div>
           <p className="text-muted-foreground">Sign in to analyze startups and save your reports</p>
         </div>
 
-        <Card>
+        <Card className="backdrop-blur-sm bg-card/80 border-border/50 shadow-xl">
           <CardHeader>
             <CardTitle>Welcome</CardTitle>
             <CardDescription>Sign in to your account or create a new one</CardDescription>
