@@ -108,7 +108,11 @@ const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
+        <button 
+          type="button"
+          className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
             <AvatarFallback className="bg-primary text-primary-foreground">
               {initials}
