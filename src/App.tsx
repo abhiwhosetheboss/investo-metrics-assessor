@@ -16,6 +16,7 @@ import Analysis from "./pages/Analysis";
 import About from "./pages/About";
 import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 
 // Create a new QueryClient instance with retry configuration
 const queryClient = new QueryClient({
@@ -50,6 +51,7 @@ const App = () => {
                 <Route path="/analysis/:id" element={<Analysis />} />
                 <Route path="/analyze" element={<Analyze />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
