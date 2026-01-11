@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Building2 } from "lucide-react";
 
 // Map of company symbols to their logo URLs (using public CDN logos)
@@ -62,6 +63,8 @@ interface CompanyLogoProps {
 }
 
 export function CompanyLogo({ symbol, companyName, size = "md", className = "" }: CompanyLogoProps) {
+  const [imageError, setImageError] = useState(false);
+  
   const sizeClasses = {
     sm: "w-6 h-6",
     md: "w-10 h-10",
@@ -80,15 +83,18 @@ export function CompanyLogo({ symbol, companyName, size = "md", className = "" }
 
   return (
     <div className={`${sizeClasses[size]} rounded-lg bg-white dark:bg-slate-800 p-1.5 shadow-sm border border-border overflow-hidden flex items-center justify-center ${className}`}>
-      <img
-        src={logoUrl}
-        alt={`${companyName} logo`}
-        className="w-full h-full object-contain"
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-          e.currentTarget.parentElement!.innerHTML = `<span class="text-xs font-bold text-primary">${symbol.slice(0, 2).toUpperCase()}</span>`;
-        }}
-      />
+      {imageError ? (
+        <span className="text-xs font-bold text-primary">
+          {symbol.slice(0, 2).toUpperCase()}
+        </span>
+      ) : (
+        <img
+          src={logoUrl}
+          alt={`${companyName} logo`}
+          className="w-full h-full object-contain"
+          onError={() => setImageError(true)}
+        />
+      )}
     </div>
   );
 }
