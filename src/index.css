@@ -119,12 +119,9 @@
   }
 }
 
-/* Import Inter font */
-@import url('https://rsms.me/inter/inter.css');
-html { font-family: 'Inter', sans-serif; }
-@supports (font-variation-settings: normal) {
-  html { font-family: 'Inter var', sans-serif; }
-}
+/* Import Futura font (using Jost as a web-safe alternative with similar geometric style) */
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
+html { font-family: 'Jost', 'Futura', -apple-system, BlinkMacSystemFont, sans-serif; }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

@@ -126,15 +126,15 @@ const UserMenu = () => {
           <span className="text-xs text-muted-foreground">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
           <User className="h-4 w-4 mr-2" />
           My Profile
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/dashboard")}>
           <History className="h-4 w-4 mr-2" />
           Analysis History
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("/profile")}>
           <Settings className="h-4 w-4 mr-2" />
           Account Settings
         </DropdownMenuItem>

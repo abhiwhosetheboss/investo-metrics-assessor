@@ -19,8 +19,8 @@ export default {
 			}
 		},
 		extend: {
-			fontFamily: {
-				sans: ['Inter var', 'sans-serif'],
+		fontFamily: {
+				sans: ['Jost', 'Futura', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',

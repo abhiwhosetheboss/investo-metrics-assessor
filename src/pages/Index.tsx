@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,34 @@ import { useToast } from "@/components/ui/use-toast";
 import { sampleData } from "@/utils/sampleData";
 import { Badge } from "@/components/ui/badge";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { motion } from "framer-motion";
+
+// Stagger animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" as const }
+  }
+};
 
 const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [demoRisk, setDemoRisk] = useState(35);
+  const [demoReward, setDemoReward] = useState(75);
   
   const handleAnalyzeStocks = () => {
     navigate("/dashboard");
@@ -31,62 +54,119 @@ const Index = () => {
       <section className="relative bg-gradient-to-b from-slate-50 via-blue-50/30 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-16 md:py-24 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+          <motion.div 
+            className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"
+            animate={{ 
+              y: [0, -20, 0],
+              scale: [1, 1.1, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div 
+            className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
+            animate={{ 
+              y: [0, 20, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/3 to-accent/3 rounded-full blur-3xl" />
         </div>
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row gap-12 items-center">
-            <div className="flex-1 space-y-6 animate-fade-in">
-              <Badge variant="outline" className="mb-2 py-1.5 px-4 backdrop-blur-sm bg-background/50 border-primary/20 shadow-sm">
-                <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                Live Market Data
-                <Sparkles className="h-3 w-3 ml-2 text-primary" />
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
+            <motion.div 
+              className="flex-1 space-y-6"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants}>
+                <Badge variant="outline" className="mb-2 py-1.5 px-4 backdrop-blur-sm bg-background/50 border-primary/20 shadow-sm">
+                  <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                  Live Market Data
+                  <Sparkles className="h-3 w-3 ml-2 text-primary" />
+                </Badge>
+              </motion.div>
+              
+              <motion.h1 
+                variants={itemVariants}
+                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
+              >
                 AI-Powered <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">Stock & Startup</span> Analysis
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
+              </motion.h1>
+              
+              <motion.p 
+                variants={itemVariants}
+                className="text-xl text-muted-foreground leading-relaxed max-w-xl"
+              >
                 Investometer analyzes listed stocks using real-time market data and AI-powered insights. Also supports custom startup analysis for investors.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button size="lg" className="gap-2 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-primary to-primary/90" onClick={handleAnalyzeStocks}>
+              </motion.p>
+              
+              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button 
+                  size="lg" 
+                  className="gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 bg-gradient-to-r from-primary to-primary/90" 
+                  onClick={handleAnalyzeStocks}
+                >
                   <TrendingUp className="h-4 w-4" />
                   Analyze Stocks
                 </Button>
-                <Button size="lg" variant="outline" className="gap-2 hover:scale-105 transition-all duration-300 backdrop-blur-sm" onClick={handleAnalyzeStartup}>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 backdrop-blur-sm" 
+                  onClick={handleAnalyzeStartup}
+                >
                   <Rocket className="h-4 w-4" />
                   Analyze Startup
                 </Button>
-              </div>
+              </motion.div>
               
-              <div className="flex flex-wrap gap-6 pt-6">
-                <div className="flex items-center gap-2 group">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <Brain className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">AI-Powered Analysis</span>
-                </div>
-                <div className="flex items-center gap-2 group">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">Real-Time Stock Data</span>
-                </div>
-                <div className="flex items-center gap-2 group">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <Scale className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium">Risk-Reward Assessment</span>
-                </div>
-              </div>
-            </div>
+              <motion.div variants={itemVariants} className="flex flex-wrap gap-6 pt-6">
+                {[
+                  { icon: Brain, label: "AI-Powered Analysis" },
+                  { icon: TrendingUp, label: "Real-Time Stock Data" },
+                  { icon: Scale, label: "Risk-Reward Assessment" },
+                ].map((feature, index) => (
+                  <motion.div 
+                    key={feature.label}
+                    className="flex items-center gap-2 group"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                      <feature.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium">{feature.label}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
             
-            <div className="flex-1 animate-scale-in" style={{ animationDelay: "0.2s" }}>
-              {/* Sample Risk-to-Reward Meter */}
-              <RiskToRewardMeter risk={35} reward={75} />
-            </div>
+            <motion.div 
+              className="flex-1"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Interactive Risk-to-Reward Meter */}
+              <RiskToRewardMeter 
+                risk={demoRisk} 
+                reward={demoReward}
+                interactive={true}
+                onRiskChange={setDemoRisk}
+                onRewardChange={setDemoReward}
+              />
+              <motion.p 
+                className="text-center text-sm text-muted-foreground mt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                ↑ Drag the sliders to explore risk-reward scenarios
+              </motion.p>
+            </motion.div>
           </div>
         </div>
       </section>
