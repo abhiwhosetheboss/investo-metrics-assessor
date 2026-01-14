@@ -295,38 +295,33 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
   
   try {
     console.log('Calling analyze-startup edge function with data:', startupData);
-    
-    // Call the edge function that uses OpenAI (server-side, API key is secure)
-    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-startup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({
+
+    // Use the backend function invocation so the user's session JWT is sent automatically
+    const { data, error } = await supabase.functions.invoke('analyze-startup', {
+      body: {
         startupData,
-        modelId
-      }),
+        modelId,
+      },
     });
 
-    const responseData = await response.json().catch(() => ({}));
-    console.log('Edge function response status:', response.status, 'data:', responseData);
+    if (error) {
+      const anyErr: any = error;
+      const status = anyErr?.status;
 
-    if (!response.ok) {
-      // Handle specific error codes with user-friendly messages
-      if (response.status === 429 || responseData.code === 'RATE_LIMIT') {
-        throw new Error('OpenAI rate limit exceeded. Please wait a minute and try again.');
+      if (status === 401) {
+        throw new Error('Please sign in again to analyze startups.');
       }
-      if (response.status === 401 || responseData.code === 'INVALID_KEY') {
-        throw new Error('Invalid OpenAI API key. Please verify your OPENAI_API_KEY is correctly configured.');
+      if (status === 429) {
+        throw new Error('Rate limit exceeded. Please wait a moment and try again.');
       }
-      if (response.status === 500) {
-        throw new Error(responseData.error || 'Server error during analysis. Check edge function logs for details.');
+      if (status === 402) {
+        throw new Error('AI credits exhausted. Please add funds to continue.');
       }
-      throw new Error(responseData.error || `Analysis failed with status ${response.status}`);
+
+      throw new Error(anyErr?.message || 'Analysis failed. Please try again.');
     }
 
-    const result = responseData;
+    const result = data as any;
     
     // Add investor match analysis if investor thesis was provided
     if (startupData.investorThesis) {

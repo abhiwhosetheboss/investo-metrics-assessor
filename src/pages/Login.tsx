@@ -22,14 +22,7 @@ export default function Login() {
 
   // Redirect if already logged in
   useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        navigate("/dashboard");
-      }
-    };
-    checkSession();
-
+    // Set up the listener first to avoid missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
         toast({
@@ -39,6 +32,15 @@ export default function Login() {
         navigate("/dashboard");
       }
     });
+
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate("/dashboard");
+      }
+    };
+
+    checkSession();
 
     return () => subscription.unsubscribe();
   }, [navigate, toast]);
@@ -77,7 +79,8 @@ export default function Login() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          // Use a dedicated callback route to make OAuth/email redirects reliable
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             name: name,
           },
@@ -107,29 +110,32 @@ export default function Login() {
     setError(null);
 
     try {
-      const currentUrl = window.location.origin;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${currentUrl}/dashboard`,
+          // Keep redirect target simple to avoid allow-list mismatches
+          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
+            access_type: "offline",
+            prompt: "consent",
           },
         },
       });
 
       if (error) throw error;
-      
+
       // If no redirect URL is returned, OAuth may not be configured
       if (!data?.url) {
-        throw new Error("Google OAuth is not configured. Please set up Google OAuth in your backend settings.");
+        throw new Error(
+          "Google OAuth isn't configured correctly. Double-check your backend auth settings and that the Google Console redirect URI matches the callback URL shown there."
+        );
       }
     } catch (err: any) {
-      setError(err.message || "Failed to sign in with Google");
+      const msg = err?.message || "Failed to sign in with Google";
+      setError(msg);
       toast({
         title: "Google sign in failed",
-        description: err.message || "Google OAuth may not be configured. Please contact support.",
+        description: msg,
         variant: "destructive",
       });
       setIsLoading(false);

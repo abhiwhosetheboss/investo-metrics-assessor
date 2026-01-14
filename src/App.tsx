@@ -17,6 +17,7 @@ import About from "./pages/About";
 import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import AuthCallback from "./pages/AuthCallback";
 
 // Create a new QueryClient instance with retry configuration
 const queryClient = new QueryClient({
@@ -47,6 +48,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analysis/:id" element={<Analysis />} />
                 <Route path="/analyze" element={<Analyze />} />
