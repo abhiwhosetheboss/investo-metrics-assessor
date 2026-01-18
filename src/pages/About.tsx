@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, BarChart4, Scale, LineChart, Target, Users, Heart, Mail } from "lucide-react";
+import { BrainCircuit, BarChart4, Scale, LineChart, Target, Users, Heart, Linkedin } from "lucide-react";
 
 const About = () => {
   return (
@@ -35,16 +35,18 @@ const About = () => {
             <CardContent className="text-center space-y-6">
               <div className="max-w-2xl mx-auto">
                 <p className="text-lg leading-relaxed text-foreground">
-                  Hello :) I'm <span className="font-semibold text-primary">Abhinav</span>, an 18 year old trying to figure out a way to make AI accessible to Angels, Startups and Investors to better quantize the numbers and financials of a Company. Feel free to reach out anytime for any suggestions and/or queries
+                  Hello :) I'm <span className="font-semibold text-primary">Abhinav</span>, a 19 year old trying to figure out a way to make AI accessible to Angels, Startups and Investors to better quantize the numbers and financials of a Company. Feel free to reach out anytime for any suggestions and/or queries
                 </p>
               </div>
-              <div className="flex justify-center items-center space-x-2 pt-4">
-                <Mail className="w-5 h-5 text-primary" />
+              <div className="flex justify-center items-center pt-4">
                 <a 
-                  href="mailto:trabhinav69@gmail.com"
-                  className="text-primary hover:text-accent transition-colors font-medium"
+                  href="https://www.linkedin.com/in/abhinavtr07"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-full text-primary hover:text-accent transition-all duration-300 font-medium"
                 >
-                  trabhinav69@gmail.com
+                  <Linkedin className="w-5 h-5" />
+                  <span>Connect on LinkedIn</span>
                 </a>
               </div>
             </CardContent>
