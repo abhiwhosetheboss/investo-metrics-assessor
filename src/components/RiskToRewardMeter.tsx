@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Scale, TrendingDown, TrendingUp, AlertTriangle, GripHorizontal } from "lucide-react";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { Scale, TrendingDown, TrendingUp, AlertTriangle } from "lucide-react";
+import { motion } from "framer-motion";
+import { Slider } from "@/components/ui/slider";
 
 interface RiskToRewardMeterProps {
   risk: number;
@@ -22,19 +23,14 @@ const RiskToRewardMeter = ({
 }: RiskToRewardMeterProps) => {
   const [risk, setRisk] = useState(initialRisk);
   const [reward, setReward] = useState(initialReward);
-  const [isDragging, setIsDragging] = useState<'risk' | 'reward' | null>(null);
-  
-  // Animated values for smooth transitions
-  const animatedRisk = useMotionValue(0);
-  const animatedReward = useMotionValue(0);
-  
+
   useEffect(() => {
-    animate(animatedRisk, risk, { duration: 0.8, ease: [0.22, 1, 0.36, 1] });
-  }, [risk, animatedRisk]);
-  
+    setRisk(initialRisk);
+  }, [initialRisk]);
+
   useEffect(() => {
-    animate(animatedReward, reward, { duration: 0.8, ease: [0.22, 1, 0.36, 1] });
-  }, [reward, animatedReward]);
+    setReward(initialReward);
+  }, [initialReward]);
 
   // Calculate the ratio
   const ratio = reward / (risk || 1);
@@ -45,7 +41,6 @@ const RiskToRewardMeter = ({
       description: "Very high reward compared to risk",
       color: "text-green-500", 
       bg: "bg-green-100 dark:bg-green-900/30",
-      gradient: "from-green-500 to-emerald-500",
       icon: TrendingUp 
     };
     if (ratio >= 1.75) return { 
@@ -53,7 +48,6 @@ const RiskToRewardMeter = ({
       description: "Good reward compared to risk",
       color: "text-emerald-500", 
       bg: "bg-emerald-100 dark:bg-emerald-900/30",
-      gradient: "from-emerald-500 to-teal-500",
       icon: TrendingUp 
     };
     if (ratio >= 1.25) return { 
@@ -61,7 +55,6 @@ const RiskToRewardMeter = ({
       description: "Acceptable reward for the risk",
       color: "text-yellow-500", 
       bg: "bg-yellow-100 dark:bg-yellow-900/30",
-      gradient: "from-yellow-500 to-amber-500",
       icon: Scale 
     };
     if (ratio >= 0.75) return { 
@@ -69,7 +62,6 @@ const RiskToRewardMeter = ({
       description: "Risk may outweigh potential reward",
       color: "text-orange-500", 
       bg: "bg-orange-100 dark:bg-orange-900/30",
-      gradient: "from-orange-500 to-red-500",
       icon: AlertTriangle 
     };
     return { 
@@ -77,7 +69,6 @@ const RiskToRewardMeter = ({
       description: "Risk significantly outweighs potential reward",
       color: "text-red-500", 
       bg: "bg-red-100 dark:bg-red-900/30",
-      gradient: "from-red-500 to-rose-600",
       icon: TrendingDown 
     };
   };
@@ -87,31 +78,35 @@ const RiskToRewardMeter = ({
   
   const meterPosition = Math.min(Math.max(Math.round((ratio / 3) * 100), 0), 100);
 
-  const handleSliderChange = (type: 'risk' | 'reward', value: number) => {
-    const clampedValue = Math.max(0, Math.min(100, value));
-    if (type === 'risk') {
-      setRisk(clampedValue);
-      onRiskChange?.(clampedValue);
-    } else {
-      setReward(clampedValue);
-      onRewardChange?.(clampedValue);
-    }
+  const handleRiskChange = (value: number[]) => {
+    const newRisk = value[0];
+    setRisk(newRisk);
+    onRiskChange?.(newRisk);
   };
 
-  const handleDrag = useCallback((type: 'risk' | 'reward', e: React.MouseEvent | React.TouchEvent, container: HTMLDivElement | null) => {
-    if (!container) return;
-    
-    const rect = container.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    
-    handleSliderChange(type, Math.round(percentage));
-  }, []);
+  const handleRewardChange = (value: number[]) => {
+    const newReward = value[0];
+    setReward(newReward);
+    onRewardChange?.(newReward);
+  };
 
   // Circular gauge for the main meter
   const circumference = 2 * Math.PI * 45;
   const strokeDashoffset = circumference - (meterPosition / 100) * circumference;
+
+  const getRiskColor = () => {
+    if (risk < 30) return "bg-green-500";
+    if (risk < 50) return "bg-yellow-500";
+    if (risk < 70) return "bg-orange-500";
+    return "bg-red-500";
+  };
+
+  const getRewardColor = () => {
+    if (reward > 70) return "bg-green-500";
+    if (reward > 50) return "bg-emerald-500";
+    if (reward > 30) return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
   return (
     <motion.div 
@@ -212,7 +207,6 @@ const RiskToRewardMeter = ({
             {/* Position indicator */}
             <motion.div 
               className="absolute top-1 bottom-1 w-2 bg-white rounded-full shadow-lg z-10"
-              style={{ left: `calc(${meterPosition}% - 4px)` }}
               initial={{ left: 0 }}
               animate={{ left: `calc(${meterPosition}% - 4px)` }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -231,9 +225,9 @@ const RiskToRewardMeter = ({
         {/* Interactive Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Risk Slider */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Risk Score</span>
+              <label htmlFor="risk-slider" className="text-sm font-medium">Risk Score</label>
               <motion.span 
                 key={risk}
                 initial={{ scale: 1.2 }}
@@ -250,48 +244,20 @@ const RiskToRewardMeter = ({
               </motion.span>
             </div>
             
-            <div 
+            <Slider
+              id="risk-slider"
+              value={[risk]}
+              onValueChange={handleRiskChange}
+              max={100}
+              min={0}
+              step={1}
+              disabled={!interactive}
               className={cn(
-                "relative h-3 bg-muted rounded-full overflow-hidden",
-                interactive && "cursor-pointer"
+                "w-full",
+                interactive ? "cursor-pointer" : "cursor-default opacity-70"
               )}
-              onMouseDown={(e) => {
-                if (!interactive) return;
-                setIsDragging('risk');
-                handleDrag('risk', e, e.currentTarget);
-              }}
-              onMouseMove={(e) => {
-                if (isDragging === 'risk') {
-                  handleDrag('risk', e, e.currentTarget);
-                }
-              }}
-              onMouseUp={() => setIsDragging(null)}
-              onMouseLeave={() => setIsDragging(null)}
-            >
-              <motion.div 
-                className={cn(
-                  "absolute inset-y-0 left-0 rounded-full",
-                  risk < 30 ? "bg-green-500" :
-                  risk < 50 ? "bg-yellow-500" :
-                  risk < 70 ? "bg-orange-500" : "bg-red-500"
-                )}
-                initial={{ width: 0 }}
-                animate={{ width: `${risk}%` }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              />
-              {interactive && (
-                <motion.div 
-                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing"
-                  style={{ left: `calc(${risk}% - 10px)` }}
-                  animate={{ left: `calc(${risk}% - 10px)` }}
-                  transition={{ duration: 0.1 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <GripHorizontal className="h-3 w-3 text-muted-foreground" />
-                </motion.div>
-              )}
-            </div>
+              aria-label="Risk score slider"
+            />
             
             <p className="text-xs text-muted-foreground">
               {risk < 30 ? "Low risk level" :
@@ -301,9 +267,9 @@ const RiskToRewardMeter = ({
           </div>
           
           {/* Reward Slider */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium">Potential Reward</span>
+              <label htmlFor="reward-slider" className="text-sm font-medium">Potential Reward</label>
               <motion.span 
                 key={reward}
                 initial={{ scale: 1.2 }}
@@ -320,48 +286,20 @@ const RiskToRewardMeter = ({
               </motion.span>
             </div>
             
-            <div 
+            <Slider
+              id="reward-slider"
+              value={[reward]}
+              onValueChange={handleRewardChange}
+              max={100}
+              min={0}
+              step={1}
+              disabled={!interactive}
               className={cn(
-                "relative h-3 bg-muted rounded-full overflow-hidden",
-                interactive && "cursor-pointer"
+                "w-full",
+                interactive ? "cursor-pointer" : "cursor-default opacity-70"
               )}
-              onMouseDown={(e) => {
-                if (!interactive) return;
-                setIsDragging('reward');
-                handleDrag('reward', e, e.currentTarget);
-              }}
-              onMouseMove={(e) => {
-                if (isDragging === 'reward') {
-                  handleDrag('reward', e, e.currentTarget);
-                }
-              }}
-              onMouseUp={() => setIsDragging(null)}
-              onMouseLeave={() => setIsDragging(null)}
-            >
-              <motion.div 
-                className={cn(
-                  "absolute inset-y-0 left-0 rounded-full",
-                  reward > 70 ? "bg-green-500" :
-                  reward > 50 ? "bg-emerald-500" :
-                  reward > 30 ? "bg-yellow-500" : "bg-red-500"
-                )}
-                initial={{ width: 0 }}
-                animate={{ width: `${reward}%` }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              />
-              {interactive && (
-                <motion.div 
-                  className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing"
-                  style={{ left: `calc(${reward}% - 10px)` }}
-                  animate={{ left: `calc(${reward}% - 10px)` }}
-                  transition={{ duration: 0.1 }}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <GripHorizontal className="h-3 w-3 text-muted-foreground" />
-                </motion.div>
-              )}
-            </div>
+              aria-label="Potential reward slider"
+            />
             
             <p className="text-xs text-muted-foreground">
               {reward > 70 ? "High potential reward" :
