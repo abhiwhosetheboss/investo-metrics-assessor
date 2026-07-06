@@ -1,385 +1,327 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import RiskToRewardMeter from "@/components/RiskToRewardMeter";
-import { BarChart4, Scale, LineChart, ArrowRight, Brain, TrendingUp, Building2, Rocket, Sparkles } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { sampleData } from "@/utils/sampleData";
-import { Badge } from "@/components/ui/badge";
 import { CompanyLogo } from "@/components/CompanyLogo";
-import { motion } from "framer-motion";
-
-// Stagger animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" as const }
-  }
-};
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [demoRisk, setDemoRisk] = useState(35);
-  const [demoReward, setDemoReward] = useState(75);
-  
-  const handleAnalyzeStocks = () => {
-    navigate("/dashboard");
-  };
 
-  const handleAnalyzeStartup = () => {
-    navigate("/analyze");
-  };
-  
-  // Show only the first 4 sample reports
-  const featuredSamples = sampleData.slice(0, 4);
-  
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, 120]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const featuredSamples = sampleData.slice(0, 3);
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-slate-50 via-blue-50/30 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-16 md:py-24 overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div 
-            className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"
-            animate={{ 
-              y: [0, -20, 0],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div 
-            className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl"
-            animate={{ 
-              y: [0, 20, 0],
-              scale: [1, 1.05, 1],
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/3 to-accent/3 rounded-full blur-3xl" />
-        </div>
-        
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col md:flex-row gap-12 items-center">
-            <motion.div 
-              className="flex-1 space-y-6"
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
+    <div className="min-h-screen bg-background text-foreground">
+      {/* ───────────── HERO ───────────── */}
+      <section
+        ref={heroRef}
+        className="relative flex min-h-[92vh] items-center justify-center overflow-hidden px-6"
+      >
+        {/* Subtle grain / vignette */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background))_75%)]" />
+
+        <motion.div
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="relative z-10 mx-auto max-w-5xl text-center"
+        >
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-6 text-xs uppercase tracking-[0.35em] text-muted-foreground"
+          >
+            Investometer — Intelligence for Investors
+          </motion.p>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[clamp(2.75rem,8vw,7rem)] font-semibold leading-[0.95] tracking-[-0.04em]"
+          >
+            Clarity, in every
+            <br />
+            <span className="italic font-light text-muted-foreground">
+              investment.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="mx-auto mt-8 max-w-xl text-base md:text-lg font-light leading-relaxed text-muted-foreground"
+          >
+            AI-driven analysis of listed equities and private ventures.
+            Built for investors who value precision over noise.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6"
+          >
+            <Button
+              size="lg"
+              onClick={() => navigate("/dashboard")}
+              className="group h-12 rounded-full px-8 text-sm font-medium tracking-wide"
             >
-              <motion.div variants={itemVariants}>
-                <Badge variant="outline" className="mb-2 py-1.5 px-4 backdrop-blur-sm bg-background/50 border-primary/20 shadow-sm">
-                  <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
-                  Live Market Data
-                  <Sparkles className="h-3 w-3 ml-2 text-primary" />
-                </Badge>
-              </motion.div>
-              
-              <motion.h1 
-                variants={itemVariants}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight"
-              >
-                AI-Powered <span className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">Stock & Startup</span> Analysis
-              </motion.h1>
-              
-              <motion.p 
-                variants={itemVariants}
-                className="text-xl text-muted-foreground leading-relaxed max-w-xl"
-              >
-                Investometer analyzes listed stocks using real-time market data and AI-powered insights. Also supports custom startup analysis for investors.
-              </motion.p>
-              
-              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button 
-                  size="lg" 
-                  className="gap-2 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 bg-gradient-to-r from-primary to-primary/90" 
-                  onClick={handleAnalyzeStocks}
-                >
-                  <TrendingUp className="h-4 w-4" />
-                  Analyze Stocks
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 backdrop-blur-sm" 
-                  onClick={handleAnalyzeStartup}
-                >
-                  <Rocket className="h-4 w-4" />
-                  Analyze Startup
-                </Button>
-              </motion.div>
-              
-              <motion.div variants={itemVariants} className="flex flex-wrap gap-6 pt-6">
-                {[
-                  { icon: Brain, label: "AI-Powered Analysis" },
-                  { icon: TrendingUp, label: "Real-Time Stock Data" },
-                  { icon: Scale, label: "Risk-Reward Assessment" },
-                ].map((feature, index) => (
-                  <motion.div 
-                    key={feature.label}
-                    className="flex items-center gap-2 group"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                      <feature.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <span className="text-sm font-medium">{feature.label}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              className="flex-1"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              Analyze Stocks
+              <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+            <button
+              onClick={() => navigate("/analyze")}
+              className="group inline-flex items-center gap-1.5 text-sm font-medium tracking-wide text-foreground/80 transition-colors hover:text-foreground"
             >
-              {/* Interactive Risk-to-Reward Meter */}
-              <RiskToRewardMeter 
-                risk={demoRisk} 
-                reward={demoReward}
-                interactive={true}
-                onRiskChange={setDemoRisk}
-                onRewardChange={setDemoReward}
-              />
-              <motion.p 
-                className="text-center text-sm text-muted-foreground mt-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-              >
-                ↑ Drag the sliders to explore risk-reward scenarios
-              </motion.p>
-            </motion.div>
+              Analyze a startup
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </button>
+          </motion.div>
+        </motion.div>
+
+        {/* Scroll cue */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 1 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2"
+        >
+          <div className="flex h-9 w-5 items-start justify-center rounded-full border border-foreground/20 p-1">
+            <motion.div
+              animate={{ y: [0, 10, 0], opacity: [1, 0.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="h-1.5 w-0.5 rounded-full bg-foreground/60"
+            />
           </div>
+        </motion.div>
+      </section>
+
+      {/* ───────────── STATEMENT ───────────── */}
+      <section className="border-t border-border/60 px-6 py-32 md:py-40">
+        <div className="mx-auto max-w-4xl">
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[clamp(1.5rem,3.5vw,2.75rem)] font-light leading-[1.2] tracking-[-0.02em]"
+          >
+            We built Investometer to strip the noise from investment analysis.
+            <span className="text-muted-foreground">
+              {" "}Every score, every signal — grounded in data, refined by AI,
+              distilled into a single, honest answer.
+            </span>
+          </motion.p>
         </div>
       </section>
-      
-      {/* Features Section */}
-      <section className="py-20 bg-background relative">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="mb-4" variant="secondary">Features</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">How Investometer Works</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Our platform combines real-time market data with AI analysis to provide comprehensive investment insights.
+
+      {/* ───────────── PRODUCT PILLARS ───────────── */}
+      <section className="border-t border-border/60 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-20 max-w-2xl"
+          >
+            <p className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Two disciplines. One platform.
             </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="group hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border-border/50 bg-gradient-to-b from-card to-card/50">
-              <CardHeader>
-                <div className="mb-4 relative">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <TrendingUp className="h-7 w-7 text-primary" />
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] leading-tight">
+              Public markets. Private ventures.
+            </h2>
+          </motion.div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {[
+              {
+                eyebrow: "01 — Equities",
+                title: "Analyze Listed Stocks",
+                body: "Investibility scores and risk profiles for the top US equities, computed daily from live market data.",
+                cta: "Browse reports",
+                href: "/dashboard",
+              },
+              {
+                eyebrow: "02 — Ventures",
+                title: "Analyze a Startup",
+                body: "Submit financials, team, and traction. Receive a founder-grade evaluation you can present in the room.",
+                cta: "Start analysis",
+                href: "/analyze",
+              },
+            ].map((card, i) => (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.9, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-10 md:p-12 transition-all duration-500 hover:border-foreground/30"
+              >
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/[0.02] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+                <div className="relative flex h-full min-h-[320px] flex-col">
+                  <p className="mb-8 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                    {card.eyebrow}
+                  </p>
+                  <h3 className="text-3xl md:text-4xl font-semibold tracking-[-0.02em] leading-tight">
+                    {card.title}
+                  </h3>
+                  <p className="mt-4 max-w-md text-base font-light leading-relaxed text-muted-foreground">
+                    {card.body}
+                  </p>
+                  <div className="mt-auto pt-10">
+                    <Link
+                      to={card.href}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium tracking-wide text-foreground transition-all"
+                    >
+                      {card.cta}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
                   </div>
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
-                <CardTitle className="text-xl">Stock Analysis</CardTitle>
-                <CardDescription className="text-base">
-                  Analyze top US stocks with real-time market data
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Get investibility scores, risk assessments, and AI-generated insights for the top 50 US stocks updated daily.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="group hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border-border/50 bg-gradient-to-b from-card to-card/50">
-              <CardHeader>
-                <div className="mb-4 relative">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-accent/10 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Rocket className="h-7 w-7 text-accent" />
-                  </div>
-                  <div className="absolute inset-0 bg-accent/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-                <CardTitle className="text-xl">Startup Analysis</CardTitle>
-                <CardDescription className="text-base">
-                  Evaluate early-stage companies and startups
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Input your own startup data to get comprehensive analysis including founder assessment and growth predictions.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="group hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border-border/50 bg-gradient-to-b from-card to-card/50">
-              <CardHeader>
-                <div className="mb-4 relative">
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-green-500/10 to-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Scale className="h-7 w-7 text-green-500" />
-                  </div>
-                  <div className="absolute inset-0 bg-green-500/20 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-                <CardTitle className="text-xl">Risk-Reward Balance</CardTitle>
-                <CardDescription className="text-base">
-                  Understand the balance between potential returns and risks
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Our risk-to-reward meter helps investors quickly assess if an investment's potential reward justifies the associated risks.
-                </p>
-              </CardContent>
-            </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
-      
-      {/* Stock Analysis Section */}
-      <section id="samples-section" className="py-20 bg-muted/30 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/[0.02] to-transparent pointer-events-none" />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/20">Featured Stocks</Badge>
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">Stock Analysis Reports</h2>
-              <p className="text-muted-foreground text-lg">
-                View AI-generated analysis for top US stocks with real-time market data.
+
+      {/* ───────────── FEATURED REPORTS ───────────── */}
+      <section className="border-t border-border/60 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="mb-16 flex items-end justify-between gap-8"
+          >
+            <div className="max-w-xl">
+              <p className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Featured Analyses
               </p>
+              <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] leading-tight">
+                Selected reports.
+              </h2>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {featuredSamples.map((sample, index) => (
-                <Card 
-                  key={sample.id} 
-                  className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border-border/50 bg-gradient-to-b from-card to-card/80 backdrop-blur-sm overflow-hidden"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between mb-3">
-                      <CompanyLogo 
-                        symbol={sample.id} 
-                        companyName={sample.startupName}
-                        size="md"
-                      />
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full transition-all ${
-                        sample.investibilityScore > 75 
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                          : sample.investibilityScore > 60 
-                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
-                          : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                      }`}>
-                        {sample.investibilityScore}/100
-                      </span>
+            <Link
+              to="/dashboard"
+              className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground md:inline-flex"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+
+          <div className="grid gap-px overflow-hidden rounded-3xl border border-border/60 bg-border/60 md:grid-cols-3">
+            {featuredSamples.map((sample, i) => (
+              <motion.div
+                key={sample.id}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: i * 0.08 }}
+                className="group relative bg-card p-8 transition-colors duration-300 hover:bg-muted/40"
+              >
+                <Link to={`/analysis/${sample.id}`} className="block h-full">
+                  <div className="flex items-start justify-between">
+                    <CompanyLogo
+                      symbol={sample.id}
+                      companyName={sample.startupName}
+                      size="md"
+                    />
+                    <span className="text-xs font-medium tracking-wider text-muted-foreground">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <div className="mt-10">
+                    <p className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+                      {sample.industry || "Technology"}
+                    </p>
+                    <h3 className="mt-3 text-2xl font-semibold tracking-[-0.02em]">
+                      {sample.startupName}
+                    </h3>
+                  </div>
+
+                  <div className="mt-10 flex items-end justify-between border-t border-border/60 pt-6">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                        Investibility
+                      </p>
+                      <p className="mt-1 text-3xl font-light tracking-tight">
+                        {sample.investibilityScore}
+                        <span className="text-base text-muted-foreground">/100</span>
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="outline" className="text-[10px] px-2 py-0.5">
-                        {sample.industry || 'Technology'}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-1">{sample.startupName}</CardTitle>
-                    <CardDescription className="line-clamp-2 text-sm">
-                      {sample.investibilityScore > 75 
-                        ? "Strong buy candidate with excellent fundamentals" 
-                        : sample.investibilityScore > 60 
-                        ? "Hold position with moderate growth potential"
-                        : "High risk investment requiring caution"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center py-2 px-3 bg-muted/50 rounded-lg">
-                      <span className="text-sm text-muted-foreground">Risk Level:</span>
-                      <span className={`font-semibold text-sm ${
-                        sample.overallRisk < 35 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : sample.overallRisk < 50 
-                          ? 'text-yellow-600 dark:text-yellow-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {sample.overallRisk < 35 ? 'Low' : sample.overallRisk < 50 ? 'Moderate' : 'High'}
-                      </span>
-                    </div>
-                    <Button asChild className="w-full group-hover:bg-primary/90 transition-all">
-                      <Link to={`/analysis/${sample.id}`}>
-                        View Analysis
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="flex justify-center mt-12">
-              <Button asChild size="lg" className="shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                <Link to="/dashboard">
-                  View All Stock Analyses
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowUpRight className="h-5 w-5 text-muted-foreground transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </div>
                 </Link>
-              </Button>
-            </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="mt-10 flex justify-center md:hidden">
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
+            >
+              View all reports
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
-      
-      {/* CTA Section */}
-      <section className="py-20 bg-background relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-        </div>
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Stock Analysis CTA */}
-              <Card className="group border-2 border-primary/20 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 bg-gradient-to-br from-card to-primary/[0.02]">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <TrendingUp className="h-7 w-7 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">Analyze Listed Stocks</CardTitle>
-                  <CardDescription className="text-base">
-                    Access AI-powered analysis for top 50 US stocks with real-time market data and investibility scores.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full shadow-lg hover:shadow-xl transition-all" onClick={handleAnalyzeStocks}>
-                    Browse Stock Reports
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              {/* Startup Analysis CTA */}
-              <Card className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 border-border/50 bg-gradient-to-br from-card to-accent/[0.02]">
-                <CardHeader>
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-accent/10 to-accent/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Rocket className="h-7 w-7 text-accent" />
-                  </div>
-                  <CardTitle className="text-xl">Analyze Your Startup</CardTitle>
-                  <CardDescription className="text-base">
-                    Have a startup to evaluate? Input your own data for a comprehensive AI-powered analysis.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button variant="outline" className="w-full hover:bg-accent/10 transition-all" onClick={handleAnalyzeStartup}>
-                    Start Startup Analysis
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+
+      {/* ───────────── CLOSING CTA ───────────── */}
+      <section className="border-t border-border/60 px-6 py-32 md:py-48">
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-[clamp(2.5rem,6vw,5rem)] font-semibold leading-[1] tracking-[-0.04em]"
+          >
+            Ready when
+            <br />
+            <span className="italic font-light text-muted-foreground">
+              you are.
+            </span>
+          </motion.h2>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.9, delay: 0.2 }}
+            className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6"
+          >
+            <Button
+              size="lg"
+              onClick={() => navigate("/dashboard")}
+              className="group h-12 rounded-full px-8 text-sm font-medium tracking-wide"
+            >
+              Explore the platform
+              <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+            <Link
+              to="/about"
+              className="text-sm font-medium tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Learn more →
+            </Link>
+          </motion.div>
         </div>
       </section>
     </div>
