@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { MobileDisclaimer } from "./components/MobileDisclaimer";
@@ -18,6 +18,7 @@ import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import AuthCallback from "./pages/AuthCallback";
+import SignalDeck from "./pages/SignalDeck";
 
 // Create a new QueryClient instance with retry configuration
 const queryClient = new QueryClient({
@@ -29,6 +30,22 @@ const queryClient = new QueryClient({
     }
   }
 });
+
+// Only show the beta/mobile disclaimers on pages where they're actually relevant —
+// keeping them off the landing page so the hero isn't buried under alert banners.
+const DISCLAIMER_ROUTES = ["/dashboard", "/analyze", "/analysis"];
+
+const PageDisclaimers = () => {
+  const { pathname } = useLocation();
+  const shouldShow = DISCLAIMER_ROUTES.some((route) => pathname.startsWith(route));
+  if (!shouldShow) return null;
+  return (
+    <>
+      <MobileDisclaimer />
+      <BetaDisclaimer />
+    </>
+  );
+};
 
 const App = () => {
   // Log when app is initialized
@@ -43,8 +60,7 @@ const App = () => {
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-1 pt-16 px-4"> {/* Added px-4 for better mobile padding */}
-              <MobileDisclaimer />
-              <BetaDisclaimer />
+              <PageDisclaimers />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
@@ -52,6 +68,7 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analysis/:id" element={<Analysis />} />
                 <Route path="/analyze" element={<Analyze />} />
+                <Route path="/signals" element={<SignalDeck />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<NotFound />} />

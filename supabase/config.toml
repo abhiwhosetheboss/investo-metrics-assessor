@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.analyze-startup]
 verify_jwt = false
+
+[functions.grade-risk-calls]
+verify_jwt = false

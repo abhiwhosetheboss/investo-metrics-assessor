@@ -1,4 +1,8 @@
 
+/* @import must come before any other rule (Tailwind directives included) or
+   browsers silently drop it — this font was very likely never loading. */
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -119,8 +123,7 @@
   }
 }
 
-/* Import Futura font (using Jost as a web-safe alternative with similar geometric style) */
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
+/* Futura-style font (Jost, web-safe alternative), now correctly imported at the top of this file */
 html { font-family: 'Jost', 'Futura', -apple-system, BlinkMacSystemFont, sans-serif; }
 
 /* Custom scrollbar */

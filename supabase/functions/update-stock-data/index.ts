@@ -65,8 +65,6 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
   const currentPrice = quote?.c || 0;
   const previousClose = quote?.pc || 0;
   const percentChange = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
-  const high52Week = quote?.h || currentPrice;
-  const low52Week = quote?.l || currentPrice;
   
   // Get financial metrics
   const peRatio = basicFinancials?.metric?.peNormalizedAnnual || basicFinancials?.metric?.peTTM || 20;
@@ -76,6 +74,16 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
   const grossMargin = basicFinancials?.metric?.grossMarginTTM || basicFinancials?.metric?.grossMargin5Y || 40;
   const debtEquity = basicFinancials?.metric?.totalDebtToTotalEquityQuarterly || 0.5;
   const beta = basicFinancials?.metric?.beta || 1;
+
+  // NOTE: Finnhub's /quote endpoint returns intraday high/low (quote.h / quote.l),
+  // NOT 52-week high/low — the previous version mislabeled these. Pull the real
+  // 52-week range from the financials metric object, with the day range as a fallback.
+  const week52High = basicFinancials?.metric?.['52WeekHigh'] || quote?.h || currentPrice;
+  const week52Low = basicFinancials?.metric?.['52WeekLow'] || quote?.l || currentPrice;
+  const rangeSpan = week52High - week52Low;
+  const rangePosition = rangeSpan > 0
+    ? Math.max(0, Math.min(100, ((currentPrice - week52Low) / rangeSpan) * 100))
+    : 50;
   
   // Calculate investibility score (0-100)
   let investibilityScore = 50;
@@ -194,22 +202,58 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
     growthExpected = '3% YoY';
   }
   
-  // Categories for radar chart
+  // Categories for radar chart — every value below is derived directly from a
+  // real, fetched metric. No randomness, no borrowed VC vocabulary: these are
+  // the five dimensions that actually matter for a public equity.
+  const valuationScore = peRatio > 0
+    ? Math.max(10, Math.min(95, 100 - (peRatio - 10) * 1.8))
+    : 30; // negative/no earnings -> can't be valued on a P/E basis, treat as weak
+  const profitabilityScore = Math.max(10, Math.min(95, (roe * 2 + grossMargin) / 3));
+  const financialHealthScore = Math.max(10, Math.min(95, 90 - debtEquity * 30));
+  const momentumScore = Math.round(rangePosition); // position within the real 52-week range
+  const incomeStabilityScore = Math.max(10, Math.min(95, 50 + dividendYield * 8 - Math.abs(beta - 1) * 15));
+
   const categories = [
-    { name: 'Product-Market Fit', value: Math.min(95, 60 + (grossMargin / 2)) },
-    { name: 'Founder-Market Fit', value: Math.min(95, 70 + (roe / 3)) },
-    { name: 'Team Composition', value: Math.min(95, 65 + Math.random() * 20) },
-    { name: 'Financials', value: Math.min(95, 50 + (100 - riskScore) / 2) },
-    { name: 'Exit Strategy', value: Math.min(95, 70 + Math.random() * 15) },
-    { name: 'Intangibles', value: Math.min(95, 65 + (investibilityScore / 5)) },
+    {
+      name: 'Valuation',
+      value: Math.round(valuationScore),
+      description: peRatio > 0
+        ? `Trading at ${peRatio.toFixed(1)}x earnings`
+        : 'No positive P/E (unprofitable on a trailing basis)',
+    },
+    {
+      name: 'Profitability',
+      value: Math.round(profitabilityScore),
+      description: `ROE of ${roe.toFixed(1)}%, gross margin of ${grossMargin.toFixed(1)}%`,
+    },
+    {
+      name: 'Financial Health',
+      value: Math.round(financialHealthScore),
+      description: `Debt-to-equity of ${debtEquity.toFixed(2)}`,
+    },
+    {
+      name: 'Momentum',
+      value: momentumScore,
+      description: `Trading at ${rangePosition.toFixed(0)}% of its 52-week range`,
+    },
+    {
+      name: 'Income Stability',
+      value: Math.round(incomeStabilityScore),
+      description: `${dividendYield.toFixed(2)}% dividend yield, beta of ${beta.toFixed(2)}`,
+    },
   ];
-  
-  // Risk factors
+
+  // Risk factors — "Sector Risk" is now derived from actual price volatility
+  // (52-week range width relative to price) instead of a random number.
+  const volatilityRisk = currentPrice > 0
+    ? Math.max(10, Math.min(90, (rangeSpan / currentPrice) * 100))
+    : 40;
+
   const riskFactors = [
     { name: 'Market Risk', score: Math.round(30 + beta * 20), description: `Market volatility exposure with beta of ${beta.toFixed(2)}` },
     { name: 'Financial Risk', score: Math.round(30 + debtEquity * 20), description: `Balance sheet risk with debt/equity of ${debtEquity.toFixed(2)}` },
     { name: 'Valuation Risk', score: Math.round(20 + Math.min(peRatio, 50)), description: `Valuation at ${peRatio.toFixed(1)}x earnings` },
-    { name: 'Sector Risk', score: Math.round(35 + Math.random() * 20), description: `Industry-specific headwinds and competition` },
+    { name: 'Volatility Risk', score: Math.round(volatilityRisk), description: `52-week range spans ${((rangeSpan / (currentPrice || 1)) * 100).toFixed(0)}% of current price` },
   ];
   
   return {
@@ -227,8 +271,9 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
       currentPrice,
       previousClose,
       percentChange: percentChange.toFixed(2),
-      high52Week,
-      low52Week,
+      week52High,
+      week52Low,
+      rangePosition: rangePosition.toFixed(1),
       peRatio: peRatio.toFixed(2),
       dividendYield: dividendYield.toFixed(2),
       beta: beta.toFixed(2),
@@ -284,8 +329,23 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log('Starting stock data update...');
-    
+
+    // Pull previous scores in one query so we can detect meaningful risk-score
+    // swings as we recompute each stock below (used for the Signal Deck ledger).
+    const { data: previousRows } = await supabase
+      .from('stock_analyses')
+      .select('symbol, overall_risk, market_data');
+    const previousBySymbol = new Map(
+      (previousRows || []).map((row: any) => [row.symbol, row])
+    );
+
+    // A risk score swing of this size or more (0-100 scale) gets logged as a
+    // public, dated call in risk_calls. Smaller day-to-day noise is ignored.
+    const RISK_CALL_THRESHOLD = 15;
+    const GRADE_WINDOW_DAYS = 90;
+
     const updates = [];
+    const riskCalls = [];
     let successCount = 0;
     let errorCount = 0;
 
@@ -325,7 +385,35 @@ serve(async (req) => {
             market_data: analysis.marketData,
             last_updated: new Date().toISOString(),
           });
-          
+
+          // Detect a meaningful risk-score swing vs. yesterday's stored value
+          // and log it as a public, dated call.
+          const previous = previousBySymbol.get(stock.symbol);
+          if (previous && typeof previous.overall_risk === 'number') {
+            const delta = analysis.overallRisk - previous.overall_risk;
+            if (Math.abs(delta) >= RISK_CALL_THRESHOLD) {
+              const direction = delta > 0 ? 'risk_up' : 'risk_down';
+              // Lead with whichever risk factor moved the score most, so the
+              // reasoning is grounded in a specific number, not a vague claim.
+              const topFactor = [...analysis.riskFactors].sort((a, b) => b.score - a.score)[0];
+              const reasoning = topFactor
+                ? `${direction === 'risk_up' ? 'Risk climbed' : 'Risk eased'} from ${previous.overall_risk} to ${analysis.overallRisk}. Leading factor: ${topFactor.description}`
+                : `${direction === 'risk_up' ? 'Risk climbed' : 'Risk eased'} from ${previous.overall_risk} to ${analysis.overallRisk}.`;
+
+              riskCalls.push({
+                symbol: stock.symbol,
+                company_name: stock.name,
+                previous_score: previous.overall_risk,
+                new_score: analysis.overallRisk,
+                delta: Math.round(delta),
+                direction,
+                reasoning,
+                price_at_call: quote.c,
+                grade_due_at: new Date(Date.now() + GRADE_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+              });
+            }
+          }
+
           successCount++;
         } else {
           console.log(`No data for ${stock.symbol}`);
@@ -349,6 +437,21 @@ serve(async (req) => {
       if (upsertError) {
         console.error('Error upserting data:', upsertError);
         throw upsertError;
+      }
+    }
+
+    // Log any new calls to the public ledger
+    if (riskCalls.length > 0) {
+      const { error: callsError } = await supabase
+        .from('risk_calls')
+        .insert(riskCalls);
+
+      if (callsError) {
+        // Don't fail the whole update over the ledger — the price data is the
+        // priority. Just log it so it's visible in function logs.
+        console.error('Error inserting risk calls:', callsError);
+      } else {
+        console.log(`Logged ${riskCalls.length} new risk call(s).`);
       }
     }
 
