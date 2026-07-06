@@ -80,8 +80,48 @@ let trainingStatus = {
 };
 
 // Fetch analysis from database first, then fall back to sample data
+// A v4 UUID, which is what Supabase generates for rows in the `analyses`
+// (startup) table. Stock symbols never look like this, so we can use it to
+// decide which table a given id belongs to before querying.
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const getAnalysisById = async (id: string): Promise<AnalysisResult> => {
-  // Try to fetch from database first
+  // A startup analysis is stored in `analyses` with a real UUID primary key.
+  // Check that table first when the id looks like a UUID — this is the path
+  // every "Analyze a startup" result takes after being saved.
+  if (UUID_PATTERN.test(id)) {
+    try {
+      const { data, error } = await supabase
+        .from('analyses')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (data && !error) {
+        return {
+          id: data.id,
+          startupName: data.startup_name,
+          industry: data.industry || undefined,
+          investibilityScore: data.investibility_score,
+          overallRisk: data.overall_risk,
+          businessModel: data.business_model || undefined,
+          founderTrustRating: data.founder_trust_rating || undefined,
+          pmfScore: data.pmf_score || undefined,
+          growthExpected: data.growth_expected || undefined,
+          riskFactors: (data.risk_factors as any[]) || [],
+          strengths: (data.strengths as any[]) || [],
+          weaknesses: (data.weaknesses as any[]) || [],
+          suggestions: (data.suggestions as any[]) || [],
+          categories: (data.categories as any[]) || [],
+          createdAt: data.created_at,
+        };
+      }
+    } catch (err) {
+      console.log('Startup analysis fetch failed:', err);
+    }
+  }
+
+  // Otherwise, treat it as a public equity lookup by stock symbol.
   try {
     const { data, error } = await supabase
       .from('stock_analyses')
@@ -111,8 +151,15 @@ export const getAnalysisById = async (id: string): Promise<AnalysisResult> => {
     console.log('Database fetch failed, using sample data:', err);
   }
 
-  // Fall back to sample data
-  let result = sampleData.find(item => item.id === id) || generateMockAnalysis(id);
+  // Fall back to curated sample data only. We deliberately do NOT fall back to
+  // randomly generated numbers here anymore — showing fabricated scores for a
+  // fictional "Demo Startup" when a real lookup fails is worse than an honest
+  // "not found," especially for a tool whose whole premise is data-grounded
+  // analysis. If nothing matches, let the caller's not-found/error state handle it.
+  let result = sampleData.find(item => item.id === id);
+  if (!result) {
+    throw new Error('Analysis not found');
+  }
   
   // Add AI model information if one is selected
   const storedModel = localStorage.getItem("selectedAIModel");
@@ -338,11 +385,16 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
       );
     }
 
-    // Save analysis to database if user is authenticated
+    // Save analysis to database if user is authenticated.
+    // IMPORTANT: we capture the real DB-generated id (.select().single()) and
+    // overwrite result.id with it. Previously result.id stayed as the ephemeral
+    // `ai-<timestamp>-<random>` string from the edge function, which never
+    // matched any row — so navigating to /analysis/:id after a fresh analysis
+    // silently fell through to random mock data instead of the real result.
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { error: insertError } = await supabase
+        const { data: insertedRow, error: insertError } = await supabase
           .from('analyses')
           .insert({
             user_id: session.user.id,
@@ -360,8 +412,14 @@ export const analyzeStartupWithAI = async (startupData: any, modelId: string): P
             risk_factors: result.riskFactors,
             categories: result.categories,
             raw_input: startupData,
-          });
-        
+          })
+          .select('id')
+          .single();
+
+        if (!insertError && insertedRow) {
+          result.id = insertedRow.id;
+        }
+
         if (insertError) {
           console.error('Error saving analysis to database:', insertError);
         } else {
@@ -772,95 +830,3 @@ const generateSmartAnalysis = (startupData: any): AnalysisResult => {
   };
 };
 
-// Generate mock data for demo purposes (fallback)
-const generateMockAnalysis = (id: string): AnalysisResult => {
-  const investibilityScore = Math.floor(Math.random() * 100);
-  const overallRisk = 100 - investibilityScore;
-  
-  return {
-    id,
-    startupName: "Demo Startup",
-    investibilityScore,
-    overallRisk,
-    riskFactors: [
-      {
-        name: "Market Risk",
-        score: Math.floor(Math.random() * 100),
-        description: "Risk associated with market conditions and demand."
-      },
-      {
-        name: "Team Risk",
-        score: Math.floor(Math.random() * 100),
-        description: "Risk associated with team composition and expertise."
-      },
-      {
-        name: "Financial Risk",
-        score: Math.floor(Math.random() * 100),
-        description: "Risk associated with financial stability and projections."
-      },
-      {
-        name: "Technology Risk",
-        score: Math.floor(Math.random() * 100),
-        description: "Risk associated with technological implementation and scalability."
-      }
-    ],
-    strengths: [
-      {
-        text: "Strong founding team with industry experience",
-        impact: "high"
-      },
-      {
-        text: "Validated product with early customer traction",
-        impact: "medium"
-      },
-      {
-        text: "Scalable business model with high margins",
-        impact: "critical"
-      }
-    ],
-    weaknesses: [
-      {
-        text: "Limited runway with high burn rate",
-        impact: "high"
-      },
-      {
-        text: "Market competition from established players",
-        impact: "medium"
-      },
-      {
-        text: "Regulatory challenges in target markets",
-        impact: "low"
-      }
-    ],
-    suggestions: [
-      {
-        title: "Strengthen Financial Position",
-        description: "Reduce burn rate by 20% and focus on extending runway before next fundraising round.",
-        priority: "high"
-      },
-      {
-        title: "Expand Advisory Board",
-        description: "Add industry experts to advisors to help navigate regulatory challenges.",
-        priority: "medium"
-      },
-      {
-        title: "Improve Customer Retention",
-        description: "Implement stronger customer success program to increase retention rates.",
-        priority: "medium"
-      }
-    ],
-    categories: [
-      { name: "Product-Market Fit", value: Math.floor(Math.random() * 100) },
-      { name: "Founder-Market Fit", value: Math.floor(Math.random() * 100) },
-      { name: "Team Composition", value: Math.floor(Math.random() * 100) },
-      { name: "Financials", value: Math.floor(Math.random() * 100) },
-      { name: "Exit Strategy", value: Math.floor(Math.random() * 100) },
-      { name: "Intangibles", value: Math.floor(Math.random() * 100) }
-    ],
-    createdAt: new Date().toISOString(),
-    businessModel: ["b2b", "b2c", "d2c", "marketplace"][Math.floor(Math.random() * 4)],
-    founderTrustRating: Math.floor(Math.random() * 10) + 1,
-    pmfScore: Math.floor(Math.random() * 100),
-    growthExpected: `${Math.floor(Math.random() * 100)}%`
-  };
-};

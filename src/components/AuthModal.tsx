@@ -84,7 +84,6 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     setAuthError(null);
     
     try {
-      console.log("Attempting Google sign in...");
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -113,7 +112,6 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     setAuthError(null);
     
     try {
-      console.log("Attempting to sign in with:", values.email);
       
       // Try to sign in with Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -128,7 +126,6 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
       
       // If successful, store user info
       if (data && data.user) {
-        console.log("Login successful, user data:", data.user);
         
         // Store auth state in localStorage for backward compatibility
         localStorage.setItem("isAuthenticated", "true");
@@ -184,7 +181,6 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
     setAuthError(null);
     
     try {
-      console.log("Attempting to sign up with:", values.email);
       
       // Try to sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -205,7 +201,6 @@ const AuthModal = ({ buttonVariant = "outline", children, open, onOpenChange }: 
       
       // If successful, store user info
       if (data && data.user) {
-        console.log("Signup successful, user data:", data.user);
         
         // Store auth state in localStorage for backward compatibility
         localStorage.setItem("isAuthenticated", "true");

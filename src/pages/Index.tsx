@@ -143,7 +143,7 @@ const Index = () => {
             </h2>
           </motion.div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
               {
                 eyebrow: "01 — Equities",
@@ -153,7 +153,14 @@ const Index = () => {
                 href: "/dashboard",
               },
               {
-                eyebrow: "02 — Ventures",
+                eyebrow: "02 — Signal Deck",
+                title: "The Public Call Ledger",
+                body: "Every meaningful risk-score swing, logged and dated the moment it happens. Graded 90 days later against what actually happened.",
+                cta: "See the calls",
+                href: "/signals",
+              },
+              {
+                eyebrow: "03 — Ventures",
                 title: "Analyze a Startup",
                 body: "Submit financials, team, and traction. Receive a founder-grade evaluation you can present in the room.",
                 cta: "Start analysis",

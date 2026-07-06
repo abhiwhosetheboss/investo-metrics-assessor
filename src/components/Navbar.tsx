@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn } from "lucide-react";
+import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import AuthModal from "./AuthModal";
@@ -17,6 +17,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { title: "Home", href: "/", icon: ChevronRight },
   { title: "Stocks", href: "/dashboard", icon: BarChart3 },
+  { title: "Signal Deck", href: "/signals", icon: Radio },
   { title: "Startups", href: "/analyze", icon: LineChart },
   { title: "About", href: "/about", icon: Info }
 ];

@@ -80,6 +80,63 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_calls: {
+        Row: {
+          called_at: string
+          company_name: string
+          delta: number
+          direction: string
+          grade_due_at: string
+          graded: boolean
+          graded_at: string | null
+          id: string
+          new_score: number
+          outcome: string | null
+          previous_score: number
+          price_at_call: number | null
+          price_at_grading: number | null
+          price_change_pct: number | null
+          reasoning: string
+          symbol: string
+        }
+        Insert: {
+          called_at?: string
+          company_name: string
+          delta: number
+          direction: string
+          grade_due_at: string
+          graded?: boolean
+          graded_at?: string | null
+          id?: string
+          new_score: number
+          outcome?: string | null
+          previous_score: number
+          price_at_call?: number | null
+          price_at_grading?: number | null
+          price_change_pct?: number | null
+          reasoning: string
+          symbol: string
+        }
+        Update: {
+          called_at?: string
+          company_name?: string
+          delta?: number
+          direction?: string
+          grade_due_at?: string
+          graded?: boolean
+          graded_at?: string | null
+          id?: string
+          new_score?: number
+          outcome?: string | null
+          previous_score?: number
+          price_at_call?: number | null
+          price_at_grading?: number | null
+          price_change_pct?: number | null
+          reasoning?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
       stock_analyses: {
         Row: {
           business_model: string | null
