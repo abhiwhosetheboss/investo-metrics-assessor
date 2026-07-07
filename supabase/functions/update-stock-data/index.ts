@@ -58,7 +58,46 @@ const TOP_STOCKS = [
   { symbol: 'PM', name: 'Philip Morris International', industry: 'Consumer Goods' },
   { symbol: 'RTX', name: 'RTX Corp', industry: 'Aerospace/Defense' },
   { symbol: 'QCOM', name: 'Qualcomm', industry: 'Semiconductors' },
+  // Expanded coverage — high-signal names across AI, fintech, semis, biotech, EV, industrials.
+  { symbol: 'PLTR', name: 'Palantir Technologies', industry: 'AI/Defense Software' },
+  { symbol: 'COIN', name: 'Coinbase Global', industry: 'Crypto Exchange' },
+  { symbol: 'SQ', name: 'Block Inc', industry: 'Fintech' },
+  { symbol: 'CRWD', name: 'CrowdStrike Holdings', industry: 'Cybersecurity' },
+  { symbol: 'PANW', name: 'Palo Alto Networks', industry: 'Cybersecurity' },
+  { symbol: 'SMCI', name: 'Super Micro Computer', industry: 'AI Infrastructure' },
+  { symbol: 'MU', name: 'Micron Technology', industry: 'Semiconductors' },
+  { symbol: 'ASML', name: 'ASML Holding', industry: 'Semiconductor Equipment' },
+  { symbol: 'TSM', name: 'Taiwan Semiconductor', industry: 'Semiconductors' },
+  { symbol: 'BABA', name: 'Alibaba Group', industry: 'E-Commerce' },
+  { symbol: 'RIVN', name: 'Rivian Automotive', industry: 'EV' },
+  { symbol: 'ENPH', name: 'Enphase Energy', industry: 'Clean Energy' },
+  { symbol: 'MRNA', name: 'Moderna Inc', industry: 'Biotech' },
+  { symbol: 'VRTX', name: 'Vertex Pharmaceuticals', industry: 'Biotech' },
+  { symbol: 'DAL', name: 'Delta Air Lines', industry: 'Airlines' },
+  { symbol: 'ABNB', name: 'Airbnb Inc', industry: 'Travel/Hospitality' },
+  { symbol: 'SHOP', name: 'Shopify Inc', industry: 'E-Commerce Software' },
+  { symbol: 'ROKU', name: 'Roku Inc', industry: 'Streaming' },
+  { symbol: 'LULU', name: 'Lululemon Athletica', industry: 'Apparel' },
+  { symbol: 'CAT', name: 'Caterpillar Inc', industry: 'Industrials' },
+  { symbol: 'DE', name: 'Deere & Company', industry: 'Industrials' },
+  { symbol: 'SCHW', name: 'Charles Schwab', industry: 'Financial Services' },
+  { symbol: 'O', name: 'Realty Income', industry: 'REIT' },
+  { symbol: 'UBER', name: 'Uber Technologies', industry: 'Mobility' },
+  { symbol: 'SOFI', name: 'SoFi Technologies', industry: 'Fintech' },
 ];
+
+// Finnhub free tier allows ~1 request/second. Every fetch to Finnhub must
+// wait at least this long AFTER the previous fetch, regardless of which stock
+// it belongs to. 1100ms gives a safety margin.
+const FINNHUB_MIN_INTERVAL_MS = 1100;
+let lastFinnhubCallAt = 0;
+async function finnhubFetch(url: string): Promise<Response> {
+  const now = Date.now();
+  const wait = Math.max(0, lastFinnhubCallAt + FINNHUB_MIN_INTERVAL_MS - now);
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  lastFinnhubCallAt = Date.now();
+  return fetch(url);
+}
 
 // Calculate analysis scores based on market data
 function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, stockInfo: any) {
@@ -349,22 +388,37 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
 
-    // Process stocks in batches to avoid rate limits
-    for (const stock of TOP_STOCKS) {
+
+    // Batching: the full list is ~75 stocks × 2 API calls × 1.1s ≈ ~165s,
+    // which pushes past typical edge function time budgets. Support an optional
+    // ?batch=1 or ?batch=2 query param so the scheduled job can process the
+    // list in two halves via two separate runs. No batch param = process all.
+    const url = new URL(req.url);
+    const batchParam = url.searchParams.get('batch');
+    let stocksToProcess = TOP_STOCKS;
+    if (batchParam === '1' || batchParam === '2') {
+      const mid = Math.ceil(TOP_STOCKS.length / 2);
+      stocksToProcess = batchParam === '1'
+        ? TOP_STOCKS.slice(0, mid)
+        : TOP_STOCKS.slice(mid);
+      console.log(`Processing batch ${batchParam}: ${stocksToProcess.length} stocks`);
+    }
+
+    for (const stock of stocksToProcess) {
       try {
-        // Fetch quote data
-        const quoteResponse = await fetch(
+        // Each Finnhub call is throttled to >=1.1s apart via finnhubFetch,
+        // so both the quote and the financials request are individually rate-safe.
+        const quoteResponse = await finnhubFetch(
           `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${finnhubApiKey}`
         );
         const quote = await quoteResponse.json();
 
-        // Fetch basic financials
-        const financialsResponse = await fetch(
+        const financialsResponse = await finnhubFetch(
           `https://finnhub.io/api/v1/stock/metric?symbol=${stock.symbol}&metric=all&token=${finnhubApiKey}`
         );
         const basicFinancials = await financialsResponse.json();
 
-        if (quote.c) { // Only process if we got valid data
+        if (quote.c) {
           const analysis = calculateAnalysis(quote, basicFinancials, stock.symbol, stock);
 
           updates.push({
@@ -386,15 +440,11 @@ serve(async (req) => {
             last_updated: new Date().toISOString(),
           });
 
-          // Detect a meaningful risk-score swing vs. yesterday's stored value
-          // and log it as a public, dated call.
           const previous = previousBySymbol.get(stock.symbol);
           if (previous && typeof previous.overall_risk === 'number') {
             const delta = analysis.overallRisk - previous.overall_risk;
             if (Math.abs(delta) >= RISK_CALL_THRESHOLD) {
               const direction = delta > 0 ? 'risk_up' : 'risk_down';
-              // Lead with whichever risk factor moved the score most, so the
-              // reasoning is grounded in a specific number, not a vague claim.
               const topFactor = [...analysis.riskFactors].sort((a, b) => b.score - a.score)[0];
               const reasoning = topFactor
                 ? `${direction === 'risk_up' ? 'Risk climbed' : 'Risk eased'} from ${previous.overall_risk} to ${analysis.overallRisk}. Leading factor: ${topFactor.description}`
@@ -419,9 +469,6 @@ serve(async (req) => {
           console.log(`No data for ${stock.symbol}`);
           errorCount++;
         }
-
-        // Rate limiting - Finnhub free tier allows 60 calls/minute
-        await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error) {
         console.error(`Error fetching ${stock.symbol}:`, error);
         errorCount++;
@@ -447,8 +494,6 @@ serve(async (req) => {
         .insert(riskCalls);
 
       if (callsError) {
-        // Don't fail the whole update over the ledger — the price data is the
-        // priority. Just log it so it's visible in function logs.
         console.error('Error inserting risk calls:', callsError);
       } else {
         console.log(`Logged ${riskCalls.length} new risk call(s).`);
@@ -458,11 +503,12 @@ serve(async (req) => {
     console.log(`Update complete. Success: ${successCount}, Errors: ${errorCount}`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        updated: successCount, 
+      JSON.stringify({
+        success: true,
+        batch: batchParam ?? 'all',
+        updated: successCount,
         errors: errorCount,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
