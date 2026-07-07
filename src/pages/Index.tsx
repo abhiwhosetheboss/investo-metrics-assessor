@@ -147,7 +147,7 @@ const Index = () => {
             </h2>
           </motion.div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2">
             {[
               {
                 eyebrow: "01 — Equities",
@@ -163,13 +163,6 @@ const Index = () => {
                 cta: "See the calls",
                 href: "/signals",
               },
-              {
-                eyebrow: "03 — Ventures",
-                title: "Analyze a Startup",
-                body: "Submit financials, team, and traction. Receive a founder-grade evaluation you can present in the room.",
-                cta: "Start analysis",
-                href: "/analyze",
-              },
             ].map((card, i) => (
               <motion.div
                 key={card.title}
@@ -177,18 +170,18 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-80px" }}
                 transition={{ duration: 0.9, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-10 md:p-12 transition-all duration-500 hover:border-foreground/30"
+                className="group relative overflow-hidden rounded-3xl border border-border/60 bg-card p-10 md:p-14 transition-all duration-500 hover:border-foreground/30"
               >
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/[0.02] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                <div className="relative flex h-full min-h-[320px] flex-col">
+                <div className="relative flex h-full min-h-[380px] flex-col">
                   <p className="mb-8 text-xs uppercase tracking-[0.3em] text-muted-foreground">
                     {card.eyebrow}
                   </p>
-                  <h3 className="text-3xl md:text-4xl font-semibold tracking-[-0.02em] leading-tight">
+                  <h3 className="text-4xl md:text-5xl font-semibold tracking-[-0.02em] leading-tight">
                     {card.title}
                   </h3>
-                  <p className="mt-4 max-w-md text-base font-light leading-relaxed text-muted-foreground">
+                  <p className="mt-5 max-w-md text-base md:text-lg font-light leading-relaxed text-muted-foreground">
                     {card.body}
                   </p>
                   <div className="mt-auto pt-10">
@@ -204,6 +197,33 @@ const Index = () => {
               </motion.div>
             ))}
           </div>
+
+          {/* Secondary — Startup analysis lives here, deliberately smaller. */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-6"
+          >
+            <Link
+              to="/analyze"
+              className="group flex flex-col gap-2 rounded-2xl border border-border/60 bg-card/50 px-8 py-6 transition-colors hover:border-foreground/30 hover:bg-card sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                  Also available
+                </p>
+                <p className="mt-1 text-lg font-medium tracking-[-0.01em]">
+                  Analyze a private startup
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground group-hover:text-foreground">
+                Open the venture tool
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </span>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
