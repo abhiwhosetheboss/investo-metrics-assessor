@@ -140,10 +140,10 @@ const Index = () => {
             className="mb-20 max-w-2xl"
           >
             <p className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Two disciplines. One platform.
+              Two flagship products.
             </p>
             <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] leading-tight">
-              Public markets. Private ventures.
+              Stocks. And the calls we make on them.
             </h2>
           </motion.div>
 
