@@ -18,8 +18,12 @@ const navItems: NavItem[] = [
   { title: "Home", href: "/", icon: ChevronRight },
   { title: "Stocks", href: "/dashboard", icon: BarChart3 },
   { title: "Signal Deck", href: "/signals", icon: Radio },
-  { title: "Startups", href: "/analyze", icon: LineChart },
   { title: "About", href: "/about", icon: Info }
+];
+
+// Secondary destinations — reachable but intentionally de-emphasised.
+const secondaryItems: NavItem[] = [
+  { title: "Analyze a Startup", href: "/analyze", icon: LineChart },
 ];
 
 const Navbar = () => {
