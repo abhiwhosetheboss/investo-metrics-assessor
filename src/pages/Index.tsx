@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { sampleData } from "@/utils/sampleData";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import { LogoMarquee } from "@/components/LogoMarquee";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
@@ -105,9 +106,12 @@ const Index = () => {
           </div>
         </motion.div>
       </section>
+      {/* ───────────── LOGO MARQUEE ───────────── */}
+      <LogoMarquee />
 
       {/* ───────────── STATEMENT ───────────── */}
       <section className="border-t border-border/60 px-6 py-32 md:py-40">
+
         <div className="mx-auto max-w-4xl">
           <motion.p
             initial={{ opacity: 0, y: 30 }}
