@@ -403,7 +403,36 @@ serve(async (req) => {
         );
         const basicFinancials = await financialsResponse.json();
 
-        if (quote.c) { // Only process if we got valid data
+    // Batching: the full list is ~75 stocks × 2 API calls × 1.1s ≈ ~165s,
+    // which pushes past typical edge function time budgets. Support an optional
+    // ?batch=1 or ?batch=2 query param so the scheduled job can process the
+    // list in two halves via two separate runs. No batch param = process all.
+    const url = new URL(req.url);
+    const batchParam = url.searchParams.get('batch');
+    let stocksToProcess = TOP_STOCKS;
+    if (batchParam === '1' || batchParam === '2') {
+      const mid = Math.ceil(TOP_STOCKS.length / 2);
+      stocksToProcess = batchParam === '1'
+        ? TOP_STOCKS.slice(0, mid)
+        : TOP_STOCKS.slice(mid);
+      console.log(`Processing batch ${batchParam}: ${stocksToProcess.length} stocks`);
+    }
+
+    for (const stock of stocksToProcess) {
+      try {
+        // Each Finnhub call is throttled to >=1.1s apart via finnhubFetch,
+        // so both the quote and the financials request are individually rate-safe.
+        const quoteResponse = await finnhubFetch(
+          `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${finnhubApiKey}`
+        );
+        const quote = await quoteResponse.json();
+
+        const financialsResponse = await finnhubFetch(
+          `https://finnhub.io/api/v1/stock/metric?symbol=${stock.symbol}&metric=all&token=${finnhubApiKey}`
+        );
+        const basicFinancials = await financialsResponse.json();
+
+        if (quote.c) {
           const analysis = calculateAnalysis(quote, basicFinancials, stock.symbol, stock);
 
           updates.push({
@@ -425,15 +454,11 @@ serve(async (req) => {
             last_updated: new Date().toISOString(),
           });
 
-          // Detect a meaningful risk-score swing vs. yesterday's stored value
-          // and log it as a public, dated call.
           const previous = previousBySymbol.get(stock.symbol);
           if (previous && typeof previous.overall_risk === 'number') {
             const delta = analysis.overallRisk - previous.overall_risk;
             if (Math.abs(delta) >= RISK_CALL_THRESHOLD) {
               const direction = delta > 0 ? 'risk_up' : 'risk_down';
-              // Lead with whichever risk factor moved the score most, so the
-              // reasoning is grounded in a specific number, not a vague claim.
               const topFactor = [...analysis.riskFactors].sort((a, b) => b.score - a.score)[0];
               const reasoning = topFactor
                 ? `${direction === 'risk_up' ? 'Risk climbed' : 'Risk eased'} from ${previous.overall_risk} to ${analysis.overallRisk}. Leading factor: ${topFactor.description}`
@@ -458,9 +483,6 @@ serve(async (req) => {
           console.log(`No data for ${stock.symbol}`);
           errorCount++;
         }
-
-        // Rate limiting - Finnhub free tier allows 60 calls/minute
-        await new Promise(resolve => setTimeout(resolve, 200));
       } catch (error) {
         console.error(`Error fetching ${stock.symbol}:`, error);
         errorCount++;
@@ -486,8 +508,6 @@ serve(async (req) => {
         .insert(riskCalls);
 
       if (callsError) {
-        // Don't fail the whole update over the ledger — the price data is the
-        // priority. Just log it so it's visible in function logs.
         console.error('Error inserting risk calls:', callsError);
       } else {
         console.log(`Logged ${riskCalls.length} new risk call(s).`);
@@ -497,11 +517,12 @@ serve(async (req) => {
     console.log(`Update complete. Success: ${successCount}, Errors: ${errorCount}`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        updated: successCount, 
+      JSON.stringify({
+        success: true,
+        batch: batchParam ?? 'all',
+        updated: successCount,
         errors: errorCount,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
