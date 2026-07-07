@@ -388,20 +388,6 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
 
-    // Process stocks in batches to avoid rate limits
-    for (const stock of TOP_STOCKS) {
-      try {
-        // Fetch quote data
-        const quoteResponse = await fetch(
-          `https://finnhub.io/api/v1/quote?symbol=${stock.symbol}&token=${finnhubApiKey}`
-        );
-        const quote = await quoteResponse.json();
-
-        // Fetch basic financials
-        const financialsResponse = await fetch(
-          `https://finnhub.io/api/v1/stock/metric?symbol=${stock.symbol}&metric=all&token=${finnhubApiKey}`
-        );
-        const basicFinancials = await financialsResponse.json();
 
     // Batching: the full list is ~75 stocks × 2 API calls × 1.1s ≈ ~165s,
     // which pushes past typical edge function time budgets. Support an optional
