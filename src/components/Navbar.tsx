@@ -188,6 +188,19 @@ const Navbar = () => {
                   <span>{item.title}</span>
                 </Link>
               ))}
+              <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
+                <p className="px-3 pb-1 text-[10px] uppercase tracking-[0.25em] text-muted-foreground">More tools</p>
+                {secondaryItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="flex items-center space-x-2 py-2 text-muted-foreground hover:text-primary rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 px-3 text-sm"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
+                  </Link>
+                ))}
+              </div>
               <Button 
                 className="w-full mt-4 rounded-full"
                 onClick={handleStartAnalysis}
