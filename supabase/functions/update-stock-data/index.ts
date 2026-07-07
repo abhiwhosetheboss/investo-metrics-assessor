@@ -58,7 +58,46 @@ const TOP_STOCKS = [
   { symbol: 'PM', name: 'Philip Morris International', industry: 'Consumer Goods' },
   { symbol: 'RTX', name: 'RTX Corp', industry: 'Aerospace/Defense' },
   { symbol: 'QCOM', name: 'Qualcomm', industry: 'Semiconductors' },
+  // Expanded coverage — high-signal names across AI, fintech, semis, biotech, EV, industrials.
+  { symbol: 'PLTR', name: 'Palantir Technologies', industry: 'AI/Defense Software' },
+  { symbol: 'COIN', name: 'Coinbase Global', industry: 'Crypto Exchange' },
+  { symbol: 'SQ', name: 'Block Inc', industry: 'Fintech' },
+  { symbol: 'CRWD', name: 'CrowdStrike Holdings', industry: 'Cybersecurity' },
+  { symbol: 'PANW', name: 'Palo Alto Networks', industry: 'Cybersecurity' },
+  { symbol: 'SMCI', name: 'Super Micro Computer', industry: 'AI Infrastructure' },
+  { symbol: 'MU', name: 'Micron Technology', industry: 'Semiconductors' },
+  { symbol: 'ASML', name: 'ASML Holding', industry: 'Semiconductor Equipment' },
+  { symbol: 'TSM', name: 'Taiwan Semiconductor', industry: 'Semiconductors' },
+  { symbol: 'BABA', name: 'Alibaba Group', industry: 'E-Commerce' },
+  { symbol: 'RIVN', name: 'Rivian Automotive', industry: 'EV' },
+  { symbol: 'ENPH', name: 'Enphase Energy', industry: 'Clean Energy' },
+  { symbol: 'MRNA', name: 'Moderna Inc', industry: 'Biotech' },
+  { symbol: 'VRTX', name: 'Vertex Pharmaceuticals', industry: 'Biotech' },
+  { symbol: 'DAL', name: 'Delta Air Lines', industry: 'Airlines' },
+  { symbol: 'ABNB', name: 'Airbnb Inc', industry: 'Travel/Hospitality' },
+  { symbol: 'SHOP', name: 'Shopify Inc', industry: 'E-Commerce Software' },
+  { symbol: 'ROKU', name: 'Roku Inc', industry: 'Streaming' },
+  { symbol: 'LULU', name: 'Lululemon Athletica', industry: 'Apparel' },
+  { symbol: 'CAT', name: 'Caterpillar Inc', industry: 'Industrials' },
+  { symbol: 'DE', name: 'Deere & Company', industry: 'Industrials' },
+  { symbol: 'SCHW', name: 'Charles Schwab', industry: 'Financial Services' },
+  { symbol: 'O', name: 'Realty Income', industry: 'REIT' },
+  { symbol: 'UBER', name: 'Uber Technologies', industry: 'Mobility' },
+  { symbol: 'SOFI', name: 'SoFi Technologies', industry: 'Fintech' },
 ];
+
+// Finnhub free tier allows ~1 request/second. Every fetch to Finnhub must
+// wait at least this long AFTER the previous fetch, regardless of which stock
+// it belongs to. 1100ms gives a safety margin.
+const FINNHUB_MIN_INTERVAL_MS = 1100;
+let lastFinnhubCallAt = 0;
+async function finnhubFetch(url: string): Promise<Response> {
+  const now = Date.now();
+  const wait = Math.max(0, lastFinnhubCallAt + FINNHUB_MIN_INTERVAL_MS - now);
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  lastFinnhubCallAt = Date.now();
+  return fetch(url);
+}
 
 // Calculate analysis scores based on market data
 function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, stockInfo: any) {
