@@ -510,6 +510,19 @@ serve(async (req) => {
       }
     }
 
+    // Append today's score snapshot to the historical ledger
+    if (historyRows.length > 0) {
+      const { error: historyError } = await supabase
+        .from('stock_score_history')
+        .insert(historyRows);
+
+      if (historyError) {
+        console.error('Error inserting score history:', historyError);
+      } else {
+        console.log(`Recorded ${historyRows.length} score history rows.`);
+      }
+    }
+
     console.log(`Update complete. Success: ${successCount}, Errors: ${errorCount}`);
 
     return new Response(
