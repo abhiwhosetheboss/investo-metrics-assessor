@@ -18,6 +18,9 @@ import RiskToRewardMeter from "@/components/RiskToRewardMeter";
 import { useEffect, useState } from "react";
 import { AIModel } from "@/components/AIModelSelector";
 import { supabase } from "@/integrations/supabase/client";
+import StockHistorySection from "@/components/StockHistorySection";
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const Analysis = () => {
   const { id } = useParams<{ id: string }>();
@@ -313,6 +316,8 @@ const Analysis = () => {
           factors={analysis.riskFactors} 
         />
       </div>
+
+      {id && !UUID_PATTERN.test(id) && <StockHistorySection symbol={id} />}
 
       {/* Add Investor Match section if available */}
       {analysis.investorMatch && (

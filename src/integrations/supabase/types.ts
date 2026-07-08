@@ -200,6 +200,33 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_score_history: {
+        Row: {
+          id: string
+          investibility_score: number
+          overall_risk: number
+          price: number | null
+          recorded_at: string
+          symbol: string
+        }
+        Insert: {
+          id?: string
+          investibility_score: number
+          overall_risk: number
+          price?: number | null
+          recorded_at?: string
+          symbol: string
+        }
+        Update: {
+          id?: string
+          investibility_score?: number
+          overall_risk?: number
+          price?: number | null
+          recorded_at?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

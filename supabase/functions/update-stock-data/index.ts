@@ -385,6 +385,7 @@ serve(async (req) => {
 
     const updates = [];
     const riskCalls = [];
+    const historyRows = [];
     let successCount = 0;
     let errorCount = 0;
 
@@ -438,6 +439,15 @@ serve(async (req) => {
             categories: analysis.categories,
             market_data: analysis.marketData,
             last_updated: new Date().toISOString(),
+          });
+
+          // Snapshot today's scores + price into the historical ledger so we
+          // can render a line chart per stock over time. One row per stock per run.
+          historyRows.push({
+            symbol: stock.symbol,
+            overall_risk: analysis.overallRisk,
+            investibility_score: analysis.investibilityScore,
+            price: quote.c,
           });
 
           const previous = previousBySymbol.get(stock.symbol);
@@ -497,6 +507,19 @@ serve(async (req) => {
         console.error('Error inserting risk calls:', callsError);
       } else {
         console.log(`Logged ${riskCalls.length} new risk call(s).`);
+      }
+    }
+
+    // Append today's score snapshot to the historical ledger
+    if (historyRows.length > 0) {
+      const { error: historyError } = await supabase
+        .from('stock_score_history')
+        .insert(historyRows);
+
+      if (historyError) {
+        console.error('Error inserting score history:', historyError);
+      } else {
+        console.log(`Recorded ${historyRows.length} score history rows.`);
       }
     }
 
