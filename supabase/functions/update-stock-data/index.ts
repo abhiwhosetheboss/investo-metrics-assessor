@@ -441,6 +441,15 @@ serve(async (req) => {
             last_updated: new Date().toISOString(),
           });
 
+          // Snapshot today's scores + price into the historical ledger so we
+          // can render a line chart per stock over time. One row per stock per run.
+          historyRows.push({
+            symbol: stock.symbol,
+            overall_risk: analysis.overallRisk,
+            investibility_score: analysis.investibilityScore,
+            price: quote.c,
+          });
+
           const previous = previousBySymbol.get(stock.symbol);
           if (previous && typeof previous.overall_risk === 'number') {
             const delta = analysis.overallRisk - previous.overall_risk;
