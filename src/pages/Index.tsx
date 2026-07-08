@@ -70,7 +70,7 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6"
+            className="mt-12"
           >
             <Button
               size="lg"
@@ -80,13 +80,6 @@ const Index = () => {
               Analyze Stocks
               <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Button>
-            <button
-              onClick={() => navigate("/analyze")}
-              className="group inline-flex items-center gap-1.5 text-sm font-medium tracking-wide text-foreground/80 transition-colors hover:text-foreground"
-            >
-              Analyze a startup
-              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </button>
           </motion.div>
         </motion.div>
 

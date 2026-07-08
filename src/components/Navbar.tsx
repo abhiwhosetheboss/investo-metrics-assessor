@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn, Radio } from "lucide-react";
+import { Menu, X, ChevronRight, ChevronDown, LineChart, BarChart3, Info, LogIn, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import AuthModal from "./AuthModal";
 import UserMenu from "./UserMenu";
@@ -128,7 +134,33 @@ const Navbar = () => {
                 {item.title}
               </Link>
             ))}
-            
+
+            {/* More — secondary destinations */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none"
+                >
+                  More
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8}>
+                {secondaryItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <item.icon className="h-4 w-4 text-muted-foreground" />
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               {isAuthenticated ? (
