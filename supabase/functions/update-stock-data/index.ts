@@ -385,6 +385,7 @@ serve(async (req) => {
 
     const updates = [];
     const riskCalls = [];
+    const historyRows = [];
     let successCount = 0;
     let errorCount = 0;
 
