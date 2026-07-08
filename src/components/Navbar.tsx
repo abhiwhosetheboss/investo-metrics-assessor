@@ -134,7 +134,33 @@ const Navbar = () => {
                 {item.title}
               </Link>
             ))}
-            
+
+            {/* More — secondary destinations */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none"
+                >
+                  More
+                  <ChevronDown className="h-3.5 w-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8}>
+                {secondaryItems.map((item) => (
+                  <DropdownMenuItem key={item.href} asChild>
+                    <Link
+                      to={item.href}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <item.icon className="h-4 w-4 text-muted-foreground" />
+                      {item.title}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               {isAuthenticated ? (
