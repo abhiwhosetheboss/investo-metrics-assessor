@@ -317,6 +317,8 @@ const Analysis = () => {
         />
       </div>
 
+      {id && !UUID_PATTERN.test(id) && <StockHistorySection symbol={id} />}
+
       {/* Add Investor Match section if available */}
       {analysis.investorMatch && (
         <div className="mb-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6">
