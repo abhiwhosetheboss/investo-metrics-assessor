@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronRight, LineChart, BarChart3, Info, LogIn, Radio } from "lucide-react";
+import { Menu, X, ChevronRight, ChevronDown, LineChart, BarChart3, Info, LogIn, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import AuthModal from "./AuthModal";
 import UserMenu from "./UserMenu";
