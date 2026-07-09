@@ -99,166 +99,174 @@ async function finnhubFetch(url: string): Promise<Response> {
   return fetch(url);
 }
 
-// Calculate analysis scores based on market data
+// ─────────────────────────────────────────────────────────────────────────────
+// InvestibilityScore methodology (0-100, weights sum to 100)
+// ─────────────────────────────────────────────────────────────────────────────
+//   Valuation           (P/E ratio)                              max 20 pts
+//   Profitability       (ROE + gross margin)                     max 20 pts
+//   Growth              (revenue YoY + EPS YoY)                  max 25 pts
+//   Financial Health    (debt-to-equity + current ratio)         max 20 pts
+//   Momentum            (position in 52-week range)              max 10 pts
+//   Income              (dividend yield)                          max  5 pts
+//                                                                ─────────
+//                                                                    100 pts
+//
+// Growth and liquidity are pulled from Finnhub's basicFinancials.metric object
+// (revenueGrowthTTMYoy / epsGrowthTTMYoy / currentRatioQuarterly). Momentum is
+// derived from rangePosition (where the price sits between the 52-week high
+// and low), replacing the noisier single-day percentChange signal.
+// ─────────────────────────────────────────────────────────────────────────────
 function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, stockInfo: any) {
+  const m = basicFinancials?.metric || {};
   const currentPrice = quote?.c || 0;
   const previousClose = quote?.pc || 0;
   const percentChange = previousClose ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
-  
-  // Get financial metrics
-  const peRatio = basicFinancials?.metric?.peNormalizedAnnual || basicFinancials?.metric?.peTTM || 20;
-  const pbRatio = basicFinancials?.metric?.pbQuarterly || basicFinancials?.metric?.pbAnnual || 3;
-  const dividendYield = basicFinancials?.metric?.dividendYieldIndicatedAnnual || 0;
-  const roe = basicFinancials?.metric?.roeTTM || basicFinancials?.metric?.roeRfy || 15;
-  const grossMargin = basicFinancials?.metric?.grossMarginTTM || basicFinancials?.metric?.grossMargin5Y || 40;
-  const debtEquity = basicFinancials?.metric?.totalDebtToTotalEquityQuarterly || 0.5;
-  const beta = basicFinancials?.metric?.beta || 1;
 
-  // NOTE: Finnhub's /quote endpoint returns intraday high/low (quote.h / quote.l),
-  // NOT 52-week high/low — the previous version mislabeled these. Pull the real
-  // 52-week range from the financials metric object, with the day range as a fallback.
-  const week52High = basicFinancials?.metric?.['52WeekHigh'] || quote?.h || currentPrice;
-  const week52Low = basicFinancials?.metric?.['52WeekLow'] || quote?.l || currentPrice;
+  // Core metrics
+  const peRatio = m.peNormalizedAnnual ?? m.peTTM ?? 20;
+  const pbRatio = m.pbQuarterly ?? m.pbAnnual ?? 3;
+  const dividendYield = m.dividendYieldIndicatedAnnual ?? 0;
+  const roe = m.roeTTM ?? m.roeRfy ?? 15;
+  const grossMargin = m.grossMarginTTM ?? m.grossMargin5Y ?? 40;
+  const debtEquity = m.totalDebtToTotalEquityQuarterly ?? m.totalDebt2TotalEquityAnnual ?? 0.5;
+  const beta = m.beta ?? 1;
+
+  // Growth (Finnhub's YoY growth fields — prefer TTM, fall back to 5Y trend)
+  const revenueGrowth =
+    m.revenueGrowthTTMYoy ?? m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth5Y ?? 0;
+  const epsGrowth =
+    m.epsGrowthTTMYoy ?? m.epsGrowthQuarterlyYoy ?? m.epsGrowth5Y ?? 0;
+
+  // Liquidity
+  const currentRatio = m.currentRatioQuarterly ?? m.currentRatioAnnual ?? 1.5;
+
+  // 52-week range
+  const week52High = m['52WeekHigh'] ?? quote?.h ?? currentPrice;
+  const week52Low = m['52WeekLow'] ?? quote?.l ?? currentPrice;
   const rangeSpan = week52High - week52Low;
   const rangePosition = rangeSpan > 0
     ? Math.max(0, Math.min(100, ((currentPrice - week52Low) / rangeSpan) * 100))
     : 50;
-  
-  // Calculate investibility score (0-100)
-  let investibilityScore = 50;
-  
-  // PE ratio scoring (lower is generally better, but not too low)
-  if (peRatio > 0 && peRatio < 15) investibilityScore += 15;
-  else if (peRatio >= 15 && peRatio < 25) investibilityScore += 10;
-  else if (peRatio >= 25 && peRatio < 40) investibilityScore += 5;
-  else if (peRatio >= 40) investibilityScore -= 10;
-  
-  // ROE scoring (higher is better)
-  if (roe > 25) investibilityScore += 15;
-  else if (roe > 15) investibilityScore += 10;
-  else if (roe > 10) investibilityScore += 5;
-  else investibilityScore -= 5;
-  
-  // Gross margin scoring
-  if (grossMargin > 50) investibilityScore += 10;
-  else if (grossMargin > 30) investibilityScore += 5;
-  
-  // Price momentum scoring
-  if (percentChange > 2) investibilityScore += 5;
-  else if (percentChange < -2) investibilityScore -= 5;
-  
-  // Dividend scoring for stability
-  if (dividendYield > 2) investibilityScore += 5;
-  
-  investibilityScore = Math.max(20, Math.min(98, investibilityScore));
-  
-  // Calculate risk score (0-100)
+
+  // ─── Factor sub-scores (each normalized 0..maxWeight) ─────────────────────
+  // Valuation: reward reasonable P/E, penalize very high or negative earnings.
+  let valuationPts = 0;
+  if (peRatio <= 0) valuationPts = 4;
+  else if (peRatio < 15) valuationPts = 20;
+  else if (peRatio < 25) valuationPts = 16;
+  else if (peRatio < 40) valuationPts = 10;
+  else if (peRatio < 60) valuationPts = 5;
+  else valuationPts = 0;
+
+  // Profitability: blend of ROE and gross margin.
+  const roePts = Math.max(0, Math.min(12, (roe / 25) * 12));            // up to 12
+  const marginPts = Math.max(0, Math.min(8, (grossMargin / 60) * 8));   // up to 8
+  const profitabilityPts = roePts + marginPts;
+
+  // Growth: revenue YoY + EPS YoY. Growth values are in percent.
+  const revGrowthPts = Math.max(-6, Math.min(13, (revenueGrowth / 20) * 13));
+  const epsGrowthPts = Math.max(-6, Math.min(12, (epsGrowth / 25) * 12));
+  const growthPts = Math.max(0, revGrowthPts + epsGrowthPts); // clamp floor at 0
+
+  // Financial Health: leverage + short-term liquidity.
+  //   Leverage: 12 pts at D/E<=0.3, down to 0 at D/E>=2.5
+  //   Liquidity: 8 pts if currentRatio>=2, 0 pts if <1
+  const leveragePts = Math.max(0, Math.min(12, 12 - ((debtEquity - 0.3) / 2.2) * 12));
+  const liquidityPts = Math.max(0, Math.min(8, ((currentRatio - 1) / 1) * 8));
+  const financialHealthPts = leveragePts + liquidityPts;
+
+  // Momentum: position in 52-week range (0-100) scaled to 0-10 pts.
+  const momentumPts = (rangePosition / 100) * 10;
+
+  // Income: dividend yield, capped.
+  const incomePts = Math.max(0, Math.min(5, (dividendYield / 4) * 5));
+
+  const investibilityScoreRaw =
+    valuationPts + profitabilityPts + growthPts + financialHealthPts + momentumPts + incomePts;
+  const investibilityScore = Math.max(5, Math.min(98, Math.round(investibilityScoreRaw)));
+
+  // ─── Risk score (unchanged in structure) ──────────────────────────────────
   let riskScore = 50;
-  
-  // Beta-based risk
   if (beta > 1.5) riskScore += 20;
   else if (beta > 1.2) riskScore += 10;
   else if (beta < 0.8) riskScore -= 10;
-  
-  // Debt-based risk
   if (debtEquity > 2) riskScore += 15;
   else if (debtEquity > 1) riskScore += 5;
   else if (debtEquity < 0.5) riskScore -= 10;
-  
-  // Valuation risk
+  if (currentRatio < 1) riskScore += 10;
+  else if (currentRatio > 2) riskScore -= 5;
   if (peRatio > 50) riskScore += 15;
   else if (peRatio > 30) riskScore += 5;
-  
+  if (revenueGrowth < 0) riskScore += 10;
   riskScore = Math.max(15, Math.min(85, riskScore));
-  
-  // Generate dynamic strengths based on metrics
+
+  // ─── Strengths / weaknesses / suggestions ─────────────────────────────────
   const strengths = [];
-  if (grossMargin > 40) {
-    strengths.push({ text: `Strong gross margin of ${grossMargin.toFixed(1)}% indicates pricing power`, impact: 'critical' });
-  }
-  if (roe > 20) {
-    strengths.push({ text: `High return on equity at ${roe.toFixed(1)}% shows efficient capital use`, impact: 'high' });
-  }
-  if (dividendYield > 2) {
-    strengths.push({ text: `Attractive dividend yield of ${dividendYield.toFixed(2)}% for income investors`, impact: 'medium' });
-  }
-  if (peRatio > 0 && peRatio < 20) {
-    strengths.push({ text: `Reasonable P/E ratio of ${peRatio.toFixed(1)}x suggests fair valuation`, impact: 'high' });
-  }
-  if (percentChange > 0) {
-    strengths.push({ text: `Positive price momentum with ${percentChange.toFixed(2)}% daily gain`, impact: 'medium' });
-  }
-  if (strengths.length < 3) {
-    strengths.push({ text: `Established market position in ${stockInfo.industry} sector`, impact: 'high' });
-  }
-  
-  // Generate dynamic weaknesses based on metrics
+  if (grossMargin > 40) strengths.push({ text: `Strong gross margin of ${grossMargin.toFixed(1)}% indicates pricing power`, impact: 'critical' });
+  if (roe > 20) strengths.push({ text: `High return on equity at ${roe.toFixed(1)}% shows efficient capital use`, impact: 'high' });
+  if (revenueGrowth > 10) strengths.push({ text: `Revenue growing ${revenueGrowth.toFixed(1)}% YoY signals expanding business`, impact: 'critical' });
+  if (epsGrowth > 15) strengths.push({ text: `EPS up ${epsGrowth.toFixed(1)}% YoY reflects rising profitability`, impact: 'high' });
+  if (currentRatio > 1.5) strengths.push({ text: `Current ratio of ${currentRatio.toFixed(2)} indicates healthy short-term liquidity`, impact: 'medium' });
+  if (dividendYield > 2) strengths.push({ text: `Attractive dividend yield of ${dividendYield.toFixed(2)}% for income investors`, impact: 'medium' });
+  if (peRatio > 0 && peRatio < 20) strengths.push({ text: `Reasonable P/E ratio of ${peRatio.toFixed(1)}x suggests fair valuation`, impact: 'high' });
+  if (strengths.length < 3) strengths.push({ text: `Established market position in ${stockInfo.industry} sector`, impact: 'high' });
+
   const weaknesses = [];
-  if (peRatio > 40) {
-    weaknesses.push({ text: `Elevated P/E ratio of ${peRatio.toFixed(1)}x may indicate overvaluation`, impact: 'high' });
-  }
-  if (debtEquity > 1.5) {
-    weaknesses.push({ text: `High debt-to-equity ratio of ${debtEquity.toFixed(2)} creates leverage risk`, impact: 'critical' });
-  }
-  if (beta > 1.3) {
-    weaknesses.push({ text: `High beta of ${beta.toFixed(2)} indicates above-average volatility`, impact: 'medium' });
-  }
-  if (percentChange < -2) {
-    weaknesses.push({ text: `Negative price action today with ${percentChange.toFixed(2)}% decline`, impact: 'medium' });
-  }
-  if (roe < 10) {
-    weaknesses.push({ text: `Low ROE of ${roe.toFixed(1)}% suggests inefficient capital deployment`, impact: 'high' });
-  }
+  if (peRatio > 40) weaknesses.push({ text: `Elevated P/E ratio of ${peRatio.toFixed(1)}x may indicate overvaluation`, impact: 'high' });
+  if (debtEquity > 1.5) weaknesses.push({ text: `High debt-to-equity ratio of ${debtEquity.toFixed(2)} creates leverage risk`, impact: 'critical' });
+  if (currentRatio < 1) weaknesses.push({ text: `Current ratio of ${currentRatio.toFixed(2)} is below 1 — short-term liquidity concern`, impact: 'critical' });
+  if (revenueGrowth < 0) weaknesses.push({ text: `Revenue shrinking ${Math.abs(revenueGrowth).toFixed(1)}% YoY — top line under pressure`, impact: 'critical' });
+  if (epsGrowth < 0) weaknesses.push({ text: `EPS down ${Math.abs(epsGrowth).toFixed(1)}% YoY — profitability weakening`, impact: 'high' });
+  if (beta > 1.3) weaknesses.push({ text: `High beta of ${beta.toFixed(2)} indicates above-average volatility`, impact: 'medium' });
+  if (roe < 10) weaknesses.push({ text: `Low ROE of ${roe.toFixed(1)}% suggests inefficient capital deployment`, impact: 'high' });
   if (weaknesses.length < 3) {
     weaknesses.push({ text: `Market conditions and sector rotation could impact performance`, impact: 'medium' });
     weaknesses.push({ text: `Macroeconomic headwinds may affect near-term growth`, impact: 'low' });
   }
-  
-  // Generate suggestions based on metrics
+
   const suggestions = [];
-  if (peRatio > 30) {
-    suggestions.push({ title: 'Monitor Valuation', description: 'Watch for potential valuation compression if growth slows.', priority: 'high' });
-  }
-  if (debtEquity > 1) {
-    suggestions.push({ title: 'Track Debt Levels', description: 'Monitor debt reduction efforts and interest coverage ratios.', priority: 'medium' });
-  }
+  if (peRatio > 30) suggestions.push({ title: 'Monitor Valuation', description: 'Watch for potential valuation compression if growth slows.', priority: 'high' });
+  if (debtEquity > 1) suggestions.push({ title: 'Track Debt Levels', description: 'Monitor debt reduction efforts and interest coverage ratios.', priority: 'medium' });
+  if (currentRatio < 1.2) suggestions.push({ title: 'Watch Liquidity', description: 'Follow working-capital trends and near-term cash needs.', priority: 'high' });
   suggestions.push({ title: 'Diversification', description: 'Consider position sizing relative to portfolio concentration.', priority: 'medium' });
   suggestions.push({ title: 'Earnings Watch', description: 'Monitor upcoming earnings reports for guidance updates.', priority: 'high' });
-  if (dividendYield > 0) {
-    suggestions.push({ title: 'Dividend Sustainability', description: 'Verify payout ratio supports continued dividend growth.', priority: 'low' });
-  }
-  
-  // Growth expectation based on sector and metrics
-  let growthExpected = '5% YoY';
-  if (stockInfo.industry.includes('Technology') || stockInfo.industry.includes('Semiconductors')) {
-    if (peRatio > 30) growthExpected = '15% YoY';
-    else growthExpected = '10% YoY';
+  if (dividendYield > 0) suggestions.push({ title: 'Dividend Sustainability', description: 'Verify payout ratio supports continued dividend growth.', priority: 'low' });
+
+  // Growth expectation based on actual reported growth, with sector fallback.
+  let growthExpected: string;
+  if (Number.isFinite(revenueGrowth) && Math.abs(revenueGrowth) > 0.1) {
+    growthExpected = `${revenueGrowth.toFixed(1)}% YoY`;
+  } else if (stockInfo.industry.includes('Technology') || stockInfo.industry.includes('Semiconductors')) {
+    growthExpected = peRatio > 30 ? '15% YoY' : '10% YoY';
   } else if (stockInfo.industry.includes('Healthcare') || stockInfo.industry.includes('Pharmaceuticals')) {
     growthExpected = '8% YoY';
   } else if (stockInfo.industry.includes('Banking') || stockInfo.industry.includes('Financial')) {
     growthExpected = '6% YoY';
   } else if (stockInfo.industry.includes('Energy')) {
     growthExpected = '3% YoY';
+  } else {
+    growthExpected = '5% YoY';
   }
-  
-  // Categories for radar chart — every value below is derived directly from a
-  // real, fetched metric. No randomness, no borrowed VC vocabulary: these are
-  // the five dimensions that actually matter for a public equity.
+
+  // ─── Radar categories ─────────────────────────────────────────────────────
   const valuationScore = peRatio > 0
     ? Math.max(10, Math.min(95, 100 - (peRatio - 10) * 1.8))
-    : 30; // negative/no earnings -> can't be valued on a P/E basis, treat as weak
+    : 30;
   const profitabilityScore = Math.max(10, Math.min(95, (roe * 2 + grossMargin) / 3));
-  const financialHealthScore = Math.max(10, Math.min(95, 90 - debtEquity * 30));
-  const momentumScore = Math.round(rangePosition); // position within the real 52-week range
+  // Financial Health now blends leverage AND liquidity to match the new formula.
+  const financialHealthScore = Math.max(
+    10,
+    Math.min(95, 60 - debtEquity * 20 + Math.min(35, currentRatio * 15))
+  );
+  const growthScore = Math.max(10, Math.min(95, 50 + revenueGrowth * 1.5 + epsGrowth * 0.8));
+  const momentumScore = Math.round(rangePosition);
   const incomeStabilityScore = Math.max(10, Math.min(95, 50 + dividendYield * 8 - Math.abs(beta - 1) * 15));
 
   const categories = [
     {
       name: 'Valuation',
       value: Math.round(valuationScore),
-      description: peRatio > 0
-        ? `Trading at ${peRatio.toFixed(1)}x earnings`
-        : 'No positive P/E (unprofitable on a trailing basis)',
+      description: peRatio > 0 ? `Trading at ${peRatio.toFixed(1)}x earnings` : 'No positive P/E (unprofitable on a trailing basis)',
     },
     {
       name: 'Profitability',
@@ -266,14 +274,19 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
       description: `ROE of ${roe.toFixed(1)}%, gross margin of ${grossMargin.toFixed(1)}%`,
     },
     {
+      name: 'Growth',
+      value: Math.round(growthScore),
+      description: `Revenue ${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}% YoY, EPS ${epsGrowth >= 0 ? '+' : ''}${epsGrowth.toFixed(1)}% YoY`,
+    },
+    {
       name: 'Financial Health',
       value: Math.round(financialHealthScore),
-      description: `Debt-to-equity of ${debtEquity.toFixed(2)}`,
+      description: `Debt/equity ${debtEquity.toFixed(2)}, current ratio ${currentRatio.toFixed(2)}`,
     },
     {
       name: 'Momentum',
       value: momentumScore,
-      description: `Trading at ${rangePosition.toFixed(0)}% of its 52-week range`,
+      description: `At ${rangePosition.toFixed(0)}% of its 52-week range (low → high)`,
     },
     {
       name: 'Income Stability',
@@ -282,21 +295,20 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
     },
   ];
 
-  // Risk factors — "Sector Risk" is now derived from actual price volatility
-  // (52-week range width relative to price) instead of a random number.
   const volatilityRisk = currentPrice > 0
     ? Math.max(10, Math.min(90, (rangeSpan / currentPrice) * 100))
     : 40;
 
   const riskFactors = [
     { name: 'Market Risk', score: Math.round(30 + beta * 20), description: `Market volatility exposure with beta of ${beta.toFixed(2)}` },
-    { name: 'Financial Risk', score: Math.round(30 + debtEquity * 20), description: `Balance sheet risk with debt/equity of ${debtEquity.toFixed(2)}` },
+    { name: 'Financial Risk', score: Math.round(30 + debtEquity * 20), description: `Balance sheet risk: D/E ${debtEquity.toFixed(2)}, current ratio ${currentRatio.toFixed(2)}` },
     { name: 'Valuation Risk', score: Math.round(20 + Math.min(peRatio, 50)), description: `Valuation at ${peRatio.toFixed(1)}x earnings` },
     { name: 'Volatility Risk', score: Math.round(volatilityRisk), description: `52-week range spans ${((rangeSpan / (currentPrice || 1)) * 100).toFixed(0)}% of current price` },
+    { name: 'Growth Risk', score: Math.round(Math.max(10, Math.min(90, 50 - revenueGrowth * 1.5))), description: `Revenue trend ${revenueGrowth >= 0 ? '+' : ''}${revenueGrowth.toFixed(1)}% YoY` },
   ];
-  
+
   return {
-    investibilityScore: Math.round(investibilityScore),
+    investibilityScore,
     overallRisk: Math.round(riskScore),
     founderTrustRating: Math.min(10, Math.round(7 + (roe / 10))),
     pmfScore: Math.round(60 + (grossMargin / 3)),
@@ -318,6 +330,17 @@ function calculateAnalysis(quote: any, basicFinancials: any, symbol: string, sto
       beta: beta.toFixed(2),
       roe: roe.toFixed(2),
       grossMargin: grossMargin.toFixed(2),
+      revenueGrowthYoy: Number(revenueGrowth).toFixed(2),
+      epsGrowthYoy: Number(epsGrowth).toFixed(2),
+      currentRatio: Number(currentRatio).toFixed(2),
+      scoreBreakdown: {
+        valuation: Math.round(valuationPts),
+        profitability: Math.round(profitabilityPts),
+        growth: Math.round(growthPts),
+        financialHealth: Math.round(financialHealthPts),
+        momentum: Math.round(momentumPts),
+        income: Math.round(incomePts),
+      },
     },
   };
 }
