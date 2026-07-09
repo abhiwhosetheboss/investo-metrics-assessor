@@ -276,6 +276,9 @@ const Analysis = () => {
             Back to Dashboard
           </Link>
           <h1 className="text-3xl font-bold">{analysis.startupName}</h1>
+          {id && !UUID_PATTERN.test(id) && (
+            <LivePrice symbol={id.toUpperCase()} variant="full" className="mt-2" />
+          )}
           <div className="flex flex-wrap items-center gap-2 mt-1">
           {analysis.createdAt && (
             <p className="text-muted-foreground">
