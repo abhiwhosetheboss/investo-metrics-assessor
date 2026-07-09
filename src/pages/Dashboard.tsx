@@ -14,6 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 import AICustomization from "@/components/AICustomization";
 import TrainingData from "@/components/TrainingData";
 import { CompanyLogo } from "@/components/CompanyLogo";
+import LivePrice from "@/components/LivePrice";
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -257,9 +260,12 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
+                  <CardContent className="pt-0 space-y-2">
+                    {!UUID_PATTERN.test(analysis.id) && (
+                      <LivePrice symbol={analysis.id.toUpperCase()} />
+                    )}
                     {analysis.businessModel && (
-                      <Badge variant="outline" className="mt-2">
+                      <Badge variant="outline">
                         {analysis.businessModel.toUpperCase()}
                       </Badge>
                     )}
