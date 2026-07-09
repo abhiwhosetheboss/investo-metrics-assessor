@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { AIModel } from "@/components/AIModelSelector";
 import { supabase } from "@/integrations/supabase/client";
 import StockHistorySection from "@/components/StockHistorySection";
+import LivePrice from "@/components/LivePrice";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
