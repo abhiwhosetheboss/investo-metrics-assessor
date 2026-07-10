@@ -15,6 +15,7 @@ import AICustomization from "@/components/AICustomization";
 import TrainingData from "@/components/TrainingData";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import LivePrice from "@/components/LivePrice";
+import StockSearch from "@/components/StockSearch";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -186,7 +187,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <label className="text-sm text-muted-foreground">
+          Search any US-listed stock — we'll score it on demand
+        </label>
+        <StockSearch />
+      </div>
+
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+
         <TabsList>
           <TabsTrigger value="recent">Recent Analyses</TabsTrigger>
           <TabsTrigger value="saved" disabled={!user}>Saved Analyses</TabsTrigger>
