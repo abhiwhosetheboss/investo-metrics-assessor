@@ -187,7 +187,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <label className="text-sm text-muted-foreground">
+          Search any US-listed stock — we'll score it on demand
+        </label>
+        <StockSearch />
+      </div>
+
       <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+
         <TabsList>
           <TabsTrigger value="recent">Recent Analyses</TabsTrigger>
           <TabsTrigger value="saved" disabled={!user}>Saved Analyses</TabsTrigger>
