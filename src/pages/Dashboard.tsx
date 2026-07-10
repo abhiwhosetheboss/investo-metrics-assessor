@@ -15,6 +15,7 @@ import AICustomization from "@/components/AICustomization";
 import TrainingData from "@/components/TrainingData";
 import { CompanyLogo } from "@/components/CompanyLogo";
 import LivePrice from "@/components/LivePrice";
+import StockSearch from "@/components/StockSearch";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
