@@ -28,18 +28,12 @@ export default function StockSearch() {
     const t = setTimeout(async () => {
       setSearching(true);
       try {
-        const { data, error } = await supabase.functions.invoke("search-stock", {
-          method: "GET" as any,
-          // supabase-js v2 supports body only on POST; use fetch fallback:
-        });
-        // Fallback to direct fetch because invoke doesn't support query params cleanly.
-        const url = `https://maouxxwhjkaudaaowyka.supabase.co/functions/v1/search-stock?q=${encodeURIComponent(q)}`;
-        const resp = await fetch(url, {
-          headers: {
-            apikey: (supabase as any).supabaseKey ?? "",
-            Authorization: `Bearer ${(supabase as any).supabaseKey ?? ""}`,
-          },
-        });
+        const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+        const base = import.meta.env.VITE_SUPABASE_URL as string;
+        const resp = await fetch(
+          `${base}/functions/v1/search-stock?q=${encodeURIComponent(q)}`,
+          { headers: { apikey: key, Authorization: `Bearer ${key}` } },
+        );
         const json = await resp.json();
         if (resp.ok) {
           setResults(json.results || []);
@@ -48,7 +42,6 @@ export default function StockSearch() {
           console.error(json);
           setResults([]);
         }
-        void data; void error;
       } catch (e) {
         console.error(e);
         setResults([]);
