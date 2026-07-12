@@ -302,15 +302,35 @@ const Analysis = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={async () => {
+              const shareUrl = window.location.href;
+              const shareTitle = `${analysis.startupName} — Investibility Analysis`;
+              const shareText = `${analysis.startupName}: Investibility ${analysis.investibilityScore}/100 · Risk ${analysis.overallRisk}/100`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+                  return;
+                }
+              } catch (err) {
+                // user cancelled or share failed — fall through to clipboard
+              }
+              try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast({ title: "Link copied", description: "Analysis link copied to your clipboard." });
+              } catch {
+                toast({ title: "Couldn't share", description: "Copy this page URL manually.", variant: "destructive" });
+              }
+            }}
+          >
             <Share2 className="h-4 w-4" />
             Share
           </Button>
         </div>
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
