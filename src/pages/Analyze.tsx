@@ -110,8 +110,9 @@ export default function Analyze() {
     }
   };
 
-  // Only show the first 4 sample reports
-  const featuredSamples = sampleData.slice(0, 4);
+  // Show all sample reports
+  const featuredSamples = sampleData;
+
 
   return (
     <div className="container mx-auto py-6 md:py-10 px-4 md:px-6 space-y-6 md:space-y-8">
