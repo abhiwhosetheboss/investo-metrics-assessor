@@ -587,6 +587,9 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         batch: batchParam ?? 'all',
+        totalBatches,
+        processed: stocksToProcess.length,
+        totalTracked: allStocks.length,
         updated: successCount,
         errors: errorCount,
         timestamp: new Date().toISOString(),
