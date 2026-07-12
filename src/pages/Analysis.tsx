@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAnalysisById } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
+import { Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -302,18 +302,101 @@ const Analysis = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1"
+            onClick={async () => {
+              const shareUrl = window.location.href;
+              const shareTitle = `${analysis.startupName} — Investibility Analysis`;
+              const shareText = `${analysis.startupName}: Investibility ${analysis.investibilityScore}/100 · Risk ${analysis.overallRisk}/100`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+                  return;
+                }
+              } catch (err) {
+                // user cancelled or share failed — fall through to clipboard
+              }
+              try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast({ title: "Link copied", description: "Analysis link copied to your clipboard." });
+              } catch {
+                toast({ title: "Couldn't share", description: "Copy this page URL manually.", variant: "destructive" });
+              }
+            }}
+          >
             <Share2 className="h-4 w-4" />
             Share
           </Button>
         </div>
+
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
+        <h2 className="text-xl font-medium mb-6">Evaluation Insights</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Strengths Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-green-600 dark:text-green-400">
+              <CheckCircle2 className="h-5 w-5" />
+              Key Strengths
+            </h3>
+            <ul className="space-y-3">
+              {strengthsData.map((strength, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                    <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
+                  </span>
+                  <span>{strength.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Weaknesses Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-red-600 dark:text-red-400">
+              <XCircle className="h-5 w-5" />
+              Key Weaknesses
+            </h3>
+            <ul className="space-y-3">
+              {weaknessesData.map((weakness, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mt-0.5">
+                    <XCircle className="h-3 w-3 text-red-600 dark:text-red-400" />
+                  </span>
+                  <span>{weakness.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Suggestions Column */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium flex items-center gap-2 text-blue-600 dark:text-blue-400">
+              <TrendingUp className="h-5 w-5" />
+              Improvement Areas
+            </h3>
+            <ul className="space-y-3">
+              {suggestionsData.map((suggestion, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm">
+                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mt-0.5">
+                    <TrendingUp className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  </span>
+                  <div>
+                    <span className="font-medium">{suggestion.title}</span>
+                    <p className="text-muted-foreground text-xs mt-0.5">{suggestion.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
         <InvestibilityScore score={analysis.investibilityScore} />
         <RiskRating 
           overallRisk={analysis.overallRisk} 
@@ -500,67 +583,8 @@ const Analysis = () => {
         </div>
       )}
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
-        <h2 className="text-xl font-medium mb-6">Evaluation Insights</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Strengths Column */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2 text-green-600 dark:text-green-400">
-              <CheckCircle2 className="h-5 w-5" />
-              Key Strengths
-            </h3>
-            <ul className="space-y-3">
-              {strengthsData.map((strength, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
-                    <CheckCircle2 className="h-3 w-3 text-green-600 dark:text-green-400" />
-                  </span>
-                  <span>{strength.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {/* Weaknesses Column */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2 text-red-600 dark:text-red-400">
-              <XCircle className="h-5 w-5" />
-              Key Weaknesses
-            </h3>
-            <ul className="space-y-3">
-              {weaknessesData.map((weakness, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mt-0.5">
-                    <XCircle className="h-3 w-3 text-red-600 dark:text-red-400" />
-                  </span>
-                  <span>{weakness.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {/* Suggestions Column */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium flex items-center gap-2 text-blue-600 dark:text-blue-400">
-              <TrendingUp className="h-5 w-5" />
-              Improvement Areas
-            </h3>
-            <ul className="space-y-3">
-              {suggestionsData.map((suggestion, index) => (
-                <li key={index} className="flex items-start gap-2 text-sm">
-                  <span className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mt-0.5">
-                    <TrendingUp className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-                  </span>
-                  <div>
-                    <span className="font-medium">{suggestion.title}</span>
-                    <p className="text-muted-foreground text-xs mt-0.5">{suggestion.description}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+
+
 
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 mb-8">
         <h2 className="text-xl font-medium mb-6">Category Analysis</h2>
