@@ -394,12 +394,29 @@ serve(async (req) => {
 
     // Pull previous scores in one query so we can detect meaningful risk-score
     // swings as we recompute each stock below (used for the Signal Deck ledger).
+    // Also acts as the source of truth for symbols added on-demand via search-stock.
     const { data: previousRows } = await supabase
       .from('stock_analyses')
-      .select('symbol, overall_risk, market_data');
+      .select('symbol, company_name, industry, overall_risk, market_data');
     const previousBySymbol = new Map(
       (previousRows || []).map((row: any) => [row.symbol, row])
     );
+
+    // Merge the hardcoded TOP_STOCKS list with every symbol currently present
+    // in stock_analyses (which grows as users search for new tickers). Dedupe
+    // by symbol; TOP_STOCKS entries win for name/industry metadata.
+    const stockMap = new Map<string, { symbol: string; name: string; industry: string }>();
+    for (const s of TOP_STOCKS) stockMap.set(s.symbol, s);
+    for (const row of previousRows || []) {
+      if (!stockMap.has(row.symbol)) {
+        stockMap.set(row.symbol, {
+          symbol: row.symbol,
+          name: row.company_name || row.symbol,
+          industry: row.industry || 'General',
+        });
+      }
+    }
+    const allStocks = Array.from(stockMap.values());
 
     // A risk score swing of this size or more (0-100 scale) gets logged as a
     // public, dated call in risk_calls. Smaller day-to-day noise is ignored.
@@ -412,20 +429,38 @@ serve(async (req) => {
     let successCount = 0;
     let errorCount = 0;
 
-
-    // Batching: the full list is ~75 stocks × 2 API calls × 1.1s ≈ ~165s,
-    // which pushes past typical edge function time budgets. Support an optional
-    // ?batch=1 or ?batch=2 query param so the scheduled job can process the
-    // list in two halves via two separate runs. No batch param = process all.
+    // Batching: each stock takes ~2 API calls × 1.1s ≈ 2.2s of throttled fetch
+    // time. Edge functions have a wall-time budget of ~150s; keep each batch
+    // comfortably under that at ~30 stocks (~66s of Finnhub time + overhead).
+    // The scheduler calls ?batch=1 and ?batch=2 today — if the combined list
+    // outgrows what 2 batches can safely cover, automatically compute more
+    // batches (still evenly split) so no single run risks timing out.
+    const MAX_STOCKS_PER_BATCH = 30;
     const url = new URL(req.url);
     const batchParam = url.searchParams.get('batch');
-    let stocksToProcess = TOP_STOCKS;
-    if (batchParam === '1' || batchParam === '2') {
-      const mid = Math.ceil(TOP_STOCKS.length / 2);
-      stocksToProcess = batchParam === '1'
-        ? TOP_STOCKS.slice(0, mid)
-        : TOP_STOCKS.slice(mid);
-      console.log(`Processing batch ${batchParam}: ${stocksToProcess.length} stocks`);
+    let stocksToProcess = allStocks;
+    let totalBatches = 1;
+
+    if (batchParam) {
+      const batchNum = parseInt(batchParam, 10);
+      totalBatches = Math.max(2, Math.ceil(allStocks.length / MAX_STOCKS_PER_BATCH));
+      if (!Number.isFinite(batchNum) || batchNum < 1 || batchNum > totalBatches) {
+        return new Response(
+          JSON.stringify({
+            error: `Invalid batch ${batchParam}. Valid range: 1..${totalBatches}`,
+            totalBatches,
+          }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      const perBatch = Math.ceil(allStocks.length / totalBatches);
+      const start = (batchNum - 1) * perBatch;
+      stocksToProcess = allStocks.slice(start, start + perBatch);
+      console.log(
+        `Processing batch ${batchNum}/${totalBatches}: ${stocksToProcess.length} of ${allStocks.length} stocks`
+      );
+    } else {
+      console.log(`Processing all ${allStocks.length} stocks (no batch param)`);
     }
 
     for (const stock of stocksToProcess) {
