@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAnalysisById } from "@/utils/analysisUtils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Download, Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
+import { Share2, ArrowLeft, Brain, TrendingUp, Building2, Users, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
