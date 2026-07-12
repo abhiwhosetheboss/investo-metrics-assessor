@@ -352,13 +352,11 @@ export default function Analyze() {
           </div>
 
           <div className="flex justify-center mt-6">
-            <Button asChild variant="outline">
-              <Link to="/dashboard" className="flex items-center">
-                View All Sample Analyses
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              Showing {featuredSamples.length} sample analyses
+            </p>
           </div>
+
         </TabsContent>
       </Tabs>
     </div>
