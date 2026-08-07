@@ -351,35 +351,44 @@ serve(async (req) => {
   }
 
   try {
-    // Authenticate the user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - Missing or invalid authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    
-    // Create client for auth verification
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
-    
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - Invalid or expired token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Two legitimate callers:
+    //  1) A logged-in user clicking "Refresh" -> valid Supabase JWT.
+    //  2) The daily pg_cron job -> no user session, authenticates with the
+    //     shared CRON_SECRET passed in the x-cron-secret header.
+    const cronSecret = Deno.env.get('CRON_SECRET');
+    const providedCronSecret = req.headers.get('x-cron-secret');
+    const isScheduledRun = !!cronSecret && providedCronSecret === cronSecret;
+
+    if (isScheduledRun) {
+      console.log('Authenticated as scheduled job (cron secret)');
+    } else {
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Missing or invalid authorization header' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+
+      const token = authHeader.replace('Bearer ', '');
+      const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+
+      if (claimsError || !claimsData?.claims) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Invalid or expired token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log('Authenticated user:', claimsData.claims.sub);
     }
-
-    const userId = claimsData.claims.sub;
-    console.log('Authenticated user:', userId);
 
     const finnhubApiKey = Deno.env.get('FINNHUB_API_KEY');
     if (!finnhubApiKey) {
