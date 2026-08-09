@@ -1,4 +1,7 @@
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 // Lightweight live-quote endpoint. Given a stock symbol, returns just the
 // current price and percent change from Finnhub's /quote endpoint. No DB
